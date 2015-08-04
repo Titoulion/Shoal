@@ -209,8 +209,11 @@ public class FishScript : MonoBehaviour {
 		main = MainScript.Instance;
 
 
-		petitPondCentre = Vector3.zero+(main.littlePond.transform.position-main.bigPond.transform.position)*multDecal;
-		petitPondExit = petitPondCentre+Vector3.Normalize(main.bigPond.transform.position-main.littlePond.transform.position)*2f*1f;
+//		petitPondCentre = Vector3.zero+(main.littlePond.transform.position-main.bigPond.transform.position)*multDecal;
+		//petitPondExit = petitPondCentre+Vector3.Normalize(main.bigPond.transform.position-main.littlePond.transform.position)*2f*1f;
+
+		petitPondCentre = petitPondExit = Vector3.zero;
+
 		centerPond = petitPondCentre;
 
 		InitValues();
@@ -219,6 +222,27 @@ public class FishScript : MonoBehaviour {
 
 		ChangeValuesVirage();
 		GenerateBody();
+
+		isInBigPond = true;
+		
+		goBigPond = false;
+		goCenter = false;
+
+		progressChangementPond = 1f;
+
+
+		progressChangementPond = Mathf.Clamp01(progressChangementPond+Time.deltaTime*0.2f);
+		centerPond = Vector3.Lerp(petitPondExit,Vector3.zero,curveToNewPond.Evaluate(progressChangementPond));
+		
+		
+		radiusMotion.minMaxNextValue = Vector2.Lerp(new Vector2(2.2f,2.8f),new Vector2(1f,11f),curveTransfertValuesBigPond.Evaluate(progressChangementPond));
+		radiusMotion.minMaxDurationProgress= Vector2.Lerp(new Vector2(1f,1.5f),new Vector2(1f,1.5f),curveTransfertValuesBigPond.Evaluate(progressChangementPond));
+		
+		
+		speedProgressCircle.minMaxNextValue = Vector2.Lerp(new Vector2(0.2f,0.4f),new Vector2(0.1f,0.3f)*sensSpeed,curveTransfertValuesBigPond.Evaluate(progressChangementPond));
+		speedProgressCircle.minMaxDurationProgress= Vector2.Lerp(new Vector2(1f,3f),new Vector2(1f,3f),curveTransfertValuesBigPond.Evaluate(progressChangementPond));
+
+
 
 	}
 
@@ -773,7 +797,7 @@ public class FishScript : MonoBehaviour {
 
 
 
-		if(!isInBigPond && !goBigPond && !goCenter)
+		if(!isInBigPond && !goBigPond && !goCenter || true)
 		{
 			lerpColor1 += (nextLerpColor1-lerpColor1)*valueProgressProgress;
 			lerpColor2 += (nextLerpColor2-lerpColor2)*valueProgressProgress;

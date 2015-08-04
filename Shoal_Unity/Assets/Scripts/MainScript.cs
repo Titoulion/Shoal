@@ -279,7 +279,7 @@ public class MainScript : MonoBehaviour {
 		progressClosePond=Mathf.Clamp01(progressClosePond);
 
 
-		littlePond.GetComponent<Renderer>().material.SetFloat("_EdgeWidth",Map (progressClosePond,0f,1f,0.268f,1f)+(wasPlayerConnected&&playerConnected?curveBeatEffet.Evaluate(pulseProgress)*forcePulsePond:0f));
+		//littlePond.GetComponent<Renderer>().material.SetFloat("_EdgeWidth",Map (progressClosePond,0f,1f,0.268f,1f)+(wasPlayerConnected&&playerConnected?curveBeatEffet.Evaluate(pulseProgress)*forcePulsePond:0f));
 		bigPond.GetComponent<Renderer>().material.SetFloat("_EdgeWidth",0.268f+(wasPlayerConnected&&playerConnected?curveBeatEffet.Evaluate(pulseProgress)*forcePulsePond:0f));
 
 		progressOpenBridge=Mathf.Clamp01(progressOpenBridge+(pathOpened?1f:-1f)*Time.deltaTime/0.8f);
@@ -289,13 +289,13 @@ public class MainScript : MonoBehaviour {
 
 		if(sensor1.isTouched || sensor2.isTouched || sensor3.isTouched)
 		{
-			if(particleLittlePond.isPlaying==false)
-			particleLittlePond.Play();
+			//if(particleLittlePond.isPlaying==false)
+			//particleLittlePond.Play();
 		}
 		else
 		{
-			if(particleLittlePond.isPlaying==true)
-			particleLittlePond.Stop();
+			//if(particleLittlePond.isPlaying==true)
+			//particleLittlePond.Stop();
 		}
 
 	}
@@ -356,8 +356,8 @@ public class MainScript : MonoBehaviour {
 	{
 
 		//Debug.Log ("ok");
-		Vector3 posInit = Vector3.zero+(littlePond.transform.position-bigPond.transform.position)*2.5f;
-
+		//Vector3 posInit = Vector3.zero+(littlePond.transform.position-bigPond.transform.position)*2.5f;
+		Vector3 posInit = Vector3.zero;
 		currentFish = Instantiate (prefabFish,posInit,Quaternion.identity) as GameObject;
 
 		/*AffectProperty1();

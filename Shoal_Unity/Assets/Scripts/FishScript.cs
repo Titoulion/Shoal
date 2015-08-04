@@ -8,13 +8,13 @@ public class FishScript : MonoBehaviour {
 	GameObject[] bodyParts = new GameObject[0];
 	Vector3[] bodyPartsPositions = new Vector3[0];
 
-	public int numberBodyParts = 50;
+	int numberBodyParts = 50;
 	public GameObject prefabBodyPart;
 
 	float tailLenght = 0f;
 	public float nextTailLenght = 1f;
-
-
+	public float nextRadiusMotionBodyParts = 1f;
+	public float nextHeadSize = 2f;
 
 
 	float[] randomValues = new float[0];
@@ -38,7 +38,7 @@ public class FishScript : MonoBehaviour {
 	Vector2 minMaxSpeedVirage;
 
 
-	public float nextRadiusMotionBodyParts = 1f;
+
 	float radiusMotionBodyParts = 1f;
 
 
@@ -55,7 +55,7 @@ public class FishScript : MonoBehaviour {
 
 
 	float headSize = 0f;
-	public float nextHeadSize = 2f;
+
 
 	float outlineWidth = 0f;
 	public float nextOutlineWidth;
@@ -119,12 +119,17 @@ public class FishScript : MonoBehaviour {
 	Vector3 petitPondCentre;
 	Vector3 petitPondExit;
 
-	public float multDecal = 2.5f;
+
 
 	public Vector2 minMaxTrailTime;
 
 
 	float sensSpeed = 1f;
+
+
+
+
+	public Gradient myGradient;
 
 
 
@@ -860,14 +865,20 @@ public class FishScript : MonoBehaviour {
 
 			thisBodyPartTrail.startWidth =thisBodyPartScript.GetSize();
 			thisBodyPartTrail.endWidth =0f;
-			//bodyParts[i].GetComponent<TrailRenderer>().time = minMaxTrailTime.x+(minMaxTrailTime.y-minMaxTrailTime.x)*(1f-progress);
+
 
 			thisBodyPartScript.SetLerpsColors(lerpColor1,lerpColor2);
 			thisBodyPartScript.SetOutlineWidth (outlineWidth);
+			thisBodyPartScript.SetCustomColor(myGradient.Evaluate(progress));
 
 
-			thisBodyPartTrail.material.color = thisBodyPartScript.GetTransitionColor();
-		//	bodyParts[i].GetComponent<TrailRenderer>().material.color = bodyParts[i].GetComponent<BodyPartScript>().GetColors()[0];
+			//thisBodyPartTrail.material.color = thisBodyPartScript.GetTransitionColor();
+			thisBodyPartTrail.material.color = myGradient.Evaluate(progress);
+
+
+
+
+		
 
 
 

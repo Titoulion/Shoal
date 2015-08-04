@@ -283,7 +283,7 @@ public class MainScript : MonoBehaviour {
 		bigPond.GetComponent<Renderer>().material.SetFloat("_EdgeWidth",0.268f+(wasPlayerConnected&&playerConnected?curveBeatEffet.Evaluate(pulseProgress)*forcePulsePond:0f));
 
 		progressOpenBridge=Mathf.Clamp01(progressOpenBridge+(pathOpened?1f:-1f)*Time.deltaTime/0.8f);
-		bridge.GetComponent<Renderer>().material.SetFloat("_OpeningBridge",progressOpenBridge);
+		//bridge.GetComponent<Renderer>().material.SetFloat("_OpeningBridge",progressOpenBridge);
 
 
 

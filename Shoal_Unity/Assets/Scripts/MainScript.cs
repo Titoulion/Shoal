@@ -128,7 +128,21 @@ public class MainScript : MonoBehaviour {
 			Application.Quit ();
 
 		if(Input.GetKeyDown(KeyCode.Space))
-			CreateFish ();
+		{
+			for(int i = 0; i<1;i++)
+			{
+				CreateFish ();
+			}
+		}
+
+		if(Input.GetKeyDown(KeyCode.Tab))
+		{
+			for(int i = 0; i<10;i++)
+			{
+				CreateFish ();
+			}
+		}
+			
 
 		if(Input.GetKeyDown(KeyCode.Return))
 		{
@@ -166,7 +180,7 @@ public class MainScript : MonoBehaviour {
 
 
 
-		Shader.SetGlobalFloat("_GlobalOutlineWidth",globalOutlineWidth);
+
 
 
 

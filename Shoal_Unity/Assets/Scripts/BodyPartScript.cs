@@ -42,9 +42,9 @@ public class BodyPartScript : MonoBehaviour {
 		transitionVal = transitionValue;
 	}
 
-	public void SetOutlineWidth(float outlineWidth)
+	public void SetExchangeColor(float exchangeColor)
 	{
-		myMat.SetFloat("_OutlineWidth",outlineWidth);
+		myMat.SetFloat("_ExchangeColor",exchangeColor);
 	}
 
 	public Color[] GetColors()
@@ -63,9 +63,20 @@ public class BodyPartScript : MonoBehaviour {
 		Color colI = Color.Lerp (col1,col2,myMat.GetFloat("_TransitionValue"));
 		Color colJ = Color.Lerp (col2,col1,myMat.GetFloat("_TransitionValue"));
 
-		return(Color.Lerp (colI,colJ,1f-myMat.GetFloat("_OutlineWidth")));
+		return(Color.Lerp (colI,colJ,1f-myMat.GetFloat("_ExchangeColor")));
 
 
+	}
+
+	public void SetPointCurve(float value)
+	{
+		myMat.SetFloat("_PointCurve",value);
+	}
+
+	public void SetHunger(float minAlpha,float value)
+	{
+		myMat.SetFloat("_Hunger",value);
+		myMat.SetFloat("_minAlpha",minAlpha);
 	}
 
 	public void SetCustomColor(Color value)

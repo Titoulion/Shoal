@@ -7,9 +7,11 @@ public class BodyPartScript : MonoBehaviour {
 	Color color1B;
 	Color color2A;
 	Color color2B;
-	float transitionVal;
+	float posInTail;
 
 	Material myMat;
+
+
 
 	void Awake()
 	{
@@ -36,10 +38,10 @@ public class BodyPartScript : MonoBehaviour {
 		myMat.SetFloat("_LerpColor2",lerpMainColor2);
 	}
 
-	public void SetTransitionColorValue(float transitionValue)
+	public void SetPosInTail(float _posInTail)
 	{
-		myMat.SetFloat("_TransitionValue",transitionValue);
-		transitionVal = transitionValue;
+		myMat.SetFloat("_PosInTail",_posInTail);
+		posInTail = _posInTail;
 	}
 
 	public void SetExchangeColor(float exchangeColor)
@@ -50,8 +52,8 @@ public class BodyPartScript : MonoBehaviour {
 	public Color[] GetColors()
 	{
 		Color[] colors = new Color[2];
-		colors[0] = Color.Lerp(myMat.GetColor("_MainColor1A"),myMat.GetColor("_MainColor1B"),myMat.GetFloat("_LerpColor1"));
-		colors[1] = Color.Lerp(myMat.GetColor("_MainColor2A"),myMat.GetColor("_MainColor2B"),myMat.GetFloat("_LerpColor2"));
+		colors[0] = Color.Lerp(color1A,color1B,myMat.GetFloat("_LerpColor1"));
+		colors[1] = Color.Lerp(color2A,color2B,myMat.GetFloat("_LerpColor2"));
 		return(colors);
 	}
 
@@ -60,8 +62,8 @@ public class BodyPartScript : MonoBehaviour {
 		Color col1 = Color.Lerp (color1A,color1B,myMat.GetFloat("_LerpColor1"));
 		Color col2 = Color.Lerp (color2A,color2B,myMat.GetFloat("_LerpColor2"));
 
-		Color colI = Color.Lerp (col1,col2,myMat.GetFloat("_TransitionValue"));
-		Color colJ = Color.Lerp (col2,col1,myMat.GetFloat("_TransitionValue"));
+		Color colI = Color.Lerp (col1,col2,myMat.GetFloat("_PosInTail"));
+		Color colJ = Color.Lerp (col2,col1,myMat.GetFloat("_PosInTail"));
 
 		return(Color.Lerp (colI,colJ,1f-myMat.GetFloat("_ExchangeColor")));
 

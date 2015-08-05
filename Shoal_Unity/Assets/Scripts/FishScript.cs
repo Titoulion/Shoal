@@ -167,9 +167,9 @@ public class FishScript : MonoBehaviour {
 			ChangeValues();
 		}
 
-		public void Update()
+		public void Update(float hungerr)
 		{
-			progress=Mathf.Clamp01(progress+_speedMotion*Time.deltaTime/durationProgress);
+			progress=Mathf.Clamp01(progress+Map (hungerr,0f,1f,1f,0.5f)*_speedMotion*Time.deltaTime/durationProgress);
 
 			value = Mathf.Lerp(prevValue,nextValue,curveProgress.Evaluate(progress));
 
@@ -200,6 +200,11 @@ public class FishScript : MonoBehaviour {
 
 			//sens = value>nextValue?-1f:1f;
 		}
+
+		float Map(float val, float fromMin, float fromMax, float toMin, float toMax) {
+			return ((val - fromMin) / (fromMax - fromMin)) * (toMax - toMin) + toMin;
+		}
+
 
 	}
 
@@ -346,7 +351,7 @@ public class FishScript : MonoBehaviour {
 			thisBodyPartScript.SetExchangeColor(Random.Range(0.0f,0.2f));
 			thisBodyPartScript.SetExchangeColor(Random.value>0.5f?1f:0f);
 			thisBodyPartScript.SetExchangeColor(0f);
-			thisBodyPartScript.SetTransitionColorValue(progress);
+			thisBodyPartScript.SetPosInTail(1f-progress);
 			thisBodyPartScript.SetColors(mainColor1A,mainColor1B,mainColor2A,mainColor2B);
 			randomValues[i]=Random.value;
 			randomValues2[i]=Random.value;
@@ -396,7 +401,7 @@ public class FishScript : MonoBehaviour {
 	
 	void Mouvement()
 	{
-		progressCircle+=Time.deltaTime*speedProgressCircle.value*main.pulse*speedMotion;
+		progressCircle+=Time.deltaTime*speedProgressCircle.value*main.pulse*speedMotion*Map (hunger,0f,1f,1f,0.2f);
 		float _progressCircle = progressCircle;
 		if(isInBigPond==false)
 		{
@@ -457,6 +462,10 @@ public class FishScript : MonoBehaviour {
 			centerPond = Vector3.zero;
 			progressCentreLittlePond = 0f;
 		}
+
+
+
+
 		Vector3 pos = centerPond;
 		pos.x+=Mathf.Cos(_progressCircle*Mathf.PI*2f)*radiusMotion.value*(1f-progressCentreLittlePond);
 		pos.y+=Mathf.Sin(_progressCircle*Mathf.PI*2f)*radiusMotion.value*(1f-progressCentreLittlePond);
@@ -550,8 +559,8 @@ public class FishScript : MonoBehaviour {
 
 	void UpdateValues()
 	{
-		radiusMotion.Update();
-		speedProgressCircle.Update();
+		radiusMotion.Update(hunger);
+		speedProgressCircle.Update(hunger);
 		ProgressionsProperties();
 		
 
@@ -621,10 +630,16 @@ public class FishScript : MonoBehaviour {
 
 
 			float progressValueHunger = Mathf.Lerp (hunger,0f,Mathf.Cos ((Time.realtimeSinceStartup*speedBlink+myFishRandom)*2f*Mathf.PI)*0.5f+0.5f);
-			progressValueHunger = Mathf.Lerp (hunger,0f,curveBlink.Evaluate(Modulo(Time.realtimeSinceStartup*speedBlink+myFishRandom,1f)));
+			progressValueHunger = Mathf.Lerp (hunger,0f,(1f-hunger+0.5f)*curveBlink.Evaluate(Modulo(Time.realtimeSinceStartup*speedBlink+myFishRandom,1f)));
+
+
 
 
 			bodyPartsTrails[i].material.color = Color.Lerp (bodyPartsScripts[i].GetTransitionColor(),new Color(0.8f,0.8f,0.8f,minAlpha),progressValueHunger);
+
+
+
+
 			bodyPartsScripts[i].SetHunger(minAlpha,progressValueHunger);
 
 

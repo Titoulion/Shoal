@@ -66,9 +66,7 @@ public class MainScript : MonoBehaviour {
 	public AnimationCurve curveBeatEffet;
 	public float forcePulsePond = 0.02f;
 
-	public LumScript sensor1;
-	public LumScript sensor2;
-	public LumScript sensor3;
+
 
 	public GameObject bridge;
 	float progressOpenBridge = 0f;
@@ -76,7 +74,7 @@ public class MainScript : MonoBehaviour {
 	public ParticleSystem particleLittlePond;
 
 	public bool needNewPlayer = false;
-	public LumScript sensorStone;
+
 
 	public bool lightOff = true;
 
@@ -301,16 +299,7 @@ public class MainScript : MonoBehaviour {
 
 
 
-		if(sensor1.isTouched || sensor2.isTouched || sensor3.isTouched)
-		{
-			//if(particleLittlePond.isPlaying==false)
-			//particleLittlePond.Play();
-		}
-		else
-		{
-			//if(particleLittlePond.isPlaying==true)
-			//particleLittlePond.Stop();
-		}
+
 
 	}
 
@@ -389,6 +378,7 @@ public class MainScript : MonoBehaviour {
 		property3B.Init ();
 		currentFish.GetComponent<FishScript>().SetInitPropertiesValues(property1.GetValue(),property1B.GetValue(),property2.GetValue(),property2B.GetValue(),property2C.GetValue(),property3.GetValue(),property3B.GetValue());
 		needNewPlayer = true;
+		listFish.Add(currentFish);
 
 	
 	}
@@ -415,12 +405,12 @@ public class MainScript : MonoBehaviour {
 				
 				property1B.Update();
 				currentFish.GetComponent<FishScript>().AffectProperty1B(property1B.GetValue());
-				sensor1.isTouched = true;
+				//sensor1.isTouched = true;
 
 			}
 			else
 			{
-				sensor1.isTouched = false;
+				//sensor1.isTouched = false;
 			}
 
 
@@ -431,7 +421,7 @@ public class MainScript : MonoBehaviour {
 		}
 		else
 		{
-			sensor1.isTouched = false;
+			//sensor1.isTouched = false;
 		}
 			
 	}
@@ -452,16 +442,16 @@ public class MainScript : MonoBehaviour {
 				property2C.Update();
 				currentFish.GetComponent<FishScript>().AffectProperty2C(property2C.GetValue());
 
-				sensor2.isTouched = true;
+				//sensor2.isTouched = true;
 			}
 			else
 			{
-				sensor2.isTouched = false;
+				//sensor2.isTouched = false;
 			}
 		}
 		else
 		{
-			sensor2.isTouched = false;
+			//sensor2.isTouched = false;
 		}
 	}
 
@@ -479,16 +469,16 @@ public class MainScript : MonoBehaviour {
 				
 				currentFish.GetComponent<FishScript>().AffectProperty3B(property3B.GetValue());
 
-				sensor3.isTouched = true;
+				//sensor3.isTouched = true;
 			}
 			else
 			{
-				sensor3.isTouched = false;
+				//sensor3.isTouched = false;
 			}
 		}
 		else
 		{
-			sensor3.isTouched = false;
+			//sensor3.isTouched = false;
 		}
 	}
 
@@ -571,7 +561,7 @@ public class MainScript : MonoBehaviour {
 			}
 			else
 			{
-				sensor1.isTouched = false;
+				//sensor1.isTouched = false;
 			}
 			
 			if(stateButtons[1]==1 || Input.GetKey (KeyCode.Keypad2))
@@ -581,7 +571,7 @@ public class MainScript : MonoBehaviour {
 			}
 			else
 			{
-				sensor2.isTouched = false;
+				//sensor2.isTouched = false;
 			}
 			
 			if(stateButtons[2]==1 || Input.GetKey (KeyCode.Keypad3))
@@ -591,7 +581,7 @@ public class MainScript : MonoBehaviour {
 			}
 			else
 			{
-				sensor3.isTouched = false;
+				//sensor3.isTouched = false;
 			}
 		//}
 
@@ -692,7 +682,7 @@ public class MainScript : MonoBehaviour {
 	public void RockInPlace(bool rockInPlace)
 	{
 		pathOpened = !rockInPlace;
-		sensorStone.isTouched = rockInPlace;
+		//sensorStone.isTouched = rockInPlace;
 
 	}
 

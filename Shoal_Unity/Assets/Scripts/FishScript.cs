@@ -60,7 +60,7 @@ public class FishScript : MonoBehaviour {
 	float headSize = 0f;
 
 
-	float exchangeColor = 0f;
+	public float exchangeColor = 0f;
 	public float nextExchangeColor;
 
 
@@ -132,7 +132,7 @@ public class FishScript : MonoBehaviour {
 
 
 
-	public Gradient myGradient;
+	//public Gradient myGradient;
 
 	[Range(0f,1f)]
 	public float hunger =0f;
@@ -588,7 +588,7 @@ public class FishScript : MonoBehaviour {
 			float valueSizeB = curveSizeB.Evaluate((1f-Mathf.Clamp01(progress)));
 			bodyPartsScripts[i].SetLerpsColors(lerpColor1,lerpColor2);
 			bodyPartsScripts[i].SetExchangeColor (exchangeColor);
-			bodyPartsScripts[i].SetCustomColor(myGradient.Evaluate(progress));
+			//bodyPartsScripts[i].SetCustomColor(myGradient.Evaluate(progress));
 			bodyPartsTrails[i].material.color = bodyPartsScripts[i].GetTransitionColor();
 		}
 	}
@@ -615,6 +615,16 @@ public class FishScript : MonoBehaviour {
 
 		headSize *= finalLife;
 
+
+
+
+
+		Gradient gradient1 = GetComponent<NewGradient>().randomGradient;
+		Gradient gradient2 = GetComponent<NewGradient>().randomGradient2;
+
+
+
+
 		for (int i=0; i<bodyParts.Length; i++)
 		{
 			float progress = Map ((float)i,0f,(float)(bodyParts.Length-1),0f,1f);
@@ -625,7 +635,7 @@ public class FishScript : MonoBehaviour {
 			bodyPartsTrails[i].endWidth =0f;
 			bodyPartsScripts[i].SetLerpsColors(lerpColor1,lerpColor2);
 			bodyPartsScripts[i].SetExchangeColor (exchangeColor);
-			bodyPartsScripts[i].SetCustomColor(myGradient.Evaluate(progress));
+			bodyPartsScripts[i].SetCustomColors(gradient1.Evaluate(progress),gradient2.Evaluate(progress));
 			bodyPartsScripts[i].SetPointCurve(curveGradient.Evaluate(progress));
 
 
@@ -635,8 +645,8 @@ public class FishScript : MonoBehaviour {
 
 
 
-			bodyPartsTrails[i].material.color = Color.Lerp (bodyPartsScripts[i].GetTransitionColor(),new Color(0.8f,0.8f,0.8f,minAlpha),progressValueHunger);
-
+			//bodyPartsTrails[i].material.color = Color.Lerp (bodyPartsScripts[i].GetTransitionColor(),new Color(0.8f,0.8f,0.8f,minAlpha),progressValueHunger);
+			bodyPartsTrails[i].material.color = gradient1.Evaluate(progress);
 
 
 

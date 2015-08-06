@@ -14,6 +14,7 @@ Shoal_Unity/*.booproj
 Shoal_Unity/*.pidb.meta
 Shoal_Unity/sysinfo.txt
 Shoal_Unity/Assets/ShaderForge/
+Shoal_Unity/Assets/ShaderForge.meta
 
 Shoal_Unity/Shoal_Unity-csharp.sln
 Shoal_Unity/Shoal_Unity.sln

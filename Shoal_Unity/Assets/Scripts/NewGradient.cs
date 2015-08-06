@@ -8,6 +8,7 @@ using UnityEditor;
 public class NewGradient : MonoBehaviour {
 	
 	public Gradient randomGradient;
+	public Gradient randomGradient2;
 	[HideInInspector]public GradientColorKey[] gradientKeys;
 	[HideInInspector]public GradientAlphaKey[] gradientAlpha;
 	
@@ -117,6 +118,28 @@ public class NewGradient : MonoBehaviour {
 		
 		randomGradient = new Gradient();
 		randomGradient.SetKeys(gradientKeys,gradientAlpha);
+
+
+
+		gradientKeys = new GradientColorKey[4];
+		gradientKeys [0].color = bottomColor_hsv;
+		gradientKeys [0].time = 0.0f;
+		gradientKeys [1].color = bottomAScolor_hsv;
+		gradientKeys [1].time = 0.2f;
+		gradientKeys [2].color = headASColor_hsv;
+		gradientKeys [2].time = 0.7f;
+		gradientKeys [3].color = headColor_hsv;
+		gradientKeys [3].time = 1.0f;
+
+		
+		randomGradient2 = new Gradient();
+		randomGradient2.SetKeys(gradientKeys,gradientAlpha);
+
+
+
+
+
+
 		
 	}
 	

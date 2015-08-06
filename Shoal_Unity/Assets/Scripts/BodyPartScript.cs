@@ -32,6 +32,14 @@ public class BodyPartScript : MonoBehaviour {
 		color2B = mainColor2B;
 	}
 
+	public void SetCustomColors(Color mainColor1, Color mainColor2)
+	{
+		myMat.SetColor("_CustomColorA",mainColor1);
+		myMat.SetColor("_CustomColorB",mainColor2);
+
+	}
+
+
 	public void SetLerpsColors(float lerpMainColor1,float lerpMainColor2)
 	{
 		myMat.SetFloat("_LerpColor1",lerpMainColor1);

@@ -135,7 +135,7 @@ public class Tail : MonoBehaviour {
 	void Start () 
 	{
 		main = MainScript.Instance;
-
+		GetComponentInParent<Fish>().EventDeath += GoDie;
 
 //		petitPondCentre = Vector3.zero+(main.littlePond.transform.position-main.bigPond.transform.position)*multDecal;
 		//petitPondExit = petitPondCentre+Vector3.Normalize(main.bigPond.transform.position-main.littlePond.transform.position)*2f*1f;
@@ -189,6 +189,14 @@ public class Tail : MonoBehaviour {
 		speedMotionBodyPart = Random.Range (0.7f,1.35f);
 
 		radiusMotionBodyParts = Random.Range (0f,1.2f);
+
+
+		main.BumpProperties(this);
+
+
+
+
+
 	}
 
 	public void SetInitPropertiesValues(float p1, float p1B, float p2,float p2B,float p2C, float p3, float p3B)
@@ -301,7 +309,7 @@ public class Tail : MonoBehaviour {
 	void LateUpdate()
 	{
 		if(dead)
-			DestroyImmediate(this.gameObject);
+			Destroy(transform.parent.gameObject);
 	}
 	
 	float Radians(float value)
@@ -486,6 +494,8 @@ public class Tail : MonoBehaviour {
 	{
 		dying = true;
 	}
+
+
 
 	
 }

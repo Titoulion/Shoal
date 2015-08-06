@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using System.Collections;
 
@@ -11,6 +12,8 @@ public class Fish : Entity
 	
     private float health;
 
+	public event Action EventDeath;
+
     protected override void Awake()
     {
         base.Awake();
@@ -19,7 +22,9 @@ public class Fish : Entity
 
     private void Update()
     {
-        Health -= Time.deltaTime / timeToDeath;
+       if(Health==0)
+			return;
+		Health -= Time.deltaTime / timeToDeath;
 
         var eatingTransformPosition = eatingTransform.position;
         foreach (var food in pond.GetEntitiesOfType(EntityType.Food))
@@ -61,7 +66,8 @@ public class Fish : Entity
 
     private void Die()
     {
-        Destroy(gameObject);
+        if(EventDeath!=null)
+			EventDeath();
     }
 
     public override EntityType Type

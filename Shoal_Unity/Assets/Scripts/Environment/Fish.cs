@@ -8,21 +8,12 @@ public class Fish : Entity
     [SerializeField] private Transform eatingTransform;
     [SerializeField] private float eatingRadius;
     [SerializeField] private float eatMaxValue = 0.8f;
-
-    private Material material;
+	
     private float health;
 
     protected override void Awake()
     {
         base.Awake();
-
-        var renderers = GetComponentsInChildren<Renderer>();
-        material = renderers[0].material;
-        for (var i = 1; i < renderers.Length; i++)
-        {
-            renderers[i].sharedMaterial = material;
-        }
-
         health = 1;
     }
 
@@ -39,13 +30,7 @@ public class Fish : Entity
             }
         }
     }
-
-    public float Transparency
-    {
-        get { return material.color.a; }
-        set { material.color = material.color.ChangeAlpha(value); }
-    }
-
+	
     public float Health
     {
         get { return health; }
@@ -57,7 +42,6 @@ public class Fish : Entity
                 return;
 
             health = value;
-            Transparency = health;
 
             if (health == 0)
             {

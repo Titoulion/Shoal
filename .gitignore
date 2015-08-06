@@ -18,3 +18,5 @@ Shoal_Unity/Assets/ShaderForge/
 Shoal_Unity/Shoal_Unity-csharp.sln
 Shoal_Unity/Shoal_Unity.sln
 Shoal_Unity/Shoal_Unity.userprefs
+
+*.sublime*

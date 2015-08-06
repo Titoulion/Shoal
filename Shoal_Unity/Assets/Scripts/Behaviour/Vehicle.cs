@@ -36,9 +36,11 @@ public class Vehicle : MonoBehaviourBase
                 continue;
 
             var weight = movement.CurrentWeight;
-            var force = movement.CurrentForce;
+            if (weight == 0)
+                continue;
 
-            if ((weight == 0) || (force.sqrMagnitude == 0))
+            var force = movement.CurrentForce;
+            if (force.sqrMagnitude == 0)
                 continue;
 
             totalDesiredForce += movement.CurrentForce * weight;

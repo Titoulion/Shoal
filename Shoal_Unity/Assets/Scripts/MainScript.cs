@@ -85,8 +85,8 @@ public class MainScript : MonoBehaviour {
 	public GameObject foodArea;
 
 	float valDistortFood = 0f;
-
-
+	float openFoodArea = 0f;
+	public GameObject prefabFood;
 
 
 
@@ -112,7 +112,7 @@ public class MainScript : MonoBehaviour {
 	{
 		if(listFish.Count>0)
 		{
-			listFish[0].GetComponent<FishScript>().Kill();
+			listFish[0].GetComponentInChildren<Tail>().Kill();
 			listFish.RemoveAt(0);
 		}
 	}
@@ -168,18 +168,7 @@ public class MainScript : MonoBehaviour {
 
 
 
-		if(currentFish!=null)
-		{
-			if(Input.GetKeyDown(KeyCode.T))
-			{
-				currentFish.GetComponent<FishScript>().LaunchGoBigPond();
-			}
-
-			if(Input.GetKeyDown(KeyCode.Y))
-			{
-				currentFish.GetComponent<FishScript>().StopGoBigPond();
-			}
-		}
+	
 
 
 
@@ -244,7 +233,7 @@ public class MainScript : MonoBehaviour {
 
 				CheckDestroyFish();
 				//currentFish = null;
-				//currentFish.GetComponent<FishScript>().LaunchGoBigPond();
+				//currentFish.GetComponent<Tail>().LaunchGoBigPond();
 
 				isRemoving = false;
 			}
@@ -311,6 +300,28 @@ public class MainScript : MonoBehaviour {
 
 
 
+		if(Input.GetKey(KeyCode.F))
+		{
+			openFoodArea+=Time.deltaTime*2f;
+		}
+		else
+		{
+			openFoodArea-=Time.deltaTime*2f;
+		}
+
+		openFoodArea = Mathf.Clamp01(openFoodArea);
+
+		foodArea.GetComponent<Renderer>().material.SetFloat("_ProgressTouch",openFoodArea);
+
+
+		if(openFoodArea>0.2f && Random.value>0.8f)
+		{
+			Vector3 rand = Random.insideUnitSphere;
+
+			Instantiate(prefabFood,new Vector3(8f+rand.x,4.5f+rand.y,0f),Quaternion.identity);
+		}
+
+
 
 	}
 
@@ -328,7 +339,7 @@ public class MainScript : MonoBehaviour {
 	{
 		if(currentFish!=null)
 		{
-			currentFish.GetComponent<FishScript>().GoDie();
+			currentFish.GetComponentInChildren<Tail>().GoDie();
 			currentFish = null;
 		}
 	}
@@ -387,7 +398,7 @@ public class MainScript : MonoBehaviour {
 		property2C.Init ();
 		property3.Init ();
 		property3B.Init ();
-		currentFish.GetComponent<FishScript>().SetInitPropertiesValues(property1.GetValue(),property1B.GetValue(),property2.GetValue(),property2B.GetValue(),property2C.GetValue(),property3.GetValue(),property3B.GetValue());
+		currentFish.GetComponentInChildren<Tail>().SetInitPropertiesValues(property1.GetValue(),property1B.GetValue(),property2.GetValue(),property2B.GetValue(),property2C.GetValue(),property3.GetValue(),property3B.GetValue());
 		needNewPlayer = true;
 		listFish.Add(currentFish);
 
@@ -409,13 +420,13 @@ public class MainScript : MonoBehaviour {
 		if(currentFish!=null)
 		{
 
-			if(currentFish.GetComponent<FishScript>().CanChangeValues())
+			if(currentFish.GetComponentInChildren<Tail>().CanChangeValues())
 			{
 				property1.Update();
-				currentFish.GetComponent<FishScript>().AffectProperty1(property1.GetValue());
+				currentFish.GetComponentInChildren<Tail>().AffectProperty1(property1.GetValue());
 				
 				property1B.Update();
-				currentFish.GetComponent<FishScript>().AffectProperty1B(property1B.GetValue());
+				currentFish.GetComponentInChildren<Tail>().AffectProperty1B(property1B.GetValue());
 				//sensor1.isTouched = true;
 
 			}
@@ -442,16 +453,16 @@ public class MainScript : MonoBehaviour {
 		if(currentFish!=null)
 		{
 
-			if(currentFish.GetComponent<FishScript>().CanChangeValues())
+			if(currentFish.GetComponentInChildren<Tail>().CanChangeValues())
 			{
 				property2.Update();
-				currentFish.GetComponent<FishScript>().AffectProperty2(property2.GetValue());
+				currentFish.GetComponentInChildren<Tail>().AffectProperty2(property2.GetValue());
 
 				property2B.Update();
-				currentFish.GetComponent<FishScript>().AffectProperty2B(property2B.GetValue());
+				currentFish.GetComponentInChildren<Tail>().AffectProperty2B(property2B.GetValue());
 
 				property2C.Update();
-				currentFish.GetComponent<FishScript>().AffectProperty2C(property2C.GetValue());
+				currentFish.GetComponentInChildren<Tail>().AffectProperty2C(property2C.GetValue());
 
 				//sensor2.isTouched = true;
 			}
@@ -470,15 +481,15 @@ public class MainScript : MonoBehaviour {
 	{
 		if(currentFish!=null)
 		{
-			if(currentFish.GetComponent<FishScript>().CanChangeValues())
+			if(currentFish.GetComponentInChildren<Tail>().CanChangeValues())
 			{
 				property3.Update();
 
-				currentFish.GetComponent<FishScript>().AffectProperty3(property3.GetValue());
+				currentFish.GetComponentInChildren<Tail>().AffectProperty3(property3.GetValue());
 				
 				property3B.Update();
 				
-				currentFish.GetComponent<FishScript>().AffectProperty3B(property3B.GetValue());
+				currentFish.GetComponentInChildren<Tail>().AffectProperty3B(property3B.GetValue());
 
 				//sensor3.isTouched = true;
 			}
@@ -649,15 +660,7 @@ public class MainScript : MonoBehaviour {
 
 	void CheckToFreeFish()
 	{
-		if(currentFish!=null && pathOpened == true && playerConnected == true && wasPlayerConnected == true)
-		{
-			currentFish.GetComponent<FishScript>().LaunchGoBigPond();
-		}
 
-		if(currentFish!=null && pathOpened == false && playerConnected == true && wasPlayerConnected == true)
-		{
-			currentFish.GetComponent<FishScript>().StopGoBigPond();
-		}
 
 	}
 

@@ -23,7 +23,7 @@ public class Vehicle : MonoBehaviourBase
             velocity = Random.insideUnitCircle;
         }
         while (velocity.sqrMagnitude < 0.001f);
-        transform.eulerAngles = new Vector3(0, 0, velocity.GetAngleDeg());
+        //transform.eulerAngles = new Vector3(0, 0, velocity.GetAngleDeg());
     }
 
     private void Update()
@@ -60,6 +60,6 @@ public class Vehicle : MonoBehaviourBase
 
         velocity = Vector2.ClampMagnitude(velocity, maxSpeed);
         transform.Translate(velocity * Time.deltaTime, Space.World);
-        transform.eulerAngles = new Vector3(0, 0, velocity.GetAngleDeg());
+        //transform.eulerAngles = new Vector3(0, 0, velocity.GetAngleDeg());
     }
 }

@@ -82,6 +82,12 @@ public class MainScript : MonoBehaviour {
 	public List<GameObject> listFish = new List<GameObject>();
 
 
+	public GameObject foodArea;
+
+	float valDistortFood = 0f;
+
+
+
 
 
 	void Awake()
@@ -296,6 +302,11 @@ public class MainScript : MonoBehaviour {
 
 		progressOpenBridge=Mathf.Clamp01(progressOpenBridge+(pathOpened?1f:-1f)*Time.deltaTime/0.8f);
 		//bridge.GetComponent<Renderer>().material.SetFloat("_OpeningBridge",progressOpenBridge);
+
+
+		valDistortFood+=Map (foodArea.GetComponent<Renderer>().material.GetFloat("_ProgressTouch"),0f,1f,5f,25f)*0.001f;
+
+		foodArea.GetComponent<Renderer>().material.SetFloat("_valueDistort",valDistortFood);
 
 
 

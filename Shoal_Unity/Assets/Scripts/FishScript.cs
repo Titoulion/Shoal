@@ -130,7 +130,7 @@ public class FishScript : MonoBehaviour {
 	float sensSpeed = 1f;
 
 
-
+	public bool useTitouanMotion = false;
 
 	//public Gradient myGradient;
 
@@ -373,7 +373,11 @@ public class FishScript : MonoBehaviour {
 			if(started)
 			{
 				UpdateValues();
+
+				if(useTitouanMotion)
 				Mouvement();
+
+
 				PositionBodyParts();
 				timeLife+=Time.deltaTime;
 			}

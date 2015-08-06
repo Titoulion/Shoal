@@ -135,7 +135,7 @@ public class MainScript : MonoBehaviour {
 		{
 			for(int i = 0; i<1;i++)
 			{
-				CreateFish ();
+			//	CreateFish ();
 			}
 		}
 
@@ -143,7 +143,7 @@ public class MainScript : MonoBehaviour {
 		{
 			for(int i = 0; i<10;i++)
 			{
-				CreateFish ();
+				//CreateFish ();
 			}
 		}
 			
@@ -413,6 +413,41 @@ public class MainScript : MonoBehaviour {
 
 		if(isTrueHeartBeat)
 		timeSinceLastHeartBeat = 0f;
+	}
+
+	public void BumpProperties(Tail thisTail)
+	{
+
+		property1.Init ();
+		property1B.Init ();
+		property2.Init ();
+		property2B.Init ();
+		property2C.Init ();
+		property3.Init ();
+		property3B.Init ();
+
+		property1.Update();
+		thisTail.AffectProperty1(property1.GetValue());
+		
+		property1B.Update();
+		thisTail.AffectProperty1B(property1B.GetValue());
+
+		property2.Update();
+		thisTail.AffectProperty2(property2.GetValue());
+		
+		property2B.Update();
+		thisTail.AffectProperty2B(property2B.GetValue());
+		
+		property2C.Update();
+		thisTail.AffectProperty2C(property2C.GetValue());
+
+		property3.Update();
+		thisTail.AffectProperty3(property3.GetValue());
+		
+		property3B.Update();
+		thisTail.AffectProperty3B(property3B.GetValue());
+
+
 	}
 
 	public void AffectProperty1()

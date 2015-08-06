@@ -129,7 +129,7 @@ public class Tail : MonoBehaviour {
 	public AnimationCurve curveBlink;
 
 
-
+	//public bool realTimeUpdateAspect = false;
 
 
 	void Start () 
@@ -378,7 +378,7 @@ public class Tail : MonoBehaviour {
 	void UpdateValues()
 	{
 
-		ProgressionsProperties();
+		ProgressionsProperties(true);
 		
 
 
@@ -410,69 +410,91 @@ public class Tail : MonoBehaviour {
 		}
 	}
 	
-	void ProgressionsProperties()
+	void ProgressionsProperties(bool realTimeUpdateAspect)
 	{
 		float valueProgressProgress = Map (Mathf.Clamp01(timeLife),0f,1f,0.1f,1f);
 
-
-		lerpColor1 += (nextLerpColor1-lerpColor1)*valueProgressProgress;
-		lerpColor2 += (nextLerpColor2-lerpColor2)*valueProgressProgress;
-		exchangeColor += (nextExchangeColor-exchangeColor)*valueProgressProgress;
-		radiusMotionBodyParts += (nextRadiusMotionBodyParts-radiusMotionBodyParts)*valueProgressProgress;
-		tailLenght+=(nextTailLenght-tailLenght)*valueProgressProgress;
 		headSize+=(nextHeadSize-headSize)*valueProgressProgress;
-		lerpValueSize+=(nextLerpValueSize-lerpValueSize)*valueProgressProgress;
-
-
 		if(dying)
 		{
 			finalLife=Mathf.Clamp01(finalLife-Time.deltaTime);
 		}
-
+		
 		headSize *= finalLife;
 
 
+			
+			
+			lerpColor1 += (nextLerpColor1-lerpColor1)*valueProgressProgress;
+			lerpColor2 += (nextLerpColor2-lerpColor2)*valueProgressProgress;
+			exchangeColor += (nextExchangeColor-exchangeColor)*valueProgressProgress;
+			radiusMotionBodyParts += (nextRadiusMotionBodyParts-radiusMotionBodyParts)*valueProgressProgress;
+			tailLenght+=(nextTailLenght-tailLenght)*valueProgressProgress;
 
-		hunger = 1f-GetComponentInParent<Fish>().Health;
+			lerpValueSize+=(nextLerpValueSize-lerpValueSize)*valueProgressProgress;
+			
+			
+
+			
+			
+			
+			hunger = 1f-GetComponentInParent<Fish>().Health;
+			
+			
+			
+			
+			Gradient gradient1 = GetComponent<NewGradient>().randomGradient;
+			Gradient gradient2 = GetComponent<NewGradient>().randomGradient2;
+			
+			
+			
+			
+			for (int i=0; i<bodyParts.Length; i++)
+			{
+				float progress = Map ((float)i,0f,(float)(bodyParts.Length-1),0f,1f);
+				float progressValueHunger = Mathf.Lerp (hunger,0f,Mathf.Cos ((Time.realtimeSinceStartup*speedBlink+myFishRandom)*2f*Mathf.PI)*0.5f+0.5f);
+				float valueSizeA = curveSizeA.Evaluate((1f-Mathf.Clamp01(progress)));
+				float valueSizeB = curveSizeB.Evaluate((1f-Mathf.Clamp01(progress)));
+				
+				bodyPartsScripts[i].SetSize(headSize* Mathf.Lerp(valueSizeA,valueSizeB,lerpValueSize));
+				if(realTimeUpdateAspect)
+				{
 
 
+					bodyPartsTrails[i].startWidth =headSize* Mathf.Lerp(valueSizeA,valueSizeB,lerpValueSize);
+					bodyPartsTrails[i].endWidth =0f;
+					bodyPartsScripts[i].SetLerpsColors(lerpColor1,lerpColor2);
+					bodyPartsScripts[i].SetExchangeColor (exchangeColor);
+					bodyPartsScripts[i].SetCustomColors(gradient1.Evaluate(progress),gradient2.Evaluate(progress));
+					bodyPartsScripts[i].SetPointCurve(curveGradient.Evaluate(progress));
 
 
-		Gradient gradient1 = GetComponent<NewGradient>().randomGradient;
-		Gradient gradient2 = GetComponent<NewGradient>().randomGradient2;
+					progressValueHunger = Mathf.Lerp (hunger,0f,(1f-hunger+0.5f)*curveBlink.Evaluate(Modulo(Time.realtimeSinceStartup*speedBlink+myFishRandom,1f)));
+					
+					
+					bodyPartsScripts[i].SetCustomColors(gradient1.Evaluate(progress),gradient2.Evaluate(progress));
+					
+					bodyPartsTrails[i].material.color = Color.Lerp (gradient1.Evaluate(progress),new Color(0.8f,0.8f,0.8f),progressValueHunger);
+					//bodyPartsTrails[i].material.color = gradient1.Evaluate(progress);
+					
 
 
+				}
 
 
-		for (int i=0; i<bodyParts.Length; i++)
-		{
-			float progress = Map ((float)i,0f,(float)(bodyParts.Length-1),0f,1f);
-			float valueSizeA = curveSizeA.Evaluate((1f-Mathf.Clamp01(progress)));
-			float valueSizeB = curveSizeB.Evaluate((1f-Mathf.Clamp01(progress)));
-			bodyPartsScripts[i].SetSize(headSize* Mathf.Lerp(valueSizeA,valueSizeB,lerpValueSize));
-			bodyPartsTrails[i].startWidth =headSize* Mathf.Lerp(valueSizeA,valueSizeB,lerpValueSize);
-			bodyPartsTrails[i].endWidth =0f;
-			bodyPartsScripts[i].SetLerpsColors(lerpColor1,lerpColor2);
-			bodyPartsScripts[i].SetExchangeColor (exchangeColor);
-			bodyPartsScripts[i].SetCustomColors(gradient1.Evaluate(progress),gradient2.Evaluate(progress));
-			bodyPartsScripts[i].SetPointCurve(curveGradient.Evaluate(progress));
+				Color col = bodyPartsTrails[i].material.color;
+				col.a = Mathf.Lerp (1f,minAlpha,progressValueHunger);
+				bodyPartsTrails[i].material.color = col;
+
+				bodyPartsScripts[i].SetHunger(minAlpha,progressValueHunger);
 
 
-			float progressValueHunger = Mathf.Lerp (hunger,0f,Mathf.Cos ((Time.realtimeSinceStartup*speedBlink+myFishRandom)*2f*Mathf.PI)*0.5f+0.5f);
-			progressValueHunger = Mathf.Lerp (hunger,0f,(1f-hunger+0.5f)*curveBlink.Evaluate(Modulo(Time.realtimeSinceStartup*speedBlink+myFishRandom,1f)));
-
-
-
-
-			bodyPartsTrails[i].material.color = Color.Lerp (gradient1.Evaluate(progress),new Color(0.8f,0.8f,0.8f,minAlpha),progressValueHunger);
-			//bodyPartsTrails[i].material.color = gradient1.Evaluate(progress);
-
-
-
-			bodyPartsScripts[i].SetHunger(minAlpha,progressValueHunger);
+				
+				
 
 
 		}
+
 
 		if(finalLife==0f)
 		{

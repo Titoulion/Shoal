@@ -15,7 +15,7 @@ public class TestSpawner : MonoBehaviourBase
 
             if (Input.GetMouseButtonDown(i))
             {
-                var position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                var position = Camera.main.ScreenToWorldPoint(Input.mousePosition)*2.5f;
                 position.z = 0;
                 InstantiatePrefab(mouseButtonPrefabs[i], position, Quaternion.identity);
             }

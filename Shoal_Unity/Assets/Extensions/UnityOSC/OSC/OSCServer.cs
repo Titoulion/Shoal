@@ -116,8 +116,11 @@ namespace UnityOSC
 		{
 			if(_receiverThread !=null) _receiverThread.Abort();
 			_receiverThread = null;
-			_udpClient.Close();
-			_udpClient = null;
+            if (_udpClient != null)
+            {
+                _udpClient.Close();
+                _udpClient = null;
+            }
 		}
 		
 

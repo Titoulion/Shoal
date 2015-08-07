@@ -24,6 +24,7 @@ public class Fish : Entity
     {
        if(Health==0)
 			return;
+
 		Health -= Time.deltaTime / timeToDeath;
 
         var eatingTransformPosition = eatingTransform.position;

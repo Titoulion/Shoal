@@ -311,6 +311,7 @@ public class Tail : MonoBehaviour {
 			Vector3 toUp = Vector3.Cross (toForward,Vector3.forward);
 			float randomValueT =  randomValues[i] + Time.realtimeSinceStartup*randomSens[i]*speedMotionBodyPart;
 			bodyParts[i].transform.position = bodyPartsPositions[i]+toForward*Mathf.Cos (randomValueT*2f*Mathf.PI)*radiusMotionBodyParts*progressB+toUp*Mathf.Sin (randomValueT*2f*Mathf.PI)*radiusMotionBodyParts*progressB;
+
 		}
 	}
 
@@ -442,7 +443,7 @@ public class Tail : MonoBehaviour {
 			Gradient gradient1 = GetComponent<NewGradient>().randomGradient;
 			Gradient gradient2 = GetComponent<NewGradient>().randomGradient2;
 			
-		float progressValueHunger = progressValueHunger = Mathf.Lerp (hunger,0f,(1f-hunger+0.5f)*curveBlink.Evaluate(Modulo(Time.realtimeSinceStartup*speedBlink+myFishRandom,1f)));
+		float progressValueHunger = Mathf.Lerp (hunger,0f,(1f-hunger+0.5f)*curveBlink.Evaluate(Modulo(Time.realtimeSinceStartup*speedBlink+myFishRandom,1f)));
 			
 			
 			for (int i=0; i<bodyParts.Length; i++)

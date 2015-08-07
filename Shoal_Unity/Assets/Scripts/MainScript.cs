@@ -316,9 +316,9 @@ public class MainScript : MonoBehaviour {
 
 		if(openFoodArea>0.2f && Random.value>0.8f)
 		{
-			Vector3 rand = Random.insideUnitSphere;
+			Vector3 rand = Random.insideUnitSphere*1.5f;
 
-			Instantiate(prefabFood,new Vector3(8f+rand.x,4.5f+rand.y,0f),Quaternion.identity);
+			Instantiate(prefabFood,new Vector3(7f+rand.x,3.5f+rand.y,0f),Quaternion.identity);
 		}
 
 

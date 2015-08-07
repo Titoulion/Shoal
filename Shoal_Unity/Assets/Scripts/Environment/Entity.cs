@@ -6,11 +6,11 @@ using UnityEngine;
 
 public abstract class Entity : MonoBehaviourBase
 {
-    [SerializeField] private float healthPlus;
+    [SerializeField] private float radius;
 
     public abstract EntityType Type { get; }
 
-    public float HealthPlus { get { return healthPlus; } }
+    public float Radius { get { return radius; } }
 
     protected Pond pond;
 

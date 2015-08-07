@@ -6,5 +6,6 @@ using System.Text;
 public enum EntityType
 {
     Fish,
-    Food
+    Food,
+    Stone
 }

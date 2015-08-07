@@ -10,6 +10,7 @@ public abstract class Movement : MonoBehaviourBase
 
     protected Pond pond;
     protected Vehicle vehicle;
+    protected Entity entity;
 
     public float CurrentWeight
     {
@@ -28,6 +29,7 @@ public abstract class Movement : MonoBehaviourBase
     {
         pond = Pond.Instance;
         vehicle = GetComponentInParent<Vehicle>();
+        entity = vehicle.GetComponent<Entity>();
     }
 
     protected virtual void Update()

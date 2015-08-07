@@ -32,7 +32,7 @@ public class Fish : Entity
         {
             if (Vector2.Distance(food.transform.position, eatingTransformPosition) <= eatingRadius)
             {
-                EatFood(food);
+                EatFood((Food) food);
             }
         }
     }
@@ -56,7 +56,7 @@ public class Fish : Entity
         }
     }
 
-    private void EatFood(Entity food)
+    private void EatFood(Food food)
     {
         if ((Health == 0) || (Health > eatMaxValue))
             return;

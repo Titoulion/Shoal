@@ -8,4 +8,8 @@ public class Food : Entity
     {
         get { return EntityType.Food; }
     }
+
+    [SerializeField] private float healthPlus;
+
+    public float HealthPlus { get { return healthPlus; } }
 }

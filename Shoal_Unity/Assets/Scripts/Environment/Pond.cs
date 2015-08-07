@@ -23,8 +23,8 @@ public class Pond : SingletonMonoBehaviour<Pond>
         entities.Remove(entity);
     }
 
-    public IEnumerable<Entity> GetEntitiesOfType(EntityType type)
+    public IEnumerable<Entity> GetEntitiesOfType(EntityType type, Entity ignoreEntity = null)
     {
-        return entities.Where(entity => entity.Type == type);
+        return entities.Where(entity => (entity.Type == type) && (entity != ignoreEntity));
     }
 }

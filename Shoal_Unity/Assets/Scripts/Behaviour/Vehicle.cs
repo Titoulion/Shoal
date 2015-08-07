@@ -5,7 +5,6 @@ using System.Collections;
 public class Vehicle : MonoBehaviourBase
 {
     [SerializeField] private float maxSpeed = 2f;
-    [SerializeField] private List<Movement> movements;
 
     private Vector2 velocity;
 
@@ -16,6 +15,8 @@ public class Vehicle : MonoBehaviourBase
     public float HeadingAngleDeg { get { return velocity.GetAngleDeg(); } }
     public float HeadingAngleRad { get { return velocity.GetAngleRad(); } }
 
+    private Movement[] movements;
+
     private void Awake()
     {
         do
@@ -24,6 +25,8 @@ public class Vehicle : MonoBehaviourBase
         }
         while (velocity.sqrMagnitude < 0.001f);
         //transform.eulerAngles = new Vector3(0, 0, velocity.GetAngleDeg());
+
+        movements = GetComponents<Movement>();
     }
 
     private void Update()

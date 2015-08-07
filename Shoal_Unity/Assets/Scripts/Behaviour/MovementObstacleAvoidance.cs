@@ -9,10 +9,9 @@ public class MovementObstacleAvoidance : Movement
 
     protected override Vector2 CalculateForce()
     {
-        var obstacles = pond.GetEntitiesOfType(type);
+        var obstacles = pond.GetEntitiesOfType(type, entity);
         if (!obstacles.Any())
             return new Vector2();
-
 
         var lineFrom = vehicle.Position;
         var lineTo = lineFrom + vehicle.HeadingDirection * feelerLength;

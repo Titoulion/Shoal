@@ -9,7 +9,7 @@ public class MovementAttraction : Movement
 
     protected override Vector2 CalculateForce()
     {
-        var entities = pond.GetEntitiesOfType(type);
+        var entities = pond.GetEntitiesOfType(type, entity);
         if (!entities.Any())
             return new Vector2();
 

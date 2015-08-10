@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Whirlpool : MonoBehaviour {
+public class Whirlpool : Entity {
 
 	public float durationOpening = 4f;
 	public float durationStaying = 8f;
@@ -75,4 +75,9 @@ public class Whirlpool : MonoBehaviour {
 		}
 
 	}
+
+    public override EntityType Type
+    {
+        get { return EntityType.Whirlpool; }
+    }
 }

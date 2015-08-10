@@ -7,5 +7,6 @@ public enum EntityType
 {
     Fish,
     Food,
-    Stone
+    Stone,
+    Whirlpool
 }

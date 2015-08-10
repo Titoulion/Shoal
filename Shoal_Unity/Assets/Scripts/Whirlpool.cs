@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Whirlpool : MonoBehaviour {
+public class Whirlpool : Entity {
 
 	public float duration = 8f;
 	float progress;
@@ -70,4 +70,9 @@ public class Whirlpool : MonoBehaviour {
 		}
 
 	}
+
+    public override EntityType Type
+    {
+        get { return EntityType.Whirlpool; }
+    }
 }

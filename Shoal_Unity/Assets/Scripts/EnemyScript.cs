@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Linq;
 
 public class EnemyScript : MonoBehaviour {
 
@@ -44,7 +45,7 @@ public class EnemyScript : MonoBehaviour {
 	private float startLerpRadius, startLerpAngle;
 	private float currentAngle, currentRadius;
 
-	private FishScript prey;
+	private Entity prey;
 
 	private bool mouseHovering = false;
 
@@ -152,7 +153,9 @@ public class EnemyScript : MonoBehaviour {
 		* finding fishes with slow lookup until a constantly maintined
 		* collection of fishes is implimeneted
 		*/
-		FishScript[] fishes = FindObjectsOfType(typeof(FishScript)) as FishScript[];
+		//FishScript[] fishes = FindObjectsOfType(typeof(FishScript)) as FishScript[];
+		Entity[] fishes = Pond.Instance.GetEntitiesOfType(EntityType.Fish).ToArray();
+
 
 		Vector2 pos = transform.position;
 		float enemyRads = Mathf.Atan2(pos.y, pos.x);

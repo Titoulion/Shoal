@@ -91,6 +91,7 @@ public class MainScript : MonoBehaviour {
 
 	public Gradient rampColorsEdgePond;
 	public Gradient rampColorsFondPond;
+	public Gradient rampColorsWaves;
 
 	public float progressDay;
 	public float durationDay = 10f;
@@ -104,6 +105,8 @@ public class MainScript : MonoBehaviour {
 	public EnemyScript theEnemy;
 
 	public AnimationCurve curveDistort;
+
+
 
 
 	void Awake()
@@ -359,8 +362,15 @@ public class MainScript : MonoBehaviour {
 		Color col2 = rampColorsFondPond.Evaluate(Modulo(progressDay,1f));
 		camRenderFish.backgroundColor = col2;
 
+		Color col3 = rampColorsWaves.Evaluate(Modulo(progressDay,1f));
+
+
 		Shader.SetGlobalColor("_ColorGlobal2",col);
 		Shader.SetGlobalColor("_ColorGlobal",col2);
+		Shader.SetGlobalColor("_ColorGlobal3",col3);
+
+
+
 
 
 

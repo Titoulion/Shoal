@@ -15,6 +15,14 @@ public class Whirlpool : Entity {
 
 	public AnimationCurve curveSize;
 
+	public float progressDanger = 0f;
+
+	float intensitySwirl = 1f;
+
+
+	float progressRotation = 0f;
+	public float speedRotation = 1f;
+
 	// Use this for initialization
 	void Start () {
 		myMat = GetComponent<Renderer>().material;
@@ -42,6 +50,11 @@ public class Whirlpool : Entity {
 		{
 			progress+=Time.deltaTime/durationStaying;
 			progress = Mathf.Clamp01(progress);
+
+			progressDanger+=Time.deltaTime/durationStaying;
+			progressDanger = Mathf.Clamp01(progressDanger);
+
+
 			valueOpen = 1f;
 			if(progress==1f)
 			{
@@ -66,7 +79,15 @@ public class Whirlpool : Entity {
 	
 		myMat.SetFloat ("_ProgressOpen",valueOpen);
 
-		transform.localScale = curveSize.Evaluate(valueOpen)*maxSize*Vector3.one;
+		transform.localScale = Map(curveSize.Evaluate(progressDanger),0f,1f,6.2f,12f)*Vector3.one;
+
+		speedRotation = Map(curveSize.Evaluate(progressDanger),0f,1f,0.02f,0.08f);
+		intensitySwirl = Map(curveSize.Evaluate(progressDanger),0f,1f,0f,-7f);
+
+
+		progressRotation+=speedRotation;
+		myMat.SetFloat ("_ProgressRotation",progressRotation);
+		myMat.SetFloat ("_IntensitySwirl",intensitySwirl);
 
 
 		if(goDie)
@@ -76,7 +97,11 @@ public class Whirlpool : Entity {
 
 	}
 
-    public override EntityType Type
+	public float Map(float val, float fromMin, float fromMax, float toMin, float toMax) {
+		return ((val - fromMin) / (fromMax - fromMin)) * (toMax - toMin) + toMin;
+	}
+
+	public override EntityType Type
     {
         get { return EntityType.Whirlpool; }
     }

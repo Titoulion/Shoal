@@ -51,14 +51,14 @@ public class EnemyScript : MonoBehaviour {
 
 	private Rect watchingRect;
 
-	// Use this for initialization
 	void Start () {
 		zPosition = transform.position.z;
 		float sleepTime = Random.Range(sleepTimeRange.x, sleepTimeRange.y);
 		Invoke("WakeUp", sleepTime);
 
 		startRadius = sleepingRadius;
-		startAngle = Random.Range(0f, 360f);
+		// startAngle = Random.Range(0f, 360f);
+		startAngle = -359f;
 		Quaternion degrees = Quaternion.Euler(0, 0, startAngle);
 		Vector3 unrotatedStart = new Vector3(sleepingRadius, 0, zPosition);
 		transform.position = degrees * unrotatedStart;
@@ -67,7 +67,6 @@ public class EnemyScript : MonoBehaviour {
 		watchingRect = new Rect(rectLeft, attackWidth/2, attackRange, attackWidth);
 	}
 	
-	// Update is called once per frame
 	void Update () {
 		switch(state) {
 			case EnemyState.Attacking:
@@ -113,11 +112,22 @@ public class EnemyScript : MonoBehaviour {
 		}
 
 		Vector2 preyPos = prey.transform.position;
+		Vector2 enemyPos = transform.position;
 
 		lerpTimer += Time.deltaTime;
 		float time = lerpTimer/lerpDuration;
 		targetRadius = Vector2.Distance(Vector2.zero, preyPos);
 		targetAngle = Mathf.Rad2Deg * Mathf.Atan2(preyPos.y, preyPos.x);
+
+		if (Mathf.Abs(targetAngle - startAngle) > 180f) {
+			if (targetAngle > startAngle) {
+				targetAngle -= 360f;
+			} else {
+				startAngle -= 360f;
+			}
+		}
+
+		// Debug.Log("starting: " + startAngle + " attacking: " + targetAngle);
 		SmoothMove(startRadius, targetRadius, startAngle, targetAngle, time);
 
 		if (time >= 1f) {

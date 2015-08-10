@@ -347,7 +347,7 @@ public class MainScript : MonoBehaviour {
 	void UpdatePondAspect()
 	{
 
-		Debug.Log (new Vector2(Input.mousePosition.x,Screen.height-Input.mousePosition.y));
+		// Debug.Log (new Vector2(Input.mousePosition.x,Screen.height-Input.mousePosition.y));
 
 
 		progressDay+=Time.deltaTime/durationDay;
@@ -375,7 +375,7 @@ public class MainScript : MonoBehaviour {
 
 		bigPond.GetComponent<Renderer>().material.SetFloat("_ProgressDistort",progressDistort);
 
-		bigPond.GetComponent<Renderer>().material.SetFloat("_Distort", Map (curveDistort.Evaluate(theEnemy.GetSpawnStatus()),0f,1f,0.16f,1.3f));
+		bigPond.GetComponent<Renderer>().material.SetFloat("_Distort", Map (curveDistort.Evaluate(theEnemy.GetSpawnStatus()),0f,1f,0.16f,1.1f));
 
 
 	}

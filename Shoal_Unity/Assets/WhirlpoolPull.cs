@@ -6,16 +6,20 @@ using UnityEngine;
 
 public class WhirlpoolPull : MonoBehaviourBase
 {
+    [SerializeField] private float radiusKill = 0.5f;
     [SerializeField] private float radius;
     [SerializeField] private float strength;
     [SerializeField] private float addStrengthPerSecond;
     [SerializeField] private AnimationCurve curve;
 
     private Pond pond;
+    private List<Entity> killFishes; 
 
     private void Awake()
     {
         pond = Pond.Instance;
+
+        killFishes = new List<Entity>();
     }
 
     public void Update()
@@ -35,7 +39,18 @@ public class WhirlpoolPull : MonoBehaviourBase
                 continue;
 
             var currentStrength = strength * curve.Evaluate(distance / radius);
-            fish.transform.Translate(-delta.normalized * currentStrength * Time.deltaTime, Space.World);
+            fish.transform.position = Vector3.MoveTowards(fish.transform.position, transform.position, currentStrength * Time.deltaTime);
+
+            if (Vector2.Distance(fish.transform.position, transform.position) <= radiusKill)
+            {
+                killFishes.Add(fish);
+            }
         }
+
+        foreach (var fish in killFishes)
+        {
+            Destroy(fish.gameObject);
+        }
+        killFishes.Clear();
     }
 }

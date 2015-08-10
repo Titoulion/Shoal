@@ -347,7 +347,7 @@ public class MainScript : MonoBehaviour {
 	void UpdatePondAspect()
 	{
 
-		Debug.Log (new Vector2(Input.mousePosition.x,Screen.height-Input.mousePosition.y));
+		// Debug.Log (new Vector2(Input.mousePosition.x,Screen.height-Input.mousePosition.y));
 
 
 		progressDay+=Time.deltaTime/durationDay;

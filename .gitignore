@@ -22,3 +22,5 @@ Shoal_Unity/Shoal_Unity.userprefs
 /Shoal_Unity/_ReSharper.UnityVS.Shoal_Unity
 /Shoal_Unity/Assets/UnityVS
 /Shoal_Unity/Assets/UnityVS.meta
+
+*.sublime*

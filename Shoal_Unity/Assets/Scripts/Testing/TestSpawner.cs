@@ -21,14 +21,14 @@ public class TestSpawner : MonoBehaviourBase
             }
         }
 
-		if (Input.GetKeyDown(KeyCode.W))
+		if (Input.GetKeyDown(KeyCode.Alpha0)||Input.GetKeyDown(KeyCode.Keypad0))
 		{
 			var positionb = Camera.main.ScreenToWorldPoint(Input.mousePosition)*2.5f;
 			positionb.z = 0;
 			InstantiatePrefab(mouseButtonPrefabs[3], positionb, Quaternion.identity);
 		}
 
-		if (Input.GetKeyDown(KeyCode.R))
+		if (Input.GetKeyDown(KeyCode.Alpha1)||Input.GetKeyDown(KeyCode.Keypad1))
 		{
 			var positionc = Camera.main.ScreenToWorldPoint(Input.mousePosition)*2.5f;
 			positionc.z = 0;

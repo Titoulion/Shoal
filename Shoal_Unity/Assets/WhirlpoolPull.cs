@@ -8,22 +8,32 @@ public class WhirlpoolPull : MonoBehaviourBase
 {
     [SerializeField] private float radiusKill = 0.5f;
     [SerializeField] private float radius;
+    [SerializeField] private float delay;
     [SerializeField] private float strength;
     [SerializeField] private float addStrengthPerSecond;
     [SerializeField] private AnimationCurve curve;
 
     private Pond pond;
-    private List<Entity> killFishes; 
+    private List<Entity> killFishes;
+    private Countdown delayCountdown;
 
     private void Awake()
     {
         pond = Pond.Instance;
 
         killFishes = new List<Entity>();
+
+        delayCountdown = new Countdown(delay);
     }
 
     public void Update()
     {
+        if (delayCountdown.TimeLeft > 0)
+        {
+            delayCountdown.Update();
+            return;
+        }
+
         strength += addStrengthPerSecond * Time.deltaTime;
 
         var fishes = pond.GetEntitiesOfType(EntityType.Fish);

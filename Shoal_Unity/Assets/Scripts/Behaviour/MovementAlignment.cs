@@ -2,10 +2,10 @@
 using UnityEngine;
 using System.Collections;
 
-public class MovementSeparation : MovementFlockingBase
+public class MovementAlignment : MovementFlockingBase
 {
     protected override Vector2 GetEntityForce(Entity otherEntity, Vector2 delta, float closenessPercent)
     {
-        return -delta.normalized * closenessPercent;
+        return -otherEntity.GetComponent<Vehicle>().Velocity * closenessPercent;
     }
 }

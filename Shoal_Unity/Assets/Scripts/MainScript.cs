@@ -101,6 +101,10 @@ public class MainScript : MonoBehaviour {
 	public float progressDistort;
 	public float speedDistort;
 
+	public EnemyScript theEnemy;
+
+	public AnimationCurve curveDistort;
+
 
 	void Awake()
 	{
@@ -371,7 +375,7 @@ public class MainScript : MonoBehaviour {
 
 		bigPond.GetComponent<Renderer>().material.SetFloat("_ProgressDistort",progressDistort);
 
-
+		bigPond.GetComponent<Renderer>().material.SetFloat("_Distort", Map (curveDistort.Evaluate(theEnemy.GetSpawnStatus()),0f,1f,0.16f,1.3f));
 
 
 	}

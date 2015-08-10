@@ -342,6 +342,10 @@ public class MainScript : MonoBehaviour {
 
 	void UpdatePondAspect()
 	{
+
+		Debug.Log (new Vector2(Input.mousePosition.x,Screen.height-Input.mousePosition.y));
+
+
 		progressDay+=Time.deltaTime/durationDay;
 
 
@@ -356,7 +360,7 @@ public class MainScript : MonoBehaviour {
 
 
 
-		speedDistort = 0.05f+0.01f*(Pond.Instance.GetEntitiesOfType(EntityType.Fish).Count());
+		speedDistort = 0.02f+0.007f*(Pond.Instance.GetEntitiesOfType(EntityType.Fish).Count());
 
 
 		progressDistort+=speedDistort;

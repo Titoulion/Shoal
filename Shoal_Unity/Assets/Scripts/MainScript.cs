@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 public class MainScript : MonoBehaviour {
 
@@ -95,6 +96,10 @@ public class MainScript : MonoBehaviour {
 	public float durationDay = 10f;
 	public Camera camRenderFish;
 
+
+
+	public float progressDistort;
+	public float speedDistort;
 
 
 	void Awake()
@@ -345,6 +350,22 @@ public class MainScript : MonoBehaviour {
 
 		Color col2 = rampColorsFondPond.Evaluate(Modulo(progressDay,1f));
 		camRenderFish.backgroundColor = col2;
+
+		Shader.SetGlobalColor("_ColorGlobal2",col);
+		Shader.SetGlobalColor("_ColorGlobal",col2);
+
+
+
+		speedDistort = 0.05f+0.01f*(Pond.Instance.GetEntitiesOfType(EntityType.Fish).Count());
+
+
+		progressDistort+=speedDistort;
+
+
+
+
+
+		bigPond.GetComponent<Renderer>().material.SetFloat("_ProgressDistort",progressDistort);
 
 
 

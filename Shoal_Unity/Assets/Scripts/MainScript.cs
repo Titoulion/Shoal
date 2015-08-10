@@ -88,6 +88,13 @@ public class MainScript : MonoBehaviour {
 	float openFoodArea = 0f;
 	public GameObject prefabFood;
 
+	public Gradient rampColorsEdgePond;
+	public Gradient rampColorsFondPond;
+
+	public float progressDay;
+	public float durationDay = 10f;
+	public Camera camRenderFish;
+
 
 
 	void Awake()
@@ -320,6 +327,25 @@ public class MainScript : MonoBehaviour {
 
 			Instantiate(prefabFood,new Vector3(7f+rand.x,3.5f+rand.y,0f),Quaternion.identity);
 		}
+
+
+
+		UpdatePondAspect();
+
+
+	}
+
+	void UpdatePondAspect()
+	{
+		progressDay+=Time.deltaTime/durationDay;
+
+
+		Color col = rampColorsEdgePond.Evaluate(Modulo(progressDay,1f));
+		bigPond.GetComponent<Renderer>().material.SetColor ("_ColorBlendRamp",col);
+
+		Color col2 = rampColorsFondPond.Evaluate(Modulo(progressDay,1f));
+		camRenderFish.backgroundColor = col2;
+
 
 
 

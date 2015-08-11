@@ -128,7 +128,7 @@ public class Tail : MonoBehaviour {
 	public float speedBlink = 0.5f;
 	public AnimationCurve curveBlink;
 
-
+	Color[] trailsColors;
 
 	GameObject tailAttractor;
 
@@ -167,7 +167,7 @@ public class Tail : MonoBehaviour {
 
 		//SetFinalValues();
 
-		ProgressionsProperties(true);
+		InitAspectValues();
 
 
 	}
@@ -330,9 +330,9 @@ public class Tail : MonoBehaviour {
 				
 				Vector3 attraction = Vector3.zero;
 				
-				if(distanceAttractor<7f && distanceAttractor>0.1f)
+				if(distanceAttractor<9f && distanceAttractor>0.1f)
 				{
-					attraction = toAttractor*(7f-distanceAttractor)*0.034f;
+					attraction = toAttractor*(9f-distanceAttractor)*0.034f;
 
 					bodyPartsPositions[i]+=attraction;
 					
@@ -444,6 +444,44 @@ public class Tail : MonoBehaviour {
 
 	}
 
+	void InitAspectValues()
+	{
+		Gradient gradient1 = GetComponent<NewGradient>().randomGradient;
+		Gradient gradient2 = GetComponent<NewGradient>().randomGradient2;
+
+		trailsColors = new Color[bodyParts.Length];
+
+
+		for (int i=0; i<bodyParts.Length; i++)
+		{
+			float progress = Map ((float)i,0f,(float)(bodyParts.Length-1),0f,1f);
+			
+			
+			if(Mathf.Abs(headSize-nextHeadSize)>0.01f)
+			{
+				float valueSizeA = curveSizeA.Evaluate((1f-Mathf.Clamp01(progress)));
+				float valueSizeB = curveSizeB.Evaluate((1f-Mathf.Clamp01(progress)));
+				bodyPartsTrails[i].startWidth =headSize* Mathf.Lerp(valueSizeA,valueSizeB,lerpValueSize);
+				bodyPartsScripts[i].SetSize(headSize* Mathf.Lerp(valueSizeA,valueSizeB,lerpValueSize));
+			}
+			
+
+				bodyPartsTrails[i].endWidth =0f;
+				bodyPartsScripts[i].SetExchangeColor (exchangeColor);
+				bodyPartsScripts[i].SetPointCurve(curveGradient.Evaluate(progress));
+				bodyPartsScripts[i].SetCustomColors(gradient1.Evaluate(progress),gradient2.Evaluate(progress));
+				//bodyPartsTrails[i].material.SetColor ("_Color", Color.Lerp (gradient1.Evaluate(progress),new Color(0.8f,0.8f,0.8f),progressValueHunger));
+				
+				bodyPartsTrails[i].material.SetColor ("_Color",gradient1.Evaluate(progress));
+				trailsColors[i] = gradient1.Evaluate(progress);
+
+		}
+
+			
+			
+
+	}
+
 
 	
 	void ProgressionsProperties(bool realTimeUpdateAspect)
@@ -453,6 +491,7 @@ public class Tail : MonoBehaviour {
 		float valueProgressProgress = Map (Mathf.Clamp01(timeLife),0f,1f,0.1f,1f);
 
 		headSize+=(nextHeadSize-headSize)*valueProgressProgress;
+
 		if(dying)
 		{
 			finalLife=Mathf.Clamp01(finalLife-Time.deltaTime);
@@ -460,66 +499,39 @@ public class Tail : MonoBehaviour {
 		
 		headSize *= finalLife;
 
+		hunger = 1f-GetComponentInParent<Fish>().Health;
 
-			
-			
-			/*lerpColor1 += (nextLerpColor1-lerpColor1)*valueProgressProgress;
-			lerpColor2 += (nextLerpColor2-lerpColor2)*valueProgressProgress;
-			exchangeColor += (nextExchangeColor-exchangeColor)*valueProgressProgress;
-			radiusMotionBodyParts += (nextRadiusMotionBodyParts-radiusMotionBodyParts)*valueProgressProgress;
-			tailLenght+=(nextTailLenght-tailLenght)*valueProgressProgress;
-
-			lerpValueSize+=(nextLerpValueSize-lerpValueSize)*valueProgressProgress;
-			
-			
-			*/
-			
-			
-			
-			hunger = 1f-GetComponentInParent<Fish>().Health;
-			
-			
-			
-			
-			Gradient gradient1 = GetComponent<NewGradient>().randomGradient;
-			Gradient gradient2 = GetComponent<NewGradient>().randomGradient2;
+		Gradient gradient1 = GetComponent<NewGradient>().randomGradient;
+		Gradient gradient2 = GetComponent<NewGradient>().randomGradient2;
 			
 		float progressValueHunger = Mathf.Lerp (hunger,0f,(1f-hunger+0.5f)*curveBlink.Evaluate(Modulo(Time.realtimeSinceStartup*speedBlink+myFishRandom,1f)));
 			
 			
-			for (int i=0; i<bodyParts.Length; i++)
+		for (int i=0; i<bodyParts.Length; i++)
+		{
+			float progress = Map ((float)i,0f,(float)(bodyParts.Length-1),0f,1f);
+	
+			if(Mathf.Abs(headSize-nextHeadSize)>0.01f)
 			{
-				float progress = Map ((float)i,0f,(float)(bodyParts.Length-1),0f,1f);
-				
-				
-				if(Mathf.Abs(headSize-nextHeadSize)>0.01f)
-				{
-					float valueSizeA = curveSizeA.Evaluate((1f-Mathf.Clamp01(progress)));
-					float valueSizeB = curveSizeB.Evaluate((1f-Mathf.Clamp01(progress)));
-					bodyPartsTrails[i].startWidth =headSize* Mathf.Lerp(valueSizeA,valueSizeB,lerpValueSize);
-					bodyPartsScripts[i].SetSize(headSize* Mathf.Lerp(valueSizeA,valueSizeB,lerpValueSize));
-				}
+				float valueSizeA = curveSizeA.Evaluate((1f-Mathf.Clamp01(progress)));
+				float valueSizeB = curveSizeB.Evaluate((1f-Mathf.Clamp01(progress)));
+				bodyPartsTrails[i].startWidth =headSize* Mathf.Lerp(valueSizeA,valueSizeB,lerpValueSize);
+				bodyPartsScripts[i].SetSize(headSize* Mathf.Lerp(valueSizeA,valueSizeB,lerpValueSize));
+			}
 
-				if(realTimeUpdateAspect)
-				{
-					bodyPartsTrails[i].endWidth =0f;
-					bodyPartsScripts[i].SetExchangeColor (exchangeColor);
-					bodyPartsScripts[i].SetPointCurve(curveGradient.Evaluate(progress));
-					bodyPartsScripts[i].SetCustomColors(gradient1.Evaluate(progress),gradient2.Evaluate(progress));
-					bodyPartsTrails[i].material.color = Color.Lerp (gradient1.Evaluate(progress),new Color(0.8f,0.8f,0.8f),progressValueHunger);
-				}
+			if(realTimeUpdateAspect)
+			{
+				bodyPartsTrails[i].endWidth =0f;
+				bodyPartsScripts[i].SetExchangeColor (exchangeColor);
+				bodyPartsScripts[i].SetPointCurve(curveGradient.Evaluate(progress));
+				bodyPartsScripts[i].SetCustomColors(gradient1.Evaluate(progress),gradient2.Evaluate(progress));
+				//bodyPartsTrails[i].material.SetColor ("_Color", Color.Lerp (gradient1.Evaluate(progress),new Color(0.8f,0.8f,0.8f),progressValueHunger));
+				bodyPartsTrails[i].material.SetColor ("_Color",gradient1.Evaluate(progress));
+			}
 
+			bodyPartsTrails[i].material.SetColor ("_Color", Color.Lerp (trailsColors[i],new Color(0.8f,0.8f,0.8f,minAlpha),progressValueHunger));
 
-				Color col = bodyPartsTrails[i].material.color;
-				col.a = Mathf.Lerp (1f,minAlpha,progressValueHunger);
-				bodyPartsTrails[i].material.color = col;
-
-				bodyPartsScripts[i].SetHunger(minAlpha,progressValueHunger);
-
-
-				
-				
-
+			bodyPartsScripts[i].SetHunger(minAlpha,progressValueHunger);
 
 		}
 

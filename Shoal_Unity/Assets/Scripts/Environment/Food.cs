@@ -4,7 +4,9 @@ using System.Collections;
 
 public class Food : Entity
 {
-    public override EntityType Type
+	public float lifeTime = 1f;
+
+	public override EntityType Type
     {
         get { return EntityType.Food; }
     }
@@ -12,4 +14,11 @@ public class Food : Entity
     [SerializeField] private float healthPlus;
 
     public float HealthPlus { get { return healthPlus; } }
+
+	void Update()
+	{
+		lifeTime-=Time.deltaTime;
+		if(lifeTime<=0f)
+			Destroy (this.gameObject);
+	}
 }

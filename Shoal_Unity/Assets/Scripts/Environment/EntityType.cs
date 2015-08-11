@@ -8,5 +8,6 @@ public enum EntityType
     Fish,
     Food,
     Stone,
-    Whirlpool
+    Whirlpool,
+    Ripple
 }

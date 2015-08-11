@@ -65,4 +65,9 @@ public class Vehicle : MonoBehaviourBase
         transform.Translate(velocity * Time.deltaTime, Space.World);
         //transform.eulerAngles = new Vector3(0, 0, velocity.GetAngleDeg());
     }
+
+    public void AddForce(Vector2 delta)
+    {
+        velocity += delta;
+    }
 }

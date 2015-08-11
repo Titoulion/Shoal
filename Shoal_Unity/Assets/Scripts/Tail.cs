@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Linq;
 
 public class Tail : MonoBehaviour {
 
@@ -128,6 +129,9 @@ public class Tail : MonoBehaviour {
 	public AnimationCurve curveBlink;
 
 
+
+	GameObject tailAttractor;
+
 	//public bool realTimeUpdateAspect = false;
 
 
@@ -135,6 +139,7 @@ public class Tail : MonoBehaviour {
 	{
 		main = MainScript.Instance;
 		GetComponentInParent<Fish>().EventDeath += GoDie;
+		//tailAttractor = GameObject.Find("TailAttractor");
 
 //		petitPondCentre = Vector3.zero+(main.littlePond.transform.position-main.bigPond.transform.position)*multDecal;
 		//petitPondExit = petitPondCentre+Vector3.Normalize(main.bigPond.transform.position-main.littlePond.transform.position)*2f*1f;
@@ -301,17 +306,53 @@ public class Tail : MonoBehaviour {
 
 	void PositionBodyParts()
 	{
+		//tailAttractor.transform.position = new Vector3(tailAttractor.transform.position.x,tailAttractor.transform.position.y,transform.position.z);
+
+
+		tailAttractor =(Pond.Instance.GetEntitiesOfType(EntityType.Whirlpool).ToArray().Count()==0)?(null):(Pond.Instance.GetEntitiesOfType(EntityType.Whirlpool).ToArray()[0].gameObject);
+
+			
+
+
 		bodyPartsPositions[0] = bodyParts[0].transform.position = transform.position;
 		for(int i=1; i<bodyParts.Length; i++)
 		{
 			float progressB = ((float)i-1f)/((float)bodyParts.Length-2);
 			float nodeAngle	 =	Mathf.Atan2(bodyPartsPositions[i].y - bodyPartsPositions[i-1].y,bodyPartsPositions[i].x - bodyPartsPositions[i-1].x);
 			bodyPartsPositions[i] = new Vector3(bodyPartsPositions[i-1].x + tailLenght*(1f-progressB) * Mathf.Cos(nodeAngle),bodyPartsPositions[i-1].y + tailLenght*(1f-progressB) * Mathf.Sin(nodeAngle),0f);
+
+
+			if(tailAttractor!=null)
+			{
+				Vector3 toAttractor = tailAttractor.transform.position-bodyPartsPositions[i];
+				float distanceAttractor = toAttractor.magnitude;
+				toAttractor = Vector3.Normalize(toAttractor);
+				
+				Vector3 attraction = Vector3.zero;
+				
+				if(distanceAttractor<7f && distanceAttractor>0.1f)
+				{
+					attraction = toAttractor*(7f-distanceAttractor)*0.034f;
+
+					bodyPartsPositions[i]+=attraction;
+					
+					if(Vector3.Distance(bodyPartsPositions[i],bodyPartsPositions[i-1])>tailLenght)
+					{
+						bodyPartsPositions[i] = bodyPartsPositions[i-1]+Vector3.Normalize(bodyPartsPositions[i]-bodyPartsPositions[i-1])*tailLenght;
+					}
+				}
+			}
+
+		
+
+
 			Vector3 toForward = Vector3.Normalize (bodyPartsPositions[i]-bodyPartsPositions[i-1]);
 			Vector3 toUp = Vector3.Cross (toForward,Vector3.forward);
 			float randomValueT =  randomValues[i] + Time.realtimeSinceStartup*randomSens[i]*speedMotionBodyPart;
-			bodyParts[i].transform.position = bodyPartsPositions[i]+toForward*Mathf.Cos (randomValueT*2f*Mathf.PI)*radiusMotionBodyParts*progressB+toUp*Mathf.Sin (randomValueT*2f*Mathf.PI)*radiusMotionBodyParts*progressB;
+			Vector3 circularMotion = toForward*Mathf.Cos (randomValueT*2f*Mathf.PI)*radiusMotionBodyParts*progressB+toUp*Mathf.Sin (randomValueT*2f*Mathf.PI)*radiusMotionBodyParts*progressB;
 
+
+			bodyParts[i].transform.position = bodyPartsPositions[i] + circularMotion;
 		}
 	}
 

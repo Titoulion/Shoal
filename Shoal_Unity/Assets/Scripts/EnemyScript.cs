@@ -10,6 +10,7 @@ public class EnemyScript : MonoBehaviour {
 						Moving,
 						Repositioning,
 						Attacking,
+						Resetting,
 						Dying,
 						WakingUp,
 						Blank,
@@ -29,6 +30,7 @@ public class EnemyScript : MonoBehaviour {
 	public float wakingUpTime;
 
 	public float attackRange;
+	public float attackWidth;
 
 	public Vector2 gapBetweenMoves; //x shortest, y longest
 	public float moveSpeed; //degrees per second to move around the circle
@@ -41,33 +43,30 @@ public class EnemyScript : MonoBehaviour {
 	private float zPosition;
 	private float lerpTimer, lerpDuration;
 
-	private float targetLerpRadius, targetLerpAngle;
-	private float startLerpRadius, startLerpAngle;
+	private float targetRadius, targetAngle;
+	private float startRadius, startAngle;
 	private float currentAngle, currentRadius;
 
 	private Entity prey;
 
-	private bool mouseHovering = false;
-
 	private Rect watchingRect;
 
-	// Use this for initialization
 	void Start () {
 		zPosition = transform.position.z;
 		float sleepTime = Random.Range(sleepTimeRange.x, sleepTimeRange.y);
 		Invoke("WakeUp", sleepTime);
 
-		startLerpRadius = sleepingRadius;
-		startLerpAngle = Random.Range(0f, 360f);
-		Quaternion degrees = Quaternion.Euler(0, 0, startLerpAngle);
+		startRadius = sleepingRadius;
+		// startAngle = Random.Range(0f, 360f);
+		startAngle = -359f;
+		Quaternion degrees = Quaternion.Euler(0, 0, startAngle);
 		Vector3 unrotatedStart = new Vector3(sleepingRadius, 0, zPosition);
 		transform.position = degrees * unrotatedStart;
 
 		float rectLeft = huntingRadius - attackRange;
-		watchingRect = new Rect(rectLeft, 0.5f, attackRange, 1f);
+		watchingRect = new Rect(rectLeft, attackWidth/2, attackRange, attackWidth);
 	}
 	
-	// Update is called once per frame
 	void Update () {
 		switch(state) {
 			case EnemyState.Attacking:
@@ -87,6 +86,9 @@ public class EnemyScript : MonoBehaviour {
 			case EnemyState.WakingUp:
 				WakingUpUpdate();
 				break;
+			case EnemyState.Resetting:
+				ResettingUpdate();
+				break;
 			case EnemyState.Blank:
 				Debug.Log("state should never be set to Blank");
 				break;
@@ -105,41 +107,56 @@ public class EnemyScript : MonoBehaviour {
 	void AttackingUpdate() {
 		if (prey == null) {
 			Debug.Log("ERROR: prey is null during attack");
+			Reset();
 			return;
 		}
 
 		Vector2 preyPos = prey.transform.position;
-		targetLerpRadius = Vector2.Distance(Vector2.zero, preyPos);
-		targetLerpAngle = Mathf.Rad2Deg * Mathf.Atan2(preyPos.y, preyPos.x);
+		Vector2 enemyPos = transform.position;
 
-		if (Move()) {
+		lerpTimer += Time.deltaTime;
+		float time = lerpTimer/lerpDuration;
+		targetRadius = Vector2.Distance(Vector2.zero, preyPos);
+		targetAngle = Mathf.Rad2Deg * Mathf.Atan2(preyPos.y, preyPos.x);
+
+		if (Mathf.Abs(targetAngle - startAngle) > 180f) {
+			if (targetAngle > startAngle) {
+				targetAngle -= 360f;
+			} else {
+				startAngle -= 360f;
+			}
+		}
+
+		// Debug.Log("starting: " + startAngle + " attacking: " + targetAngle);
+		SmoothMove(startRadius, targetRadius, startAngle, targetAngle, time);
+
+		if (time >= 1f) {
 			Destroy(prey.gameObject);
 			prey = null;
 
-			nextState = EnemyState.Moving;
+			Reset();
+		}
+	}
 
-			Vector2 pos = transform.position;
-			startLerpAngle = Mathf.Rad2Deg * Mathf.Atan2(pos.y, pos.x);
-			targetLerpAngle = startLerpAngle;
-			startLerpRadius = Vector2.Distance(Vector2.zero, pos);
-			targetLerpRadius = huntingRadius;
-			float returnDistance = targetLerpRadius - startLerpRadius;
-
-			lerpDuration = Mathf.Abs(returnDistance/(attackSpeed * 0.25f));
-			lerpTimer = 0f;
+	void ResettingUpdate() {
+		lerpTimer += Time.deltaTime;
+		float time = lerpTimer/lerpDuration;
+		SmoothMove(startRadius, targetRadius, startAngle, targetAngle, time);
+		if (time >= 1f) {
+			Hunt();
 		}
 	}
 
 	void DyingUpdate() {
 		lerpTimer += Time.deltaTime;
 		float time = lerpTimer/lerpDuration;
-		SmoothMove(startLerpRadius, targetLerpRadius, startLerpAngle, targetLerpAngle, time);
+		SmoothMove(startRadius, targetRadius, startAngle, targetAngle, time);
 		if (time >= 1f) {
 			nextState = EnemyState.Sleeping;
 
-			startLerpRadius = sleepingRadius;
-			startLerpAngle = Random.Range(0f, 360f);
-			Quaternion degrees = Quaternion.Euler(0, 0, startLerpAngle);
+			startRadius = sleepingRadius;
+			startAngle = Random.Range(0f, 360f);
+			Quaternion degrees = Quaternion.Euler(0, 0, startAngle);
 			Vector3 unrotatedStart = new Vector3(sleepingRadius, 0, zPosition);
 			transform.position = degrees * unrotatedStart;
 
@@ -156,7 +173,6 @@ public class EnemyScript : MonoBehaviour {
 		//FishScript[] fishes = FindObjectsOfType(typeof(FishScript)) as FishScript[];
 		Entity[] fishes = Pond.Instance.GetEntitiesOfType(EntityType.Fish).ToArray();
 
-
 		Vector2 pos = transform.position;
 		float enemyRads = Mathf.Atan2(pos.y, pos.x);
 
@@ -164,8 +180,6 @@ public class EnemyScript : MonoBehaviour {
 			Vector2 fishPos = fishes[i].transform.position;
 			float distance = Vector2.Distance(fishPos, pos);
 			if (distance <= attackRange) {
-				prey = fishes[i];
-
 				/*
 				* If the fish is within the attack range, check to see if the
 				* fish is actually within the area the enemy will attack. Do 
@@ -175,7 +189,6 @@ public class EnemyScript : MonoBehaviour {
 				* is much simpler than calculating if the fish is inside a
 				* rotated rectangle.
 				*/
-
 				float cos = Mathf.Cos(-enemyRads);
 				float sin = Mathf.Sin(-enemyRads);
 
@@ -185,14 +198,7 @@ public class EnemyScript : MonoBehaviour {
 											);
 
 				if (watchingRect.Contains(adjFish)) {
-					startLerpRadius = Vector2.Distance(Vector2.zero, pos);
-					startLerpAngle = Mathf.Rad2Deg * enemyRads;
-
-					lerpTimer = 0f;
-					lerpDuration = distance/attackSpeed;
-					nextState = EnemyState.Attacking;
-					CancelInvoke("Reposition");
-
+					Attack(fishes[i]);
 					break;
 				}
 			}
@@ -204,7 +210,7 @@ public class EnemyScript : MonoBehaviour {
 		lerpTimer += Time.deltaTime;
 		float time = lerpTimer/lerpDuration;
 
-		SmoothMove(currentRadius, currentRadius, startLerpAngle, targetLerpAngle, time);
+		SmoothMove(currentRadius, currentRadius, startAngle, targetAngle, time);
 		if (time <= 0.2f) {
 			float t = time / 0.2f;
 			SmoothMove(huntingRadius, movingRadius, currentAngle, currentAngle, t);
@@ -214,19 +220,7 @@ public class EnemyScript : MonoBehaviour {
 		}
 
 		if (time >= 1f) {
-			nextState = EnemyState.Hunting;
-
-			startLerpAngle = targetLerpAngle;
-			startLerpRadius = targetLerpRadius;
-
-			if (startLerpAngle > 360f) {
-				startLerpAngle -= 360f;
-			} else if (startLerpAngle < 0f) {
-				startLerpAngle += 360f;
-			}
-
-			float t = Random.Range(gapBetweenMoves.x, gapBetweenMoves.y);
-			Invoke("Reposition", t);
+			Hunt();
 		}
 
 		CheckForDamage();
@@ -235,17 +229,17 @@ public class EnemyScript : MonoBehaviour {
 	void WakingUpUpdate() {
 		lerpTimer += Time.deltaTime;
 		float time = lerpTimer/lerpDuration;
-		SmoothMove(sleepingRadius, huntingRadius, startLerpAngle, targetLerpAngle, time);
+		SmoothMove(sleepingRadius, huntingRadius, startAngle, targetAngle, time);
 		if (time >= 1f) {
 			nextState = EnemyState.Hunting;
 
-			startLerpAngle = targetLerpAngle;
-			startLerpRadius = huntingRadius;
+			startAngle = targetAngle;
+			startRadius = huntingRadius;
 
-			if (startLerpAngle > 360f) {
-				startLerpAngle -= 360f;
-			} else if (startLerpAngle < 0f) {
-				startLerpAngle += 360f;
+			if (startAngle > 360f) {
+				startAngle -= 360f;
+			} else if (startAngle < 0f) {
+				startAngle += 360f;
 			}
 
 			float t = Random.Range(gapBetweenMoves.x, gapBetweenMoves.y);
@@ -253,30 +247,8 @@ public class EnemyScript : MonoBehaviour {
 		}
 	}
 
-	void FallingAsleepUpdate() {
-		lerpTimer += Time.deltaTime;
-		float time = lerpTimer/lerpDuration;
-		SmoothMove(startLerpRadius, sleepingRadius, startLerpAngle, targetLerpAngle, time);
-		if (time >= 1f) {
-			nextState = EnemyState.Sleeping;
-
-			startLerpAngle = targetLerpAngle;
-			startLerpRadius = targetLerpRadius;
-
-			if (startLerpAngle > 360f) {
-				startLerpAngle -= 360f;
-			} else if (startLerpAngle < 0f) {
-				startLerpAngle += 360f;
-			}
-
-			float t = Random.Range(gapBetweenMoves.x, gapBetweenMoves.y);
-			Invoke("WakeUp", t);
-		}
-
-	}
-
 	/*
-	* lerp towards targetLerpRadius & targetLerpAngle
+	* lerp towards targetRadius & targetAngle
 	* When the moving is over, return true
 	*/
 	bool SmoothMove(float sRadius, float tRadius, float sAngle, float tAngle, float time) {
@@ -291,20 +263,6 @@ public class EnemyScript : MonoBehaviour {
 		}
 		return false;
 	}	
-			
-	bool Move() {
-		lerpTimer += Time.deltaTime;
-		float t = Mathf.SmoothStep(0f, 1.0f, lerpTimer/lerpDuration);
-		float radius = Mathf.Lerp(startLerpRadius, targetLerpRadius, t);
-		float angle = Mathf.Lerp(startLerpAngle, targetLerpAngle, t);
-		Quaternion degrees = Quaternion.Euler(0, 0, angle);
-		transform.position = degrees * (new Vector3(radius, 0, zPosition));
-
-		if (lerpTimer >= lerpDuration) {
-			return true;
-		}
-		return false;
-	}
 
 	void CheckForDamage() {
 		if (Input.GetKeyDown(KeyCode.B)) {
@@ -313,12 +271,12 @@ public class EnemyScript : MonoBehaviour {
 			if (currentHealth <= 0) {
 				nextState = EnemyState.Dying;
 
-				targetLerpRadius = sleepingRadius;
+				targetRadius = sleepingRadius;
 				Vector2 pos = transform.position;
-				startLerpRadius = Vector2.Distance(Vector2.zero, pos);
-				// startLerpAngle = Mathf.Atan2(pos.y, pos.x);
-				startLerpAngle = currentAngle;
-				targetLerpAngle = startLerpAngle;
+				startRadius = Vector2.Distance(Vector2.zero, pos);
+				// startAngle = Mathf.Atan2(pos.y, pos.x);
+				startAngle = currentAngle;
+				targetAngle = startAngle;
 
 				lerpDuration = wakingUpTime;
 				lerpTimer = 0f;
@@ -328,13 +286,47 @@ public class EnemyScript : MonoBehaviour {
 		}
 	}
 
-	void OnMouseEnter() {
-		mouseHovering = true;
-		Debug.Log("hovering");
+	public void Reset() {
+		nextState = EnemyState.Resetting;
+
+		Vector2 pos = transform.position;
+		startAngle = Mathf.Rad2Deg * Mathf.Atan2(pos.y, pos.x);
+		targetAngle = startAngle;
+		startRadius = Vector2.Distance(Vector2.zero, pos);
+		targetRadius = huntingRadius;
+		float returnDistance = targetRadius - startRadius;
+
+		lerpDuration = Mathf.Abs(returnDistance/(attackSpeed * 0.25f));
+		lerpTimer = 0f;
 	}
 
-	void OnMouseExit() {
-		mouseHovering = false;
+	public void Hunt() {
+		nextState = EnemyState.Hunting;
+
+		// startAngle = targetAngle;
+		// startRadius = targetRadius;
+
+		if (startAngle > 360f) {
+			startAngle -= 360f;
+		} else if (startAngle < 0f) {
+			startAngle += 360f;
+		}
+
+		float t = Random.Range(gapBetweenMoves.x, gapBetweenMoves.y);
+		Invoke("Reposition", t);
+	}
+
+	public void Attack(Entity target) {
+		prey = target;
+
+		float distance = Vector2.Distance(prey.transform.position, transform.position);
+
+		startRadius = currentRadius;
+		startAngle = currentAngle;
+		lerpTimer = 0f;
+		lerpDuration = distance/attackSpeed;
+		nextState = EnemyState.Attacking;
+		CancelInvoke("Reposition");
 	}
 
 	public void Reposition() {
@@ -344,8 +336,10 @@ public class EnemyScript : MonoBehaviour {
 		float angle = Random.Range(moveRange.x, moveRange.y);
 		angle *= (Random.Range(0, 2) == 0) ? -1 : 1;
 
-		targetLerpRadius = huntingRadius;
-		targetLerpAngle = startLerpAngle + angle;
+		startAngle = currentAngle;
+		startRadius = currentHealth;
+		targetRadius = huntingRadius;
+		targetAngle = startAngle + angle;
 
 		lerpDuration = Mathf.Abs(angle) / moveSpeed;
 		lerpTimer = 0f;
@@ -355,12 +349,23 @@ public class EnemyScript : MonoBehaviour {
 		CancelInvoke("WakeUp");
 		state = EnemyState.WakingUp;
 
-		targetLerpRadius = huntingRadius;
-		targetLerpAngle = startLerpAngle;	
+		targetRadius = huntingRadius;
+		targetAngle = startAngle;	
 
 		currentHealth = health;
 
 		lerpTimer = 0;
 		lerpDuration = wakingUpTime;
+	}
+
+	public float GetSpawnStatus() {
+		if (state == EnemyState.WakingUp) {
+			return lerpTimer/lerpDuration;
+		} else if (state == EnemyState.Sleeping) {
+			return 0f;
+		} else if (state == EnemyState.Dying) {
+			return 1f - lerpTimer/lerpDuration;
+		}
+		return 1f;
 	}
 }

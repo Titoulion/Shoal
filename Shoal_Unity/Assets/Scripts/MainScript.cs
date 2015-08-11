@@ -91,6 +91,7 @@ public class MainScript : MonoBehaviour {
 
 	public Gradient rampColorsEdgePond;
 	public Gradient rampColorsFondPond;
+	public Gradient rampColorsWaves;
 
 	public float progressDay;
 	public float durationDay = 10f;
@@ -100,6 +101,12 @@ public class MainScript : MonoBehaviour {
 
 	public float progressDistort;
 	public float speedDistort;
+
+	public EnemyScript theEnemy;
+
+	public AnimationCurve curveDistort;
+
+
 
 
 	void Awake()
@@ -342,6 +349,10 @@ public class MainScript : MonoBehaviour {
 
 	void UpdatePondAspect()
 	{
+
+		// Debug.Log (new Vector2(Input.mousePosition.x,Screen.height-Input.mousePosition.y));
+
+
 		progressDay+=Time.deltaTime/durationDay;
 
 
@@ -351,12 +362,19 @@ public class MainScript : MonoBehaviour {
 		Color col2 = rampColorsFondPond.Evaluate(Modulo(progressDay,1f));
 		camRenderFish.backgroundColor = col2;
 
+		Color col3 = rampColorsWaves.Evaluate(Modulo(progressDay,1f));
+
+
 		Shader.SetGlobalColor("_ColorGlobal2",col);
 		Shader.SetGlobalColor("_ColorGlobal",col2);
+		Shader.SetGlobalColor("_ColorGlobal3",col3);
 
 
 
-		speedDistort = 0.05f+0.01f*(Pond.Instance.GetEntitiesOfType(EntityType.Fish).Count());
+
+
+
+		speedDistort = 0.02f+0.007f*(Pond.Instance.GetEntitiesOfType(EntityType.Fish).Count());
 
 
 		progressDistort+=speedDistort;
@@ -367,7 +385,7 @@ public class MainScript : MonoBehaviour {
 
 		bigPond.GetComponent<Renderer>().material.SetFloat("_ProgressDistort",progressDistort);
 
-
+		bigPond.GetComponent<Renderer>().material.SetFloat("_Distort", Map (curveDistort.Evaluate(theEnemy.GetSpawnStatus()),0f,1f,0.16f,1.1f));
 
 
 	}

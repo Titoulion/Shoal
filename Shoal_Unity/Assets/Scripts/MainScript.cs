@@ -83,15 +83,17 @@ public class MainScript : MonoBehaviour {
 	public List<GameObject> listFish = new List<GameObject>();
 
 
-	public GameObject foodArea;
+
 
 	float valDistortFood = 0f;
-	float openFoodArea = 0f;
-	public GameObject prefabFood;
+
+
 
 	public Gradient rampColorsEdgePond;
 	public Gradient rampColorsFondPond;
 	public Gradient rampColorsWaves;
+	public Gradient rampColorsFoodOff;
+	public Gradient rampColorsFoodOn;
 
 	public float progressDay;
 	public float durationDay = 10f;
@@ -312,33 +314,12 @@ public class MainScript : MonoBehaviour {
 		//bridge.GetComponent<Renderer>().material.SetFloat("_OpeningBridge",progressOpenBridge);
 
 
-		valDistortFood+=Map (foodArea.GetComponent<Renderer>().material.GetFloat("_ProgressTouch"),0f,1f,5f,25f)*0.001f;
-
-		foodArea.GetComponent<Renderer>().material.SetFloat("_valueDistort",valDistortFood);
 
 
 
 
-		if(Input.GetKey(KeyCode.F))
-		{
-			openFoodArea+=Time.deltaTime*2f;
-		}
-		else
-		{
-			openFoodArea-=Time.deltaTime*2f;
-		}
-
-		openFoodArea = Mathf.Clamp01(openFoodArea);
-
-		foodArea.GetComponent<Renderer>().material.SetFloat("_ProgressTouch",openFoodArea);
 
 
-		if(openFoodArea>0.2f && Random.value>0.8f)
-		{
-			Vector3 rand = Random.insideUnitSphere*1.5f;
-
-			Instantiate(prefabFood,new Vector3(7f+rand.x,3.5f+rand.y,0f),Quaternion.identity);
-		}
 
 
 
@@ -364,12 +345,14 @@ public class MainScript : MonoBehaviour {
 
 		Color col3 = rampColorsWaves.Evaluate(Modulo(progressDay,1f));
 
+		Color col4 = rampColorsFoodOff.Evaluate(Modulo(progressDay,1f));
+		Color col5 = rampColorsFoodOn.Evaluate(Modulo(progressDay,1f));
 
-		Shader.SetGlobalColor("_ColorGlobal2",col);
 		Shader.SetGlobalColor("_ColorGlobal",col2);
+		Shader.SetGlobalColor("_ColorGlobal2",col);
 		Shader.SetGlobalColor("_ColorGlobal3",col3);
-
-
+		Shader.SetGlobalColor("_ColorGlobal4",col4);
+		Shader.SetGlobalColor("_ColorGlobal5",col5);
 
 
 

@@ -48,7 +48,7 @@ public class EnemyWing : MonoBehaviour {
 		
 		
 		checkStatus(statusID);
-		Debug.Log ("rotation"+ gameObject.transform.localRotation.eulerAngles);
+		//Debug.Log ("rotation"+ gameObject.transform.localRotation.eulerAngles);
 
 		
 	}

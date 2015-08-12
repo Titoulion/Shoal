@@ -3,7 +3,7 @@ using System.Collections;
 
 public class EnemyAnimationScript : MonoBehaviour {
 	
-	enum EnemyAnimation{
+	public enum EnemyAnimation{
 		
 		wakeAnimation,
 		idleAnimation,
@@ -22,9 +22,9 @@ public class EnemyAnimationScript : MonoBehaviour {
 	public GameObject prefabWing;
 	
 	private int wingsNumber  = 2;
+
 	
-	
-	void setEnemyAnimation(EnemyAnimation _state){
+	public void setEnemyAnimation(EnemyAnimation _state){
 		theAniamtionState = _state;
 	} 
 	
@@ -63,15 +63,15 @@ public class EnemyAnimationScript : MonoBehaviour {
 		animationStateCheck ();
 		
 		
-		if (Input.anyKeyDown) {
-			
-			theAniamtionState = EnemyAnimation.destroryAnimation;
-		}
-		if (Input.GetKey ("up")) {
-			
-			theAniamtionState = EnemyAnimation.huntAnimation;
-			
-		}
+//		if (Input.anyKeyDown) {
+//			
+//			theAniamtionState = EnemyAnimation.destroryAnimation;
+//		}
+//		if (Input.GetKey ("up")) {
+//			
+//			theAniamtionState = EnemyAnimation.huntAnimation;
+//			
+//		}
 
 	}
 	
@@ -100,7 +100,7 @@ public class EnemyAnimationScript : MonoBehaviour {
 			
 		}
 		
-		theAniamtionState = EnemyAnimation.idleAnimation;
+		theAniamtionState = EnemyAnimation.nullAnimation;
 		
 	}
 	
@@ -134,6 +134,8 @@ public class EnemyAnimationScript : MonoBehaviour {
 		for (int i = 0; i < EnemyWings.Length; i++) {
 			
 			WingScript[i].setStatus(4);
+
+			Debug.Log("dying animation");
 		}
 		
 		theAniamtionState = EnemyAnimation.idleAnimation;

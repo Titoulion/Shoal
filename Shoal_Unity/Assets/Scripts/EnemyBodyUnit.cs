@@ -72,7 +72,7 @@ public class EnemyBodyUnit : MonoBehaviour {
 		float n = _id%18;
 		
 		gameObject.transform.localRotation = Quaternion.AngleAxis(angelUnit * n, Vector3.forward);
-		gameObject.transform.localScale = new Vector3 (1.0f + (scaleUnit-0.2f) * r , 1.0f + scaleUnit * r, 0.0f);
+		gameObject.transform.localScale = new Vector3 (1.5f + (scaleUnit-0.2f) * r , 1.5f + scaleUnit * r, 0.0f);
 		
 		initAngel = angelUnit * n;
 		initScale = gameObject.transform.localScale;

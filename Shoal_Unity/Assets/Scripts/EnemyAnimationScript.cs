@@ -7,7 +7,7 @@ public class EnemyAnimationScript : MonoBehaviour {
 		
 		wakeAnimation,
 		idleAnimation,
-		moveAnimation,
+		huntAnimation,
 		attackAnimation,
 		repositionAnimation,
 		destroryAnimation,
@@ -40,8 +40,8 @@ public class EnemyAnimationScript : MonoBehaviour {
 		case EnemyAnimation.attackAnimation:
 			enemyAttackAnimation();
 			break;
-		case EnemyAnimation.moveAnimation:
-			enemyMoveAnimation();
+		case EnemyAnimation.huntAnimation:
+			enemyHuntAnimation();
 			break;
 		case EnemyAnimation.destroryAnimation:
 			enemyDestroyAniamtion();
@@ -69,10 +69,10 @@ public class EnemyAnimationScript : MonoBehaviour {
 		}
 		if (Input.GetKey ("up")) {
 			
-			theAniamtionState = EnemyAnimation.moveAnimation;
+			theAniamtionState = EnemyAnimation.huntAnimation;
 			
 		}
-		
+
 	}
 	
 	
@@ -110,7 +110,7 @@ public class EnemyAnimationScript : MonoBehaviour {
 		
 		
 	}
-	void enemyMoveAnimation(){
+	void enemyHuntAnimation(){
 		
 		for (int i = 0; i < EnemyWings.Length; i++) {
 			

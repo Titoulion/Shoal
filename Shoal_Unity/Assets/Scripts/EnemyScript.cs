@@ -102,6 +102,8 @@ public class EnemyScript : MonoBehaviour {
 			// Debug.Log(Time.time + " Enemy state is now " + state);
 			nextState = EnemyState.Blank;
 		}
+
+
 	}
 
 	void AttackingUpdate() {

@@ -45,7 +45,7 @@ public class EnemyScript : MonoBehaviour {
 	private float targetRadius, targetAngle;
 	private float startRadius, startAngle;
 
-	public  float currentAngle, currentRadius;
+	private  float currentAngle, currentRadius;
 
 	private Entity prey;
 
@@ -155,6 +155,8 @@ public class EnemyScript : MonoBehaviour {
 
 			Reset();
 		}
+		enemyAnimation.setTargetAngle (currentAngle);
+		enemyAnimation.setEnemyAnimation (EnemyAnimationScript.EnemyAnimation.attackAnimation);
 	}
 
 	void ResettingUpdate() {
@@ -250,6 +252,9 @@ public class EnemyScript : MonoBehaviour {
 			Hunt();
 		}
 
+		enemyAnimation.setTargetAngle (currentAngle);
+		enemyAnimation.setEnemyAnimation (EnemyAnimationScript.EnemyAnimation.repositionAnimation);
+		
 		CheckForDamage();
 
 	}

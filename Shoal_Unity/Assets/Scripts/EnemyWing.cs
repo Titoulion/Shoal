@@ -172,8 +172,7 @@ public class EnemyWing : MonoBehaviour {
 			break;
 			
 		}
-		Debug.Log ("current status" + _a);
-		
+
 	}
 	
 	float Map(float val, float fromMin, float fromMax, float toMin, float toMax) {

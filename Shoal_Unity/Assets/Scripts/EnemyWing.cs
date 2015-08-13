@@ -110,8 +110,7 @@ public class EnemyWing : MonoBehaviour {
 		}
 		if (wingID == 2) {
 		}
-		
-		
+				
 	}
 	
 	

@@ -104,5 +104,10 @@ public class BodyPartScript : MonoBehaviour {
 		return(myMat.GetFloat("_Size"));
 	}
 
+	public void SetProgressDigestion(float value)
+	{
+		myMat.SetFloat("_ProgressDigestion",value);
+	}
+
 
 }

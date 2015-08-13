@@ -134,6 +134,9 @@ public class Tail : MonoBehaviour {
 
 	//public bool realTimeUpdateAspect = false;
 
+	float progressDigestion = -0.5f;
+	bool digestion = false;
+
 
 	void Start () 
 	{
@@ -487,6 +490,18 @@ public class Tail : MonoBehaviour {
 	void ProgressionsProperties(bool realTimeUpdateAspect)
 	{
 
+		if(digestion)
+		{
+			progressDigestion+=Time.deltaTime/0.8f;
+			if(progressDigestion>1.5f)
+			{
+				digestion=false;
+
+			}
+		}
+
+
+
 
 		float valueProgressProgress = Map (Mathf.Clamp01(timeLife),0f,1f,0.1f,1f);
 
@@ -533,6 +548,11 @@ public class Tail : MonoBehaviour {
 
 			bodyPartsScripts[i].SetHunger(minAlpha,progressValueHunger);
 
+
+			bodyPartsScripts[i].SetProgressDigestion(progressDigestion);
+
+
+
 		}
 
 
@@ -540,6 +560,12 @@ public class Tail : MonoBehaviour {
 		{
 			GoDestroy();
 		}
+	}
+
+	public void GoDigest()
+	{
+		digestion = true;
+		progressDigestion = -0.5f;
 	}
 
 	public bool CanChangeValues()

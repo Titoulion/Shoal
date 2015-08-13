@@ -51,6 +51,9 @@ public class EnemyScript : MonoBehaviour {
 
 	private Rect watchingRect;
 
+	//Animation Script
+	EnemyAnimationScript enemyAnimation;
+
 	void Start () {
 		zPosition = transform.position.z;
 		float sleepTime = Random.Range(sleepTimeRange.x, sleepTimeRange.y);
@@ -65,6 +68,9 @@ public class EnemyScript : MonoBehaviour {
 
 		float rectLeft = huntingRadius - attackRange;
 		watchingRect = new Rect(rectLeft, attackWidth/2, attackRange, attackWidth);
+
+		//get animation script
+		enemyAnimation = GetComponent<EnemyAnimationScript>();
 	}
 	
 	void Update () {
@@ -85,6 +91,7 @@ public class EnemyScript : MonoBehaviour {
 				break;
 			case EnemyState.WakingUp:
 				WakingUpUpdate();
+				//enemyAnimation.setEnemyAnimation(EnemyAnimationScript.EnemyAnimation.wakeAnimation);
 				break;
 			case EnemyState.Resetting:
 				ResettingUpdate();
@@ -102,6 +109,8 @@ public class EnemyScript : MonoBehaviour {
 			// Debug.Log(Time.time + " Enemy state is now " + state);
 			nextState = EnemyState.Blank;
 		}
+
+
 	}
 
 	void AttackingUpdate() {
@@ -204,6 +213,9 @@ public class EnemyScript : MonoBehaviour {
 			}
 		}
 		CheckForDamage();
+		enemyAnimation.setEnemyAnimation(EnemyAnimationScript.EnemyAnimation.huntAnimation);
+
+
 	}
 
 	void RepositioningUpdate() {
@@ -224,6 +236,8 @@ public class EnemyScript : MonoBehaviour {
 		}
 
 		CheckForDamage();
+		enemyAnimation.setEnemyAnimation(EnemyAnimationScript.EnemyAnimation.idleAnimation);
+
 	}
 
 	void WakingUpUpdate() {
@@ -267,7 +281,8 @@ public class EnemyScript : MonoBehaviour {
 	void CheckForDamage() {
 		if (Input.GetKeyDown(KeyCode.B)) {
 			currentHealth--;
-
+			enemyAnimation.setEnemyAnimation(EnemyAnimationScript.EnemyAnimation.destroryAnimation);
+			Debug.Log("DYING");
 			if (currentHealth <= 0) {
 				nextState = EnemyState.Dying;
 

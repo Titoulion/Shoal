@@ -53,11 +53,19 @@ public class EnemyScript : MonoBehaviour {
 	//Animation Script
 	EnemyAnimationScript enemyAnimation;
 
+	void Awake(){
+	
+
+	}
+
 	void Start () {
-		zPosition = transform.position.z;
 		float sleepTime = Random.Range(sleepTimeRange.x, sleepTimeRange.y);
+		zPosition = transform.position.z;
 		Invoke("WakeUp", sleepTime);
 
+		enemyAnimation = GetComponent<EnemyAnimationScript>();
+		enemyAnimation.setSleepTime (sleepTime);
+		enemyAnimation.setEnemyAnimation (EnemyAnimationScript.EnemyAnimation.wakeAnimation);
 		startRadius = sleepingRadius;
 		// startAngle = Random.Range(0f, 360f);
 		startAngle = -359f;
@@ -68,8 +76,8 @@ public class EnemyScript : MonoBehaviour {
 		float rectLeft = huntingRadius - attackRange;
 		watchingRect = new Rect(rectLeft, attackWidth/2, attackRange, attackWidth);
 
+
 		//get animation script
-		enemyAnimation = GetComponent<EnemyAnimationScript>();
 	}
 	
 	void Update () {
@@ -90,7 +98,6 @@ public class EnemyScript : MonoBehaviour {
 				break;
 			case EnemyState.WakingUp:
 				WakingUpUpdate();
-				//enemyAnimation.setEnemyAnimation(EnemyAnimationScript.EnemyAnimation.wakeAnimation);
 				break;
 			case EnemyState.Resetting:
 				ResettingUpdate();
@@ -173,6 +180,8 @@ public class EnemyScript : MonoBehaviour {
 
 			float sleepTime = Random.Range(sleepTimeRange.x, sleepTimeRange.y);
 			Invoke("WakeUp", sleepTime);
+			enemyAnimation.setSleepTime (sleepTime);
+			enemyAnimation.setEnemyAnimation (EnemyAnimationScript.EnemyAnimation.wakeAnimation);
 		}
 	}
 
@@ -182,6 +191,9 @@ public class EnemyScript : MonoBehaviour {
 		* collection of fishes is implimeneted
 		*/
 		//FishScript[] fishes = FindObjectsOfType(typeof(FishScript)) as FishScript[];
+		enemyAnimation.setEnemyAnimation(EnemyAnimationScript.EnemyAnimation.huntAnimation);
+
+		
 		Entity[] fishes = Pond.Instance.GetEntitiesOfType(EntityType.Fish).ToArray();
 
 		Vector2 pos = transform.position;
@@ -215,7 +227,6 @@ public class EnemyScript : MonoBehaviour {
 			}
 		}
 		CheckForDamage();
-		enemyAnimation.setEnemyAnimation(EnemyAnimationScript.EnemyAnimation.huntAnimation);
 
 
 	}
@@ -238,12 +249,11 @@ public class EnemyScript : MonoBehaviour {
 		}
 
 		CheckForDamage();
-		enemyAnimation.setEnemyAnimation(EnemyAnimationScript.EnemyAnimation.idleAnimation);
 
 	}
 
 	void TakingDamageUpdate() {
-		Debug.Log("Ow");
+		Debug.Log("Ow"+ currentHealth);
 		lerpTimer += Time.deltaTime;
 		float time = lerpTimer/lerpDuration;
 		SmoothMove(startRadius, targetRadius, startAngle, targetAngle, time);
@@ -251,7 +261,7 @@ public class EnemyScript : MonoBehaviour {
 			Hunt();
 		}
 	}
-
+	
 	void WakingUpUpdate() {
 		lerpTimer += Time.deltaTime;
 		float time = lerpTimer/lerpDuration;
@@ -280,8 +290,8 @@ public class EnemyScript : MonoBehaviour {
 
 	void CheckForDamage() {
 		if (Input.GetKeyDown(KeyCode.B)) {
-			currentHealth--;
 			enemyAnimation.setEnemyAnimation(EnemyAnimationScript.EnemyAnimation.destroryAnimation);
+			currentHealth--;
 			Debug.Log("DYING");
 			if (currentHealth <= 0) {
 				nextState = EnemyState.Dying;

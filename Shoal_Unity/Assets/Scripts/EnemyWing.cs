@@ -11,7 +11,7 @@ public class EnemyWing : MonoBehaviour {
 	public 	Color testColor;
 	
 	
-	public int bodyNumber = 8;
+	public int bodyNumber;
 	
 	private int wingID;
 	private int statusID;
@@ -19,7 +19,7 @@ public class EnemyWing : MonoBehaviour {
 	private int _currentPointer;
 	
 	private int attackDistance;
-	private float enemyHalfSize;
+	public float currentAngel;
 	
 	public void setWingID(int id){
 		
@@ -32,22 +32,19 @@ public class EnemyWing : MonoBehaviour {
 		statusID = _status;
 		
 	}
-	public void setTransform(){
-		
-		
-	}
+
 	
 	void Start () {
-		
+		bodyNumber = 8;
 		_currentPointer = 0;
-		enemyHalfSize = 2.0f;
-		
+
 	}
 	
 	void Update () {
 		
 		
 		checkStatus(statusID);
+
 		//Debug.Log ("rotation"+ gameObject.transform.localRotation.eulerAngles);
 
 		
@@ -88,11 +85,11 @@ public class EnemyWing : MonoBehaviour {
 	void wingRotation(){
 		
 		if (wingID  == 1){
-			gameObject.transform.rotation = Quaternion.AngleAxis( (60 - Time.time * 20.0f), Vector3.forward);
+			gameObject.transform.rotation = Quaternion.AngleAxis((0 - Time.time * 20.0f), Vector3.forward);
 		}
 		if (wingID  == 2){
 			//gameObject.transform.localScale = new Vector3(-1.0f,1.0f,1.0f);
-			gameObject.transform.rotation = Quaternion.AngleAxis( (300 + Time.time * 20.0f), Vector3.forward);
+			gameObject.transform.rotation = Quaternion.AngleAxis((0 + Time.time * 20.0f), Vector3.forward);
 		}
 		
 	}
@@ -128,6 +125,16 @@ public class EnemyWing : MonoBehaviour {
 		setStatus (1);
 		
 	}
+
+	void rebirthAnimation(){
+
+
+		bodyNumber = 8;
+		_currentPointer = 0;
+		generateBody();
+
+		
+	}
 	
 	void destoryTheLast(){
 		
@@ -159,6 +166,9 @@ public class EnemyWing : MonoBehaviour {
 			destoryAnimation();
 			break;
 		case 5:
+			break;
+		case 6:
+			rebirthAnimation();
 			break;
 			
 		}

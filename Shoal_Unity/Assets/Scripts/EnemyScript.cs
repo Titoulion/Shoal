@@ -44,7 +44,8 @@ public class EnemyScript : MonoBehaviour {
 
 	private float targetRadius, targetAngle;
 	private float startRadius, startAngle;
-	private float currentAngle, currentRadius;
+
+	public  float currentAngle, currentRadius;
 
 	private Entity prey;
 
@@ -180,8 +181,9 @@ public class EnemyScript : MonoBehaviour {
 
 			float sleepTime = Random.Range(sleepTimeRange.x, sleepTimeRange.y);
 			Invoke("WakeUp", sleepTime);
+			Debug.Log("enemy rebirth");
 			enemyAnimation.setSleepTime (sleepTime);
-			enemyAnimation.setEnemyAnimation (EnemyAnimationScript.EnemyAnimation.wakeAnimation);
+			enemyAnimation.setEnemyAnimation (EnemyAnimationScript.EnemyAnimation.resetAnimation);
 		}
 	}
 

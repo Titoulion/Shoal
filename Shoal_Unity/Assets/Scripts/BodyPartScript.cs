@@ -5,7 +5,7 @@ public class BodyPartScript : MonoBehaviour
 {
 	private Material myMat;
 
-	void Start()
+	void Awake()
 	{
 		myMat = GetComponent<Renderer>().material;
 	}

@@ -2,90 +2,57 @@
 using System.Collections;
 using System.Linq;
 
-public class FoodArea : MonoBehaviour {
+public class FoodArea : MonoBehaviour 
+{
+	[SerializeField] private GameObject prefabFood;
+	private float openFoodArea = 0f;
+	private float valDistortFood = 0f;
+	private int counter = 0;
+	private float timerReduceCompter = 1f;
+	private float timeFood;
+	private bool isActivated = false;
+	private Material myMat;
 
-	// Use this for initialization
-
-	public KeyCode myKeyCode;
-	public KeyCode myKeyCode2;
-	float openFoodArea = 0f;
-	public GameObject prefabFood;
-	float valDistortFood = 0f;
-	int compter = 0;
-	float timerReduceCompter = 1f;
-
-	float timeFood;
-
-	public bool isActivated = false;
-
-	void Start () {
+	void Start () 
+	{
 		valDistortFood = Random.value;
 		timeFood = prefabFood.GetComponent<Food>().lifeTime;
+		myMat = GetComponent<Renderer>().material;
 	}
-	
-	// Update is called once per frame
+
 	void Update () 
 	{
-
-		if(isActivated)
-		{
-			openFoodArea+=Time.deltaTime*2f;
-		}
-		else
-		{
-			openFoodArea-=Time.deltaTime*2f;
-		}
-
-
-
-		
-		openFoodArea = Mathf.Clamp01(openFoodArea);
-		
-		GetComponent<Renderer>().material.SetFloat("_ProgressTouch",openFoodArea);
-		
-		
-		if(openFoodArea>0.2f && Random.value>0.7f && compter<8)
-		{
-			Vector3 rand = Random.insideUnitSphere*1.5f;
-			Vector3 pos = transform.position;
-			pos.z = 0f;
-			compter++;
-
-			pos+=Vector3.Normalize(-pos)*1f;
-			pos+= rand;
-			
-			Instantiate(prefabFood,pos,Quaternion.identity);
-		}
-
-		valDistortFood+=Map (GetComponent<Renderer>().material.GetFloat("_ProgressTouch"),0f,1f,5f,25f)*0.001f;
-		
-		GetComponent<Renderer>().material.SetFloat("_valueDistort",valDistortFood);
-
-
-		timerReduceCompter-=Time.deltaTime*compter;
+		timerReduceCompter-=Time.deltaTime*counter;
 		if(timerReduceCompter<=0f)
 		{
 			timerReduceCompter=timeFood;
-			compter--;
-			if(compter<0)
-				compter=0;
+			counter=Mathf.Max (0,counter-1);
 		}
 
+		openFoodArea+=(isActivated?1f:-1f)*Time.deltaTime*2f;
+		openFoodArea = Mathf.Clamp01(openFoodArea);
 
+		if(counter<8 && openFoodArea>0.2f && Random.value>0.7f)
+		{
+			Vector3 pos = transform.position;
+			pos+=Vector3.Normalize(-pos)*1f+ Random.insideUnitSphere*1.5f;
+			pos.z = 0f;
+			Instantiate(prefabFood,pos,Quaternion.identity);
+			counter++;
+		}
+
+		valDistortFood+=MyHelper.Map (openFoodArea,0f,1f,5f,25f)*0.001f;
+		myMat.SetFloat("_valueDistort",valDistortFood);
+		myMat.SetFloat("_ProgressTouch",openFoodArea);
 	}
 
 	public void GoActivate(bool goActivate)
-	{
-		isActivated = goActivate;
+	{  
+		isActivated = goActivate;	
 	}
 
 	public void RevertState()
-	{
-		isActivated = !isActivated;
+	{  
+		isActivated = !isActivated;	
 	}
-
-	public float Map(float val, float fromMin, float fromMax, float toMin, float toMax) {
-		return ((val - fromMin) / (fromMax - fromMin)) * (toMax - toMin) + toMin;
-	}
-	
 }

@@ -36,7 +36,12 @@ public class Fish : Entity
             }
         }
     }
-	
+
+	public void Kill()
+	{
+		Health = 0f;
+	}
+
     public float Health
     {
         get { return health; }

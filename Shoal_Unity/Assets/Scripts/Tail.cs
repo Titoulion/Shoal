@@ -4,238 +4,107 @@ using System.Linq;
 
 public class Tail : MonoBehaviour {
 
-	// Use this for initialization
-
-	GameObject[] bodyParts = new GameObject[0];
-	BodyPartScript[] bodyPartsScripts = new BodyPartScript[0];
-	TrailRenderer[] bodyPartsTrails = new TrailRenderer[0];
-	Vector3[] bodyPartsPositions = new Vector3[0];
-
-
-	int numberBodyParts = 50;
-	public GameObject prefabBodyPart;
-
-	float tailLenght = 0f;
-	public float nextTailLenght = 1f;
-	public float nextRadiusMotionBodyParts = 1f;
-	public float nextHeadSize = 2f;
-
-
-	float[] randomValues = new float[0];
-	float[] randomValues2 = new float[0];
-	int[] randomSens = new int[0];
-	bool started = false;
-	MainScript main;
-
-	public float speedMotionBodyPart = 1f;
-
-
-
-
-
-	float radiusMotionBodyParts = 1f;
-
-
-	public float speedMotion = 1f;
-
-
-
-	public Color mainColor1A;
-	public Color mainColor1B;
-	public Color mainColor2A;
-	public Color mainColor2B;
-
-
-	float headSize = 0f;
-
-
-	public float exchangeColor = 0f;
-	public float nextExchangeColor;
-
-
-
-	float timeLife = 0f;
-
-
-
-
-
-
-
-
-
-
-	bool goCenter = false;
-	bool goBigPond = false;
-
-	float transitionFromProgressCircle = 0f;
-
-	float transitionProgressCircle = 0f;
-
-
-
-
-
-
-
-
-	public bool dying = false;
-	bool dead = false;
-	float finalLife = 1f;
-
-
-
-
-
-
-	public AnimationCurve curveSizeA;
-	public AnimationCurve curveSizeB;
-
-	public float nextLerpColor1;
-	float lerpColor1;
-
-	public float nextLerpColor2;
-	float lerpColor2;
-
-
-	public float nextLerpValueSize = 0f;
-	float lerpValueSize = 0f;
-
-
-
-
-
-
-
-	public Vector2 minMaxTrailTime;
-
-
-	float sensSpeed = 1f;
-
-
-
-	//public Gradient myGradient;
-
-	[Range(0f,1f)]
-	public float hunger =0f;
-
-	public AnimationCurve curveGradient;
-
-	public float minAlpha = 0.5f;
-
-	float myFishRandom = 0f;
-
-	public float speedBlink = 0.5f;
-	public AnimationCurve curveBlink;
-
-	Color[] trailsColors;
-
-	GameObject tailAttractor;
-
-	//public bool realTimeUpdateAspect = false;
-
-	float progressDigestion = -0.5f;
-	bool digestion = false;
-
-
+	[SerializeField] private GameObject prefabBodyPart;
+	[SerializeField] private ProgressModifProperty property1;
+	[SerializeField] private ProgressModifProperty property1B;
+	[SerializeField] private ProgressModifProperty property2;
+	[SerializeField] private ProgressModifProperty property2B;
+	[SerializeField] private ProgressModifProperty property2C;
+	[SerializeField] private ProgressModifProperty property3;
+	[SerializeField] private ProgressModifProperty property3B;
+	[SerializeField] private AnimationCurve curveSizeA;
+	[SerializeField] private AnimationCurve curveSizeB;
+	[SerializeField] private AnimationCurve curveGradient;
+	[SerializeField] private AnimationCurve curveBlinkHunger;
+
+	private GameObject[] bodyParts = new GameObject[0];
+	private BodyPartScript[] bodyPartsScripts = new BodyPartScript[0];
+	private TrailRenderer[] bodyPartsTrails = new TrailRenderer[0];
+	private Vector3[] bodyPartsPositions = new Vector3[0];
+	private int numberBodyParts = 50;
+	private float nextHeadSize = 2f;
+	private float tailLenght = 0f;
+	private float radiusMotionBodyParts = 1f;
+	private float headSize = 0f;
+	private float exchangeColor = 0f;
+	private float lerpValueSize = 0f;
+	private float speedMotionBodyPart = 1f;
+	private float speedMotion = 1f;
+	private float[] randomValues = new float[0];
+	private float[] randomValues2 = new float[0];
+	private int[] randomSens = new int[0];
+	private float timeLife = 0f;
+	private bool dying = false;
+	private bool dead = false;
+	private float finalLife = 1f;
+	private Vector2 minMaxTrailTime;
+	private float hunger =0f;
+	private float minAlpha = 0.2f;
+	private float myFishRandom;
+	private float speedBlink = 1f;
+	private Color[] trailsColors;
+	private float progressDigestion = -0.5f;
+	private bool digestion = false;
+	private Gradient gradient1;
+	private Gradient gradient2;
+	private NewGradient myGradientsStuff;
+		
 	void Start () 
 	{
-		main = MainScript.Instance;
 		GetComponentInParent<Fish>().EventDeath += GoDie;
-		//tailAttractor = GameObject.Find("TailAttractor");
-
-//		petitPondCentre = Vector3.zero+(main.littlePond.transform.position-main.bigPond.transform.position)*multDecal;
-		//petitPondExit = petitPondCentre+Vector3.Normalize(main.bigPond.transform.position-main.littlePond.transform.position)*2f*1f;
-
-
+		myGradientsStuff = GetComponent<NewGradient>();
 		InitValues();
-
-		RandomColors();
-
-
 		GenerateBody();
-
-
-		
-		goBigPond = false;
-		goCenter = false;
-
-
-		myFishRandom = Random.value;
-
-
-		
-
-
-
-		//SetFinalValues();
-
-		InitAspectValues();
-
-
 	}
-
-	void RandomColors()
+		
+	private void InitValues()
 	{
-		mainColor1A = new Color(Random.value,Random.value,Random.value);
-		mainColor1B = new Color(Random.value,Random.value,Random.value);
-		mainColor2A = new Color(Random.value,Random.value,Random.value);
-		mainColor2B = new Color(Random.value,Random.value,Random.value);
-	}
-
-
-	void InitValues()
-	{
-
+		gradient1 = GetComponent<NewGradient>().randomGradient;
+		gradient2 = GetComponent<NewGradient>().randomGradient2;
 		numberBodyParts = Random.Range (18,30);
 		speedMotion = Random.Range (0.55f,1.35f);
-
-
+		myFishRandom = Random.value;
 		float rand1 = Random.Range(0.1f,0.3f);
-		minMaxTrailTime = new Vector2(rand1,rand1+Random.Range (0.1f,0.4f));
+		minMaxTrailTime = new Vector2(rand1,rand1+Random.Range (0.1f,0.3f));
 		speedMotionBodyPart = Random.Range (0.7f,1.35f);
-
 		radiusMotionBodyParts = Random.Range (0f,1.2f);
-
-
-		main.BumpProperties(this);
-
-
-
-
-
+		property1.Init();
+		property1B.Init();
+		property2.Init();
+		property2B.Init();
+		property2C.Init();
+		property3.Init();
+		property3B.Init();
+		SetInitPropertiesValues(property1.GetValue(), property1B.GetValue(),property2.GetValue(), property2B.GetValue(),property2C.GetValue(), property3.GetValue(), property3B.GetValue());
 	}
 
-	public void SetInitPropertiesValues(float p1, float p1B, float p2,float p2B,float p2C, float p3, float p3B)
+	private void SetInitPropertiesValues(float p1, float p1B, float p2,float p2B,float p2C, float p3, float p3B)
 	{
-		nextTailLenght = p1;
 		tailLenght = p1;
-
-		nextRadiusMotionBodyParts = p1B;
 		radiusMotionBodyParts = p1B;
-
-		nextExchangeColor = p2;
 		exchangeColor = p2;
-
-		nextLerpColor1 = p2B;
-		lerpColor1 = p2B;
-
-		nextLerpColor2= p2C;
-		lerpColor2 = p2C;
-
-		nextHeadSize = p3;
 		headSize = 0f;
-
-		nextLerpValueSize = p3B;
 		lerpValueSize = p3B;
-
-
-
 	}
 
+	private void InitAspectBodyPart(int indexBodyPart)
+	{
+		float progress = MyHelper.Map ((float)indexBodyPart,0f,(float)(bodyParts.Length-1),0f,1f);
+		bodyPartsScripts[indexBodyPart].SetExchangeColor (exchangeColor);
+		bodyPartsScripts[indexBodyPart].SetPointCurve(curveGradient.Evaluate(progress));
+		bodyPartsScripts[indexBodyPart].SetCustomColors(gradient1.Evaluate(progress),gradient2.Evaluate(progress));
+		bodyPartsScripts[indexBodyPart].SetSize(0f);
+		bodyPartsScripts[indexBodyPart].SetPosInTail(progress);
+		bodyPartsScripts[indexBodyPart].SetMinAlpha(minAlpha);
 
-	
-	void GenerateBody()
+		bodyPartsTrails[indexBodyPart].startWidth =0f;
+		bodyPartsTrails[indexBodyPart].endWidth =0f;
+		bodyPartsTrails[indexBodyPart].time = minMaxTrailTime.x+(minMaxTrailTime.y-minMaxTrailTime.x)*(progress);
+		bodyPartsTrails[indexBodyPart].material.SetColor ("_Color",gradient1.Evaluate(progress));
+		trailsColors[indexBodyPart] = gradient1.Evaluate(progress);
+	}
+
+	private void GenerateBody()
 	{
 		bodyParts = new GameObject[numberBodyParts];
 		bodyPartsPositions = new Vector3[numberBodyParts];
@@ -244,288 +113,85 @@ public class Tail : MonoBehaviour {
 		randomValues = new float[numberBodyParts];
 		randomValues2 = new float[numberBodyParts];
 		randomSens = new int[numberBodyParts];
+		trailsColors = new Color[numberBodyParts];
 
 		for(int i = 0; i<bodyParts.Length;i++)
 		{
-			float progress = Map ((float)i,0f,(float)(bodyParts.Length-1),1f,0f);
+			float progress = MyHelper.Map ((float)i,0f,(float)(bodyParts.Length-1),1f,0f);
 			GameObject bodyPart = Instantiate(prefabBodyPart,transform.position,Quaternion.identity) as GameObject;
 			bodyPart.transform.parent = transform;
 			bodyPart.GetComponent<Renderer>().material.SetFloat ("_RotationPerlin",Random.Range (0f,360f));
-			float valueSizeA = curveSizeA.Evaluate(Mathf.Clamp01(progress));
-			float valueSizeB = curveSizeB.Evaluate(Mathf.Clamp01(progress));
 			BodyPartScript thisBodyPartScript = bodyPart.GetComponent<BodyPartScript>();
 			bodyPartsScripts[i] = thisBodyPartScript;
 			TrailRenderer thisBodyPartTrail = bodyPart.GetComponent<TrailRenderer>();
 			bodyPartsTrails[i] = thisBodyPartTrail;
-			thisBodyPartScript.SetSize(headSize* Mathf.Lerp(valueSizeA,valueSizeB,lerpValueSize));
 			bodyParts[i] = bodyPart;
-			thisBodyPartScript.SetLerpsColors(lerpColor1,lerpColor2);
-			thisBodyPartScript.SetExchangeColor(Random.Range(0.0f,0.2f));
-			thisBodyPartScript.SetExchangeColor(Random.value>0.5f?1f:0f);
-			thisBodyPartScript.SetExchangeColor(0f);
-			thisBodyPartScript.SetPosInTail(1f-progress);
-
-
-			thisBodyPartScript.SetColors(mainColor1A,mainColor1B,mainColor2A,mainColor2B);
-
-
-
-
 			randomValues[i]=Random.value;
 			randomValues2[i]=Random.value;
 			randomSens[i]=Random.value<0.5f?-1:1;
-			thisBodyPartTrail.startWidth =thisBodyPartScript.GetSize();
-			thisBodyPartTrail.endWidth =0f;
-			//thisBodyPartTrail.material.color = thisBodyPartScript.GetTransitionColor();
-			thisBodyPartTrail.time = minMaxTrailTime.x+(minMaxTrailTime.y-minMaxTrailTime.x)*(progress);
 			bodyPartsPositions[i] = transform.position;
+			InitAspectBodyPart(i);
 		}
-
-		//ProgressionsProperties(true);
-
-
-		started = true;
 	}
 
-	void Update () 
+	private void PositionBodyParts()
 	{
-		if(!dead)
-		{
-			if(started)
-			{
-				UpdateValues();
-
-
-
-
-				PositionBodyParts();
-				timeLife+=Time.deltaTime;
-			}
-		}	
-	}
-
-
-
-
-	void PositionBodyParts()
-	{
-		//tailAttractor.transform.position = new Vector3(tailAttractor.transform.position.x,tailAttractor.transform.position.y,transform.position.z);
-
-
-		tailAttractor =(Pond.Instance.GetEntitiesOfType(EntityType.Whirlpool).ToArray().Count()==0)?(null):(Pond.Instance.GetEntitiesOfType(EntityType.Whirlpool).ToArray()[0].gameObject);
-
-			
-
-
+		GameObject tailAttractor =(Pond.Instance.GetEntitiesOfType(EntityType.Whirlpool).ToArray().Count()==0)?(null):(Pond.Instance.GetEntitiesOfType(EntityType.Whirlpool).ToArray()[0].gameObject);
+		
 		bodyPartsPositions[0] = bodyParts[0].transform.position = transform.position;
 		for(int i=1; i<bodyParts.Length; i++)
 		{
-			float progressB = ((float)i-1f)/((float)bodyParts.Length-2);
+			float progress = ((float)i-1f)/((float)bodyParts.Length-2);
 			float nodeAngle	 =	Mathf.Atan2(bodyPartsPositions[i].y - bodyPartsPositions[i-1].y,bodyPartsPositions[i].x - bodyPartsPositions[i-1].x);
-			bodyPartsPositions[i] = new Vector3(bodyPartsPositions[i-1].x + tailLenght*(1f-progressB) * Mathf.Cos(nodeAngle),bodyPartsPositions[i-1].y + tailLenght*(1f-progressB) * Mathf.Sin(nodeAngle),0f);
-
-
+			bodyPartsPositions[i] = new Vector3(bodyPartsPositions[i-1].x + tailLenght*(1f-progress) * Mathf.Cos(nodeAngle),bodyPartsPositions[i-1].y + tailLenght*(1f-progress) * Mathf.Sin(nodeAngle),0f);
+			
 			if(tailAttractor!=null)
 			{
 				Vector3 toAttractor = tailAttractor.transform.position-bodyPartsPositions[i];
 				float distanceAttractor = toAttractor.magnitude;
-				toAttractor = Vector3.Normalize(toAttractor);
-				
-				Vector3 attraction = Vector3.zero;
 				
 				if(distanceAttractor<9f && distanceAttractor>0.1f)
 				{
-					attraction = toAttractor*(9f-distanceAttractor)*0.034f;
-
+					toAttractor = Vector3.Normalize(toAttractor);
+					Vector3 attraction = toAttractor*(9f-distanceAttractor)*0.034f;
 					bodyPartsPositions[i]+=attraction;
-					
 					if(Vector3.Distance(bodyPartsPositions[i],bodyPartsPositions[i-1])>tailLenght)
-					{
 						bodyPartsPositions[i] = bodyPartsPositions[i-1]+Vector3.Normalize(bodyPartsPositions[i]-bodyPartsPositions[i-1])*tailLenght;
-					}
 				}
 			}
-
-		
-
-
+			
 			Vector3 toForward = Vector3.Normalize (bodyPartsPositions[i]-bodyPartsPositions[i-1]);
 			Vector3 toUp = Vector3.Cross (toForward,Vector3.forward);
 			float randomValueT =  randomValues[i] + Time.realtimeSinceStartup*randomSens[i]*speedMotionBodyPart;
-			Vector3 circularMotion = toForward*Mathf.Cos (randomValueT*2f*Mathf.PI)*radiusMotionBodyParts*progressB+toUp*Mathf.Sin (randomValueT*2f*Mathf.PI)*radiusMotionBodyParts*progressB;
-
-
+			Vector3 circularMotion = toForward*Mathf.Cos (randomValueT*2f*Mathf.PI)*radiusMotionBodyParts*progress+toUp*Mathf.Sin (randomValueT*2f*Mathf.PI)*radiusMotionBodyParts*progress;
+			
 			bodyParts[i].transform.position = bodyPartsPositions[i] + circularMotion;
 		}
 	}
 
-	void LateUpdate()
+	private void ProgressionsProperties(bool realTimeUpdateAspect)
 	{
-		if(dead)
-			Destroy(transform.parent.gameObject);
-	}
-	
-	float Radians(float value)
-	{
-		float val = Mathf.PI*value/180;
-		return(val);
-	}
-
-	float Map(float val, float fromMin, float fromMax, float toMin, float toMax) {
-		return ((val - fromMin) / (fromMax - fromMin)) * (toMax - toMin) + toMin;
-	}
-
-	float Modulo(float a,float b)
-	{
-		return a - b * Mathf.Floor(a / b);
-	}
-
-	public void AffectProperty1(float _value)
-	{
-
-			nextTailLenght = _value;
-		tailLenght = _value;
-	}
-
-	public void AffectProperty1B(float _value)
-	{
-
-			nextRadiusMotionBodyParts = _value;
-		radiusMotionBodyParts = _value;
-	}
-
-	public void AffectProperty2(float _value)
-	{
-
-			nextExchangeColor = _value;
-		exchangeColor = _value;
-	}
-
-	public void AffectProperty2B(float _value)
-	{
-
-			nextLerpColor1 = _value;
-		lerpColor1 = _value;
-	}
-
-	public void AffectProperty2C(float _value)
-	{
-
-			nextLerpColor2 = _value;
-		lerpColor2 = _value;
-	}
-
-	public void AffectProperty3(float _value)
-	{
-
-			nextHeadSize = _value;
-	}
-
-	public void AffectProperty3B(float _value)
-	{
-
-			nextLerpValueSize = _value;
-		lerpValueSize = _value;
-	}
-
-	public void Kill()
-	{
-		dying = true;
-	}
-
-	void UpdateValues()
-	{
-
-		ProgressionsProperties(false);
-		
-
-
-
-
-
-
-
-	}
-
-	void InitAspectValues()
-	{
-		Gradient gradient1 = GetComponent<NewGradient>().randomGradient;
-		Gradient gradient2 = GetComponent<NewGradient>().randomGradient2;
-
-		trailsColors = new Color[bodyParts.Length];
-
-
-		for (int i=0; i<bodyParts.Length; i++)
-		{
-			float progress = Map ((float)i,0f,(float)(bodyParts.Length-1),0f,1f);
-			
-			
-			if(Mathf.Abs(headSize-nextHeadSize)>0.01f)
-			{
-				float valueSizeA = curveSizeA.Evaluate((1f-Mathf.Clamp01(progress)));
-				float valueSizeB = curveSizeB.Evaluate((1f-Mathf.Clamp01(progress)));
-				bodyPartsTrails[i].startWidth =headSize* Mathf.Lerp(valueSizeA,valueSizeB,lerpValueSize);
-				bodyPartsScripts[i].SetSize(headSize* Mathf.Lerp(valueSizeA,valueSizeB,lerpValueSize));
-			}
-			
-
-				bodyPartsTrails[i].endWidth =0f;
-				bodyPartsScripts[i].SetExchangeColor (exchangeColor);
-				bodyPartsScripts[i].SetPointCurve(curveGradient.Evaluate(progress));
-				bodyPartsScripts[i].SetCustomColors(gradient1.Evaluate(progress),gradient2.Evaluate(progress));
-				//bodyPartsTrails[i].material.SetColor ("_Color", Color.Lerp (gradient1.Evaluate(progress),new Color(0.8f,0.8f,0.8f),progressValueHunger));
-				
-				bodyPartsTrails[i].material.SetColor ("_Color",gradient1.Evaluate(progress));
-				trailsColors[i] = gradient1.Evaluate(progress);
-
-		}
-
-			
-			
-
-	}
-
-
-	
-	void ProgressionsProperties(bool realTimeUpdateAspect)
-	{
-
 		if(digestion)
 		{
 			progressDigestion+=Time.deltaTime/0.8f;
 			if(progressDigestion>1.5f)
-			{
 				digestion=false;
-
-			}
 		}
-
-
-
-
-		float valueProgressProgress = Map (Mathf.Clamp01(timeLife),0f,1f,0.1f,1f);
-
-		headSize+=(nextHeadSize-headSize)*valueProgressProgress;
-
+	
 		if(dying)
-		{
 			finalLife=Mathf.Clamp01(finalLife-Time.deltaTime);
-		}
-		
+
+		headSize+=(nextHeadSize-headSize)*MyHelper.Map (Mathf.Clamp01(timeLife),0f,1f,0.1f,1f);
 		headSize *= finalLife;
+		
 
 		hunger = 1f-GetComponentInParent<Fish>().Health;
+		float progressValueHunger = Mathf.Lerp (hunger,0f,(1f-hunger+0.5f)*curveBlinkHunger.Evaluate(MyHelper.Modulo(Time.realtimeSinceStartup*speedBlink+myFishRandom,1f)));
 
-		Gradient gradient1 = GetComponent<NewGradient>().randomGradient;
-		Gradient gradient2 = GetComponent<NewGradient>().randomGradient2;
-			
-		float progressValueHunger = Mathf.Lerp (hunger,0f,(1f-hunger+0.5f)*curveBlink.Evaluate(Modulo(Time.realtimeSinceStartup*speedBlink+myFishRandom,1f)));
-			
-			
 		for (int i=0; i<bodyParts.Length; i++)
 		{
-			float progress = Map ((float)i,0f,(float)(bodyParts.Length-1),0f,1f);
-	
+			float progress = MyHelper.Map ((float)i,0f,(float)(bodyParts.Length-1),0f,1f);
+			
 			if(Mathf.Abs(headSize-nextHeadSize)>0.01f)
 			{
 				float valueSizeA = curveSizeA.Evaluate((1f-Mathf.Clamp01(progress)));
@@ -533,33 +199,27 @@ public class Tail : MonoBehaviour {
 				bodyPartsTrails[i].startWidth =headSize* Mathf.Lerp(valueSizeA,valueSizeB,lerpValueSize);
 				bodyPartsScripts[i].SetSize(headSize* Mathf.Lerp(valueSizeA,valueSizeB,lerpValueSize));
 			}
-
+			
 			if(realTimeUpdateAspect)
 			{
-				bodyPartsTrails[i].endWidth =0f;
-				bodyPartsScripts[i].SetExchangeColor (exchangeColor);
-				bodyPartsScripts[i].SetPointCurve(curveGradient.Evaluate(progress));
-				bodyPartsScripts[i].SetCustomColors(gradient1.Evaluate(progress),gradient2.Evaluate(progress));
-				//bodyPartsTrails[i].material.SetColor ("_Color", Color.Lerp (gradient1.Evaluate(progress),new Color(0.8f,0.8f,0.8f),progressValueHunger));
-				bodyPartsTrails[i].material.SetColor ("_Color",gradient1.Evaluate(progress));
+				bodyPartsScripts[i].SetCustomColors(myGradientsStuff.randomGradient.Evaluate(progress),myGradientsStuff.randomGradient2.Evaluate(progress));
+				bodyPartsTrails[i].material.SetColor ("_Color",myGradientsStuff.randomGradient.Evaluate(progress));
 			}
 
 			bodyPartsTrails[i].material.SetColor ("_Color", Color.Lerp (trailsColors[i],new Color(0.8f,0.8f,0.8f,minAlpha),progressValueHunger));
-
-			bodyPartsScripts[i].SetHunger(minAlpha,progressValueHunger);
-
-
+			bodyPartsScripts[i].SetHunger(progressValueHunger);
 			bodyPartsScripts[i].SetProgressDigestion(progressDigestion);
-
-
-
 		}
-
 
 		if(finalLife==0f)
-		{
-			GoDestroy();
-		}
+			Destroy(transform.parent.gameObject);
+	}
+	
+	void Update () 
+	{
+		PositionBodyParts();
+		ProgressionsProperties(true);
+		timeLife+=Time.deltaTime;
 	}
 
 	public void GoDigest()
@@ -568,22 +228,26 @@ public class Tail : MonoBehaviour {
 		progressDigestion = -0.5f;
 	}
 
-	public bool CanChangeValues()
-	{
-		return(true);
-	}
-
-	void GoDestroy()
-	{
-		dead = true;
-	}
-
 	public void GoDie()
 	{
 		dying = true;
 	}
 
+	[System.Serializable]
+	public class ProgressModifProperty
+	{
+		private float progress;
+		[SerializeField] private float valueMin;
+		[SerializeField] private float valueMax;
+		
+		public void Init()
+		{
+			progress = Random.value;
+		}
 
-
-	
+		public float GetValue()
+		{
+			return(MyHelper.Map(Mathf.Cos(progress*2f*Mathf.PI)*0.5f+0.5f,0f,1f,valueMin,valueMax));
+		}
+	}
 }

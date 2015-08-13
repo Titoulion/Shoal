@@ -34,5 +34,12 @@ public class TestSpawner : MonoBehaviourBase
 			positionc.z = 0;
 			InstantiatePrefab(mouseButtonPrefabs[4], positionc, Quaternion.identity);
 		}
+
+		if (Input.GetKeyDown(KeyCode.Alpha7)||Input.GetKeyDown(KeyCode.Keypad7))
+		{
+			var positionc = Camera.main.ScreenToWorldPoint(Input.mousePosition)*2.5f;
+			positionc.z = 0;
+			InstantiatePrefab(mouseButtonPrefabs[0], positionc, Quaternion.identity);
+		}
     }
 }

@@ -7,14 +7,13 @@ public class EnemyScript : MonoBehaviour {
 	enum EnemyState {
 						Sleeping,
 						Hunting,
-						Moving,
 						Repositioning,
 						Attacking,
 						Resetting,
 						Dying,
 						WakingUp,
 						Blank,
-						Testing
+						TakingDamage,
 					};
 	private EnemyState state = EnemyState.Sleeping;
 	private EnemyState nextState = EnemyState.Blank;
@@ -95,6 +94,9 @@ public class EnemyScript : MonoBehaviour {
 				break;
 			case EnemyState.Resetting:
 				ResettingUpdate();
+				break;
+			case EnemyState.TakingDamage:
+				TakingDamageUpdate();
 				break;
 			case EnemyState.Blank:
 				Debug.Log("state should never be set to Blank");
@@ -240,24 +242,22 @@ public class EnemyScript : MonoBehaviour {
 
 	}
 
+	void TakingDamageUpdate() {
+		Debug.Log("Ow");
+		lerpTimer += Time.deltaTime;
+		float time = lerpTimer/lerpDuration;
+		SmoothMove(startRadius, targetRadius, startAngle, targetAngle, time);
+		if (time >= 1f) {
+			Hunt();
+		}
+	}
+
 	void WakingUpUpdate() {
 		lerpTimer += Time.deltaTime;
 		float time = lerpTimer/lerpDuration;
 		SmoothMove(sleepingRadius, huntingRadius, startAngle, targetAngle, time);
 		if (time >= 1f) {
-			nextState = EnemyState.Hunting;
-
-			startAngle = targetAngle;
-			startRadius = huntingRadius;
-
-			if (startAngle > 360f) {
-				startAngle -= 360f;
-			} else if (startAngle < 0f) {
-				startAngle += 360f;
-			}
-
-			float t = Random.Range(gapBetweenMoves.x, gapBetweenMoves.y);
-			Invoke("Reposition", t);
+			Hunt();
 		}
 	}
 
@@ -297,6 +297,17 @@ public class EnemyScript : MonoBehaviour {
 				lerpTimer = 0f;
 
 				CancelInvoke("Reposition");
+			} else {
+				nextState = EnemyState.TakingDamage;
+				CancelInvoke("Reposition");
+
+				startRadius = currentRadius;
+				startAngle = currentAngle;
+				targetRadius = huntingRadius;
+				targetAngle = currentAngle;
+
+				lerpDuration = 1f;
+				lerpTimer = 0f;
 			}
 		}
 	}
@@ -321,11 +332,11 @@ public class EnemyScript : MonoBehaviour {
 		// startAngle = targetAngle;
 		// startRadius = targetRadius;
 
-		if (startAngle > 360f) {
-			startAngle -= 360f;
-		} else if (startAngle < 0f) {
-			startAngle += 360f;
-		}
+		// if (startAngle > 360f) {
+		// 	startAngle -= 360f;
+		// } else if (startAngle < 0f) {
+		// 	startAngle += 360f;
+		// }
 
 		float t = Random.Range(gapBetweenMoves.x, gapBetweenMoves.y);
 		Invoke("Reposition", t);

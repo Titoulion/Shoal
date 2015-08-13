@@ -119,7 +119,7 @@ public class MainScript : MonoBehaviour {
 
 	void Start () 
 	{
-	
+		Shader.SetGlobalFloat("_GlobalOpacity", 1f);
 		property1.Init();
 		property1B.Init();
 		property2.Init();

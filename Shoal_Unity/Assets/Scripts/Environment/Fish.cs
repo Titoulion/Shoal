@@ -61,6 +61,7 @@ public class Fish : Entity
         if ((Health == 0) || (Health > eatMaxValue))
             return;
 
+		GetComponentInChildren<Tail>().GoDigest();
         Health += food.HealthPlus;
         food.Eaten();
     }

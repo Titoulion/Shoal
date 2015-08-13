@@ -16,6 +16,8 @@ public class FoodArea : MonoBehaviour {
 
 	float timeFood;
 
+	public bool isActivated = false;
+
 	void Start () {
 		valDistortFood = Random.value;
 		timeFood = prefabFood.GetComponent<Food>().lifeTime;
@@ -25,7 +27,7 @@ public class FoodArea : MonoBehaviour {
 	void Update () 
 	{
 
-		if(Input.GetKey(myKeyCode) || Input.GetKey(myKeyCode2))
+		if(isActivated)
 		{
 			openFoodArea+=Time.deltaTime*2f;
 		}
@@ -33,6 +35,9 @@ public class FoodArea : MonoBehaviour {
 		{
 			openFoodArea-=Time.deltaTime*2f;
 		}
+
+
+
 		
 		openFoodArea = Mathf.Clamp01(openFoodArea);
 		
@@ -67,6 +72,16 @@ public class FoodArea : MonoBehaviour {
 		}
 
 
+	}
+
+	public void GoActivate(bool goActivate)
+	{
+		isActivated = goActivate;
+	}
+
+	public void RevertState()
+	{
+		isActivated = !isActivated;
 	}
 
 	public float Map(float val, float fromMin, float fromMax, float toMin, float toMax) {

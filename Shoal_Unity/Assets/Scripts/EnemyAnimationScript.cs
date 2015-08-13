@@ -41,6 +41,7 @@ public class EnemyAnimationScript : MonoBehaviour {
 	
 	void Start () {
 		enemyScript = GetComponent<EnemyScript>();
+		currentAngel = enemyScript.currentAngle;
 		theAniamtionState = EnemyAnimation.nullAnimation;
 	}
 	
@@ -80,18 +81,18 @@ public class EnemyAnimationScript : MonoBehaviour {
 
 	void enemyResetAnimation(){
 
-
 		Invoke ("wingReset", sleepTime + enemyScript.wakingUpTime - 1);
 		theAniamtionState = EnemyAnimation.idleAnimation;
 		
 	}
 
 	void enemyHuntAnimation(){
-		
+
+		currentAngel = enemyScript.currentAngle;
 		for (int i = 0; i < EnemyWings.Length; i++) {
 			
 			WingScript[i].setStatus(2);
-			
+
 		}
 		
 	}

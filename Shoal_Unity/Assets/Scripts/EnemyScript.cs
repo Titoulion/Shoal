@@ -44,7 +44,8 @@ public class EnemyScript : MonoBehaviour {
 
 	private float targetRadius, targetAngle;
 	private float startRadius, startAngle;
-	private float currentAngle, currentRadius;
+
+	public  float currentAngle, currentRadius;
 
 	private Entity prey;
 

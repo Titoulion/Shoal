@@ -51,7 +51,6 @@ public class EnemyAnimationScript : MonoBehaviour {
 			enemyWakeAnimation ();
 			break;
 		case EnemyAnimation.idleAnimation:
-			enemyIdleAnimation();
 			break;
 		case EnemyAnimation.attackAnimation:
 			enemyAttackAnimation();
@@ -86,13 +85,7 @@ public class EnemyAnimationScript : MonoBehaviour {
 		theAniamtionState = EnemyAnimation.idleAnimation;
 		
 	}
-	
-	void enemyIdleAnimation(){
-		
-		//default animation
-		
-		
-	}
+
 	void enemyHuntAnimation(){
 		
 		for (int i = 0; i < EnemyWings.Length; i++) {

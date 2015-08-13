@@ -83,6 +83,7 @@ public class Tail : MonoBehaviour {
 		tailLenght = p1;
 		radiusMotionBodyParts = p1B;
 		exchangeColor = p2;
+		nextHeadSize = p3;
 		headSize = 0f;
 		lerpValueSize = p3B;
 	}

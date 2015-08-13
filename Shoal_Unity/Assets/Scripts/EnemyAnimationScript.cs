@@ -69,17 +69,7 @@ public class EnemyAnimationScript : MonoBehaviour {
 	void Update () {
 		
 		animationStateCheck ();
-		
-		
-//		if (Input.anyKeyDown) {
-//			
-//			theAniamtionState = EnemyAnimation.destroryAnimation;
-//		}
-//		if (Input.GetKey ("up")) {
-//			
-//			theAniamtionState = EnemyAnimation.huntAnimation;
-//			
-//		}
+
 
 	}
 

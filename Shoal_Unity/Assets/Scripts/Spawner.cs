@@ -5,7 +5,6 @@ using System.Collections;
 public class Spawner : MonoBehaviourBase 
 {
 	public static Spawner Instance;
-	MainScript main;
 
 	[SerializeField] private Transform prefabBoulder;
 	[SerializeField] private Transform prefabFish;
@@ -17,11 +16,6 @@ public class Spawner : MonoBehaviourBase
 	void Awake()
 	{
 		Instance = this;
-	}
-
-	void Start ()
-	{
-		main = MainScript.Instance;
 	}
 
 	public GameObject SpawnBoulder(Vector2 posOnScreen)
@@ -90,7 +84,7 @@ public class Spawner : MonoBehaviourBase
 			RevertStateFoodArea(1);
 	}
 
-	Vector2 Vec2MousePos()
+	private Vector2 Vec2MousePos()
 	{
 		return(new Vector2(Input.mousePosition.x,Input.mousePosition.y));
 	}

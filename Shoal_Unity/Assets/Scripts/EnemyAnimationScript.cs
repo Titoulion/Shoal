@@ -20,13 +20,13 @@ public class EnemyAnimationScript : MonoBehaviour {
 	
 	private GameObject[] EnemyWings = new GameObject[0];
 	private EnemyWing[] WingScript = new EnemyWing[0];
-	private EnemyAnimation theAniamtionState = EnemyAnimation.nullAnimation;
+	private EnemyScript enemyScript;
 
-	EnemyScript enemyScript;
-	
+	private EnemyAnimation theAniamtionState;
 
 	private int wingsNumber  = 2;
-	private float currentAngel;
+	private float currentAngle;
+	private float targetAngle;
 	private float sleepTime;
 
 	
@@ -38,11 +38,17 @@ public class EnemyAnimationScript : MonoBehaviour {
 		sleepTime = _t;
 	}
 
+	public void setTargetAngle(float _a){
+
+		targetAngle = _a;
+
+	}
+
 	
 	void Start () {
 		enemyScript = GetComponent<EnemyScript>();
-		currentAngel = enemyScript.currentAngle;
 		theAniamtionState = EnemyAnimation.nullAnimation;
+		currentAngle = gameObject.transform.eulerAngles.z;
 	}
 	
 	void Update () {
@@ -64,6 +70,9 @@ public class EnemyAnimationScript : MonoBehaviour {
 			break;
 		case EnemyAnimation.resetAnimation:
 			enemyResetAnimation();
+			break;
+		case EnemyAnimation.repositionAnimation:
+			enemyRepositionAnimation();
 			break;
 		case EnemyAnimation.nullAnimation:
 			break;
@@ -88,7 +97,6 @@ public class EnemyAnimationScript : MonoBehaviour {
 
 	void enemyHuntAnimation(){
 
-		currentAngel = enemyScript.currentAngle;
 		for (int i = 0; i < EnemyWings.Length; i++) {
 			
 			WingScript[i].setStatus(2);
@@ -98,10 +106,22 @@ public class EnemyAnimationScript : MonoBehaviour {
 	}
 	void enemyAttackAnimation(){
 
+
+		Debug.Log ("attack");
+		for (int i = 0; i < EnemyWings.Length; i++) {
+			
+			WingScript[i].setStatus(3);
+			
+		}
+		theAniamtionState = EnemyAnimation.idleAnimation;
+
 	}
 	
 	void enemyRepositionAnimation(){
-		
+
+		float angle = Mathf.LerpAngle (currentAngle, targetAngle, Time.time);
+		gameObject.transform.eulerAngles = new Vector3(0.0f,0.0f, angle);
+		Debug.Log ("reposition");
 		
 	}
 	

@@ -113,6 +113,7 @@ public class EnemyAnimationScript : MonoBehaviour {
 			WingScript[i].setStatus(3);
 			
 		}
+		theAniamtionState = EnemyAnimation.idleAnimation;
 
 	}
 	

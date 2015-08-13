@@ -91,22 +91,37 @@ public class EnemyWing : MonoBehaviour {
 			//gameObject.transform.localScale = new Vector3(-1.0f,1.0f,1.0f);
 			gameObject.transform.rotation = Quaternion.AngleAxis((0 + Time.time * 20.0f), Vector3.forward);
 		}
+		//gameObject.transform.localPosition = new Vector3(0.0f,0.0f, 0.0f);
+		gameObject.transform.localScale = new Vector3 (1.0f,1.0f,0.0f);
+
 		
 	}
 	
 	void idleAniamtion(){
 		Debug.Log("idle animation");
+
 		
 	}
 	
 	void catchAnimation(){
 		
-		
+		float scale = 1.2f;
 		if(wingID == 1){
+			float angle = Mathf.LerpAngle (0, 135, Time.time);
+			float distance = Mathf.Lerp (0.0f,-0.5f, Time.time);
+			gameObject.transform.eulerAngles = new Vector3(0.0f,0.0f, angle);
+			//gameObject.transform.localPosition = new Vector3(distance,-distance, 0.0f);
+
 			
 		}
 		if (wingID == 2) {
+			float angle = Mathf.LerpAngle (180, 45, Time.time);
+			float distance = Mathf.Lerp (0.0f,0.5f, Time.time);
+			gameObject.transform.eulerAngles = new Vector3(0.0f,0.0f, angle);
+			//gameObject.transform.localPosition = new Vector3(distance,-distance, 0.0f);
+
 		}
+		gameObject.transform.localScale = new Vector3 (scale,scale,0.0f);
 				
 	}
 	

@@ -108,8 +108,11 @@ public class EnemyAnimationScript : MonoBehaviour {
 
 
 		Debug.Log ("attack");
-
-
+		for (int i = 0; i < EnemyWings.Length; i++) {
+			
+			WingScript[i].setStatus(3);
+			
+		}
 
 	}
 	

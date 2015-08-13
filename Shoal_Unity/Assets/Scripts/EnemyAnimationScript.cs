@@ -11,6 +11,7 @@ public class EnemyAnimationScript : MonoBehaviour {
 		attackAnimation,
 		repositionAnimation,
 		destroryAnimation,
+		resetAnimation,
 		nullAnimation
 	};
 
@@ -36,8 +37,14 @@ public class EnemyAnimationScript : MonoBehaviour {
 	public void setSleepTime(float _t){
 		sleepTime = _t;
 	}
+
 	
-	void animationStateCheck(){
+	void Start () {
+		enemyScript = GetComponent<EnemyScript>();
+		theAniamtionState = EnemyAnimation.nullAnimation;
+	}
+	
+	void Update () {
 		
 		switch (theAniamtionState) {
 		case EnemyAnimation.wakeAnimation:
@@ -55,30 +62,28 @@ public class EnemyAnimationScript : MonoBehaviour {
 		case EnemyAnimation.destroryAnimation:
 			enemyDestroyAniamtion();
 			break;
+		case EnemyAnimation.resetAnimation:
+			enemyResetAnimation();
+			break;
 		case EnemyAnimation.nullAnimation:
 			break;
 			
 		}
 	}
-	
-	void Start () {
-		enemyScript = GetComponent<EnemyScript>();
-		theAniamtionState = EnemyAnimation.nullAnimation;
-	}
-	
-	void Update () {
-		
-		animationStateCheck ();
-
-
-	}
-
 
 	
 	void enemyWakeAnimation(){
 
 		Invoke ("wingGeneration", sleepTime + enemyScript.wakingUpTime - 1);
-		theAniamtionState = EnemyAnimation.nullAnimation;
+		theAniamtionState = EnemyAnimation.idleAnimation;
+		
+	}
+
+	void enemyResetAnimation(){
+
+
+		Invoke ("wingReset", sleepTime + enemyScript.wakingUpTime - 1);
+		theAniamtionState = EnemyAnimation.idleAnimation;
 		
 	}
 	
@@ -98,8 +103,7 @@ public class EnemyAnimationScript : MonoBehaviour {
 		
 	}
 	void enemyAttackAnimation(){
-		
-		
+
 	}
 	
 	void enemyRepositionAnimation(){
@@ -116,7 +120,7 @@ public class EnemyAnimationScript : MonoBehaviour {
 		}
 		Debug.Log("destory Animation");
 
-		theAniamtionState = EnemyAnimation.idleAnimation;
+		theAniamtionState = EnemyAnimation.nullAnimation;
 	}
 
 
@@ -144,5 +148,15 @@ public class EnemyAnimationScript : MonoBehaviour {
 			
 		}
 		
+	}
+
+	void wingReset(){
+
+		for (int i = 0; i < EnemyWings.Length; i++) {
+			
+			WingScript[i].setStatus(6);
+			
+		}
+
 	}
 }

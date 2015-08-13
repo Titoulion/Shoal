@@ -180,8 +180,9 @@ public class EnemyScript : MonoBehaviour {
 
 			float sleepTime = Random.Range(sleepTimeRange.x, sleepTimeRange.y);
 			Invoke("WakeUp", sleepTime);
+			Debug.Log("enemy rebirth");
 			enemyAnimation.setSleepTime (sleepTime);
-			enemyAnimation.setEnemyAnimation (EnemyAnimationScript.EnemyAnimation.wakeAnimation);
+			enemyAnimation.setEnemyAnimation (EnemyAnimationScript.EnemyAnimation.resetAnimation);
 		}
 	}
 

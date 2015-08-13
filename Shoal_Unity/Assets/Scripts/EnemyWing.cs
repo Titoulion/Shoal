@@ -11,7 +11,7 @@ public class EnemyWing : MonoBehaviour {
 	public 	Color testColor;
 	
 	
-	public int bodyNumber = 8;
+	public int bodyNumber;
 	
 	private int wingID;
 	private int statusID;
@@ -38,7 +38,7 @@ public class EnemyWing : MonoBehaviour {
 	}
 	
 	void Start () {
-		
+		bodyNumber = 8;
 		_currentPointer = 0;
 		enemyHalfSize = 2.0f;
 		
@@ -128,6 +128,16 @@ public class EnemyWing : MonoBehaviour {
 		setStatus (1);
 		
 	}
+
+	void rebirthAnimation(){
+
+
+		bodyNumber = 8;
+		_currentPointer = 0;
+		generateBody();
+
+		
+	}
 	
 	void destoryTheLast(){
 		
@@ -159,6 +169,9 @@ public class EnemyWing : MonoBehaviour {
 			destoryAnimation();
 			break;
 		case 5:
+			break;
+		case 6:
+			rebirthAnimation();
 			break;
 			
 		}

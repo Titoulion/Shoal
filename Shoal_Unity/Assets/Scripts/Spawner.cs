@@ -47,10 +47,15 @@ public class Spawner : MonoBehaviourBase
 	
 	GameObject SpawnStuff(Transform prefab,Vector2 posOnScreen, float zPos)
 	{
+		return(InstantiatePrefab(prefab, GetPosition(posOnScreen, zPos), Quaternion.identity).gameObject);
+	}
+
+    public Vector3 GetPosition(Vector2 posOnScreen, float zPos)
+    {
 		Vector3 spawnPos = Camera.main.ScreenToWorldPoint(posOnScreen)*2.5f;
 		spawnPos.z = zPos;
-		return(InstantiatePrefab(prefab, spawnPos, Quaternion.identity).gameObject);
-	}
+        return spawnPos;
+    }
 
 	public void ActivateFoodArea(bool activated, int indexFoodArea)
 	{
@@ -103,7 +108,7 @@ public class Spawner : MonoBehaviourBase
             var boulder = boulders[i];
             if (i < positions.Count)
             {
-                boulder.position = positions[i];
+                boulder.position = GetPosition(positions[i], 0f);
                 boulder.gameObject.SetActive(true);
             }
             else

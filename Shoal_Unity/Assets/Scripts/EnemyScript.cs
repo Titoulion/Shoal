@@ -196,7 +196,7 @@ public class EnemyScript : MonoBehaviour {
 		* collection of fishes is implimeneted
 		*/
 		//FishScript[] fishes = FindObjectsOfType(typeof(FishScript)) as FishScript[];
-		enemyAnimation.setEnemyAnimation(EnemyAnimationScript.EnemyAnimation.huntAnimation);
+		//enemyAnimation.setEnemyAnimation(EnemyAnimationScript.EnemyAnimation.huntAnimation);
 
 		
 		Entity[] fishes = Pond.Instance.GetEntitiesOfType(EntityType.Fish).ToArray();
@@ -271,6 +271,8 @@ public class EnemyScript : MonoBehaviour {
 	}
 	
 	void WakingUpUpdate() {
+		enemyAnimation.setEnemyAnimation(EnemyAnimationScript.EnemyAnimation.huntAnimation);
+
 		lerpTimer += Time.deltaTime;
 		float time = lerpTimer/lerpDuration;
 		SmoothMove(sleepingRadius, huntingRadius, startAngle, targetAngle, time);

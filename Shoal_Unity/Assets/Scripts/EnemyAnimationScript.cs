@@ -82,15 +82,20 @@ public class EnemyAnimationScript : MonoBehaviour {
 
 	
 	void enemyWakeAnimation(){
+		//for tranparent
+		//Invoke ("wingGeneration", sleepTime + enemyScript.wakingUpTime - 2.0f);
 
-		Invoke ("wingGeneration", sleepTime + enemyScript.wakingUpTime - 1);
+		Invoke ("wingGeneration", sleepTime );
+
 		theAniamtionState = EnemyAnimation.idleAnimation;
 		
 	}
 
 	void enemyResetAnimation(){
+		//for tranparent
+		//Invoke ("wingReset", sleepTime + enemyScript.wakingUpTime - 2.0f);
+		Invoke ("wingReset", sleepTime);
 
-		Invoke ("wingReset", sleepTime + enemyScript.wakingUpTime - 1);
 		theAniamtionState = EnemyAnimation.idleAnimation;
 		
 	}

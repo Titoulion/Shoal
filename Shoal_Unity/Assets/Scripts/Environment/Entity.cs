@@ -17,10 +17,14 @@ public abstract class Entity : MonoBehaviourBase
     protected virtual void Awake()
     {
         pond = Pond.Instance;
+    }
+
+    protected virtual void OnEnable()
+    {
         pond.RegisterEntity(this);
     }
 
-    protected virtual void OnDestroy()
+    protected virtual void OnDisable()
     {
         pond.RemoveEntity(this);
     }

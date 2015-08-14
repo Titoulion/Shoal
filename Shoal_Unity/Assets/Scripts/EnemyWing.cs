@@ -89,7 +89,7 @@ public class EnemyWing : MonoBehaviour {
 			gameObject.transform.rotation = Quaternion.AngleAxis((currentAngel - Time.time * 20.0f), Vector3.forward);
 		}
 		if (wingID  == 2){
-			//gameObject.transform.localScale = new Vector3(-1.0f,1.0f,1.0f);
+			gameObject.transform.localScale = new Vector3(-1.0f,-1.0f,1.0f);
 			gameObject.transform.rotation = Quaternion.AngleAxis((currentAngel + Time.time * 20.0f), Vector3.forward);
 		}
 		//gameObject.transform.localPosition = new Vector3(0.0f,0.0f, 0.0f);
@@ -130,6 +130,8 @@ public class EnemyWing : MonoBehaviour {
 			//gameObject.transform.localPosition = new Vector3(distance,-distance, 0.0f);
 
 		}
+		setStatus (2);
+
 				
 	}
 	

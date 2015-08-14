@@ -107,7 +107,7 @@ public class EnemyAnimationScript : MonoBehaviour {
 	void enemyAttackAnimation(){
 
 
-		Debug.Log ("attack");
+		//Debug.Log ("attack");
 		for (int i = 0; i < EnemyWings.Length; i++) {
 			
 			WingScript[i].setStatus(3);
@@ -121,7 +121,7 @@ public class EnemyAnimationScript : MonoBehaviour {
 
 		float angle = Mathf.LerpAngle (currentAngle, targetAngle, Time.time);
 		gameObject.transform.eulerAngles = new Vector3(0.0f,0.0f, angle);
-		Debug.Log ("reposition");
+		//Debug.Log ("reposition");
 		
 	}
 	
@@ -132,7 +132,7 @@ public class EnemyAnimationScript : MonoBehaviour {
 			WingScript[i].setStatus(4);
 
 		}
-		Debug.Log("destory Animation");
+		//Debug.Log("destory Animation");
 
 		theAniamtionState = EnemyAnimation.nullAnimation;
 	}

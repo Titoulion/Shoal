@@ -150,7 +150,8 @@ public class EnemyScript : MonoBehaviour {
 		SmoothMove(startRadius, targetRadius, startAngle, targetAngle, time);
 
 		if (time >= 1f) {
-			Destroy(prey.gameObject);
+			//Destroy(prey.gameObject);
+			prey.gameObject.GetComponentInChildren<Tail>().GoDieWithNewDuration(0.2f);
 			prey = null;
 
 			Reset();
@@ -224,7 +225,7 @@ public class EnemyScript : MonoBehaviour {
 											fishPos.x * sin + fishPos.y * cos
 											);
 
-				if (watchingRect.Contains(adjFish)) {
+				if (watchingRect.Contains(adjFish) && fishes[i].gameObject.GetComponent<Fish>().Health>0f) {
 					Attack(fishes[i]);
 					break;
 				}

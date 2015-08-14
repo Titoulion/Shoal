@@ -48,6 +48,7 @@ public class Tail : MonoBehaviour {
 	private Gradient gradient1;
 	private Gradient gradient2;
 	private NewGradient myGradientsStuff;
+	private float durationDeath = 1f;
 		
 	void Start () 
 	{
@@ -180,7 +181,7 @@ public class Tail : MonoBehaviour {
 		}
 	
 		if(dying)
-			finalLife=Mathf.Clamp01(finalLife-Time.deltaTime);
+			finalLife=Mathf.Clamp01(finalLife-Time.deltaTime/durationDeath);
 
 		headSize+=(nextHeadSize-headSize)*MyHelper.Map (Mathf.Clamp01(timeLife),0f,1f,0.1f,1f);
 		headSize *= finalLife;
@@ -231,6 +232,12 @@ public class Tail : MonoBehaviour {
 
 	public void GoDie()
 	{
+		dying = true;
+	}
+
+	public void GoDieWithNewDuration(float duration)
+	{
+		durationDeath = duration;
 		dying = true;
 	}
 

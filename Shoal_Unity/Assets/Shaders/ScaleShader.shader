@@ -72,10 +72,7 @@ Shader "Shader Forge/ScaleShader" {
                 float node_9324 = 1.0;
                 float node_2423 = 0.0;
                 float node_9833 = lerp((node_9833_if_leA*(node_9324 + ( (node_5031 - node_9438) * (node_9438 - node_9324) ) / (node_5483 - node_9438)))+(node_9833_if_leB*node_2423),node_2423,node_9833_if_leA*node_9833_if_leB);
-                float node_3346 = (0.5*node_9833);
-                float node_8888 = (-1.0);
-                float node_9047 = (_Size+node_3346+node_8888);
-                v.vertex.xyz += (((mul( _World2Object, float4(mul(_Object2World, v.vertex).rgb,0) ).xyz.rgb-objPos.rgb)*node_9047)+float3(0,0,-0.1));
+                v.vertex.xyz += (((mul( _World2Object, float4(mul(_Object2World, v.vertex).rgb,0) ).xyz.rgb-objPos.rgb)*(_Size+(0.5*node_9833)+(-1.0)))+float3(0,0,-0.1));
                 o.posWorld = mul(_Object2World, v.vertex);
                 o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
                 return o;
@@ -160,10 +157,7 @@ Shader "Shader Forge/ScaleShader" {
                 float node_9324 = 1.0;
                 float node_2423 = 0.0;
                 float node_9833 = lerp((node_9833_if_leA*(node_9324 + ( (node_5031 - node_9438) * (node_9438 - node_9324) ) / (node_5483 - node_9438)))+(node_9833_if_leB*node_2423),node_2423,node_9833_if_leA*node_9833_if_leB);
-                float node_3346 = (0.5*node_9833);
-                float node_8888 = (-1.0);
-                float node_9047 = (_Size+node_3346+node_8888);
-                v.vertex.xyz += (((mul( _World2Object, float4(mul(_Object2World, v.vertex).rgb,0) ).xyz.rgb-objPos.rgb)*node_9047)+float3(0,0,-0.1));
+                v.vertex.xyz += (((mul( _World2Object, float4(mul(_Object2World, v.vertex).rgb,0) ).xyz.rgb-objPos.rgb)*(_Size+(0.5*node_9833)+(-1.0)))+float3(0,0,-0.1));
                 o.posWorld = mul(_Object2World, v.vertex);
                 o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
                 TRANSFER_SHADOW_CASTER(o)

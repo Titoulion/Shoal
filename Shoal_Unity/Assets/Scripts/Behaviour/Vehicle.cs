@@ -9,7 +9,13 @@ public class Vehicle : MonoBehaviourBase
     private Vector2 velocity;
 
     public Vector2 Position { get { return transform.position; } }
-    public Vector2 Velocity { get { return velocity; } }
+
+    public Vector2 Velocity
+    {
+        get { return velocity; }
+        set { velocity = value; }
+    }
+
     public float Speed { get { return velocity.magnitude; } }
     public Vector2 HeadingDirection { get { return velocity.normalized; } }
     public float HeadingAngleDeg { get { return velocity.GetAngleDeg(); } }

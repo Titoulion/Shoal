@@ -20,6 +20,16 @@ public class Fish : Entity
         health = 1;
     }
 
+    public void PutInSpawningMode()
+    {
+        GetComponent<SpawningFishBehaviour>().enabled = true;
+    }
+
+    public void ExitSpawningMode()
+    {
+        GetComponent<SpawningFishBehaviour>().enabled = false;
+    }
+
     private void Update()
     {
        if(Health==0)

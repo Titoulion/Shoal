@@ -13,6 +13,8 @@ public class Spawner : MonoBehaviourBase
 	[SerializeField] private Transform prefabFood;
 	[SerializeField] private FoodArea[] foodAreas;
 
+    private List<Transform> boulders = new List<Transform>();
+
 	void Awake()
 	{
 		Instance = this;
@@ -88,4 +90,26 @@ public class Spawner : MonoBehaviourBase
 	{
 		return(new Vector2(Input.mousePosition.x,Input.mousePosition.y));
 	}
+
+    public void SetBoulderPositions(List<Vector2> positions)
+    {
+        while (boulders.Count < positions.Count)
+        {
+            boulders.Add(SpawnBoulder(Vector2.zero).transform);
+        }
+
+        for (var i = 0; i < boulders.Count; i++)
+        {
+            var boulder = boulders[i];
+            if (i < positions.Count)
+            {
+                boulder.position = positions[i];
+                boulder.gameObject.SetActive(true);
+            }
+            else
+            {
+                boulder.gameObject.SetActive(false);
+            }
+        }
+    }
 }

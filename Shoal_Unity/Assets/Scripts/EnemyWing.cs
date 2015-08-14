@@ -108,7 +108,7 @@ public class EnemyWing : MonoBehaviour {
 		
 		float scale = 1.2f;
 		if(wingID == 1){
-			float angle = Mathf.LerpAngle (currentAngel, currentAngel + 15, Time.time);
+			float angle = Mathf.LerpAngle (currentAngel, currentAngel + 10, Time.time);
 			float size = Mathf.Lerp (1.0f, scale, Time.time);
 			float distance = Mathf.Lerp (0.0f,-0.5f, Time.time);
 			gameObject.transform.eulerAngles = new Vector3(0.0f,0.0f, angle);
@@ -120,7 +120,7 @@ public class EnemyWing : MonoBehaviour {
 			
 		}
 		if (wingID == 2) {
-			float angle = Mathf.LerpAngle (currentAngel, currentAngel + 15, Time.time);
+			float angle = Mathf.LerpAngle (currentAngel, currentAngel + 10, Time.time);
 			float distance = Mathf.Lerp (0.0f,0.5f, Time.time);
 			float size = Mathf.Lerp (1.0f, scale, Time.time);
 			gameObject.transform.eulerAngles = new Vector3(0.0f,0.0f, angle);

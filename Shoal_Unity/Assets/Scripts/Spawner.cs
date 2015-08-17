@@ -14,6 +14,10 @@ public class Spawner : MonoBehaviourBase
 	[SerializeField] private FoodArea[] foodAreas;
 
     private List<Transform> boulders = new List<Transform>();
+	[SerializeField] private float timeBetweenRipples = 0.3f;
+	[SerializeField] private float timeBetweenFood = 0.3f;
+	private float timerFood;
+	private float timerRipple;
 
 	void Awake()
 	{
@@ -37,12 +41,24 @@ public class Spawner : MonoBehaviourBase
 
 	public GameObject SpawnRipple(Vector2 posOnScreen)
 	{
-		return(SpawnStuff(prefabRipple, posOnScreen, 0f));
+		GameObject returnObject = null;
+		if(timerRipple<=0f)
+		{
+			returnObject = SpawnStuff(prefabRipple, posOnScreen, 0f);
+			timerRipple = timeBetweenRipples;
+		}
+		return(returnObject);
 	}
 
 	public GameObject SpawnFood(Vector2 posOnScreen)
 	{
-		return(SpawnStuff(prefabFood, posOnScreen, 0f));
+		GameObject returnObject = null;
+		if(timerFood<=0f)
+		{
+			returnObject = SpawnStuff(prefabFood, posOnScreen, 0f);
+			timerFood = timeBetweenFood;
+		}
+		return(returnObject);
 	}
 	
 	GameObject SpawnStuff(Transform prefab,Vector2 posOnScreen, float zPos)
@@ -69,6 +85,9 @@ public class Spawner : MonoBehaviourBase
 
 	void Update()
 	{
+		timerFood-=Time.deltaTime;
+		timerRipple-=Time.deltaTime;
+
 		if (Input.GetMouseButtonDown(0))
 			SpawnFish (Vec2MousePos());
 

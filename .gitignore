@@ -24,3 +24,5 @@ Shoal_Unity/Shoal_Unity.userprefs
 /Shoal_Unity/Assets/UnityVS.meta
 
 *.sublime*
+Shoal_Unity/Assets/Plugins.meta
+Shoal_Unity/Assets/opencvkinect.meta

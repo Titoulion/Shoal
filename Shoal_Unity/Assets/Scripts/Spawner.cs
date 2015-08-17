@@ -11,7 +11,7 @@ public class Spawner : MonoBehaviourBase
 	[SerializeField] private Transform prefabWhirlPool;
 	[SerializeField] private Transform prefabRipple;
 	[SerializeField] private Transform prefabFood;
-	[SerializeField] private FoodArea[] foodAreas;
+	[SerializeField] public FoodArea[] foodAreas;
 
     private List<Transform> boulders = new List<Transform>();
 	[SerializeField] private float timeBetweenRipples = 0.3f;

@@ -22,6 +22,7 @@ public class Whirlpool : Entity {
 
 	float progressRotation = 0f;
 	public float speedRotation = 1f;
+	public float valueOpen = 0f;
 
 	// Use this for initialization
 	void Start () {
@@ -33,7 +34,7 @@ public class Whirlpool : Entity {
 	// Update is called once per frame
 	void Update () {
 
-		float valueOpen = 1f;
+		valueOpen = 1f;
 
 		if(currentState==1f)
 		{

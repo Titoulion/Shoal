@@ -10,7 +10,7 @@ public class FoodArea : MonoBehaviour
 	private int counter = 0;
 	private float timerReduceCompter = 1f;
 	private float timeFood;
-	private bool isActivated = false;
+	public bool isActivated = false;
 	private Material myMat;
 
 	void Start () 

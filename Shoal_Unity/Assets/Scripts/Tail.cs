@@ -16,6 +16,7 @@ public class Tail : MonoBehaviour {
 	[SerializeField] private AnimationCurve curveSizeB;
 	[SerializeField] private AnimationCurve curveGradient;
 	[SerializeField] private AnimationCurve curveBlinkHunger;
+	[SerializeField] private AnimationCurve curveSizeApparition;
 
 	private GameObject[] bodyParts = new GameObject[0];
 	private BodyPartScript[] bodyPartsScripts = new BodyPartScript[0];
@@ -49,6 +50,7 @@ public class Tail : MonoBehaviour {
 	private Gradient gradient2;
 	private NewGradient myGradientsStuff;
 	private float durationDeath = 1f;
+	private float previousProgressIntro = 0f;
 		
 	void Start () 
 	{
@@ -56,6 +58,7 @@ public class Tail : MonoBehaviour {
 		myGradientsStuff = GetComponent<NewGradient>();
 		InitValues();
 		GenerateBody();
+		GetComponentInParent<Fish>().PutInSpawningMode();
 	}
 		
 	private void InitValues()
@@ -183,9 +186,9 @@ public class Tail : MonoBehaviour {
 		if(dying)
 			finalLife=Mathf.Clamp01(finalLife-Time.deltaTime/durationDeath);
 
-		headSize+=(nextHeadSize-headSize)*MyHelper.Map (Mathf.Clamp01(timeLife),0f,1f,0.1f,1f);
+		float progressIntro = Mathf.Clamp01(timeLife/3f);
+		headSize=Mathf.Lerp (0f,nextHeadSize,curveSizeApparition.Evaluate(progressIntro));
 		headSize *= finalLife;
-		
 
 		hunger = 1f-GetComponentInParent<Fish>().Health;
 		float progressValueHunger = Mathf.Lerp (hunger,0f,(1f-hunger+0.5f)*curveBlinkHunger.Evaluate(MyHelper.Modulo(Time.realtimeSinceStartup*speedBlink+myFishRandom,1f)));
@@ -194,7 +197,7 @@ public class Tail : MonoBehaviour {
 		{
 			float progress = MyHelper.Map ((float)i,0f,(float)(bodyParts.Length-1),0f,1f);
 			
-			if(Mathf.Abs(headSize-nextHeadSize)>0.01f)
+			if(progressIntro!=1f)
 			{
 				float valueSizeA = curveSizeA.Evaluate((1f-Mathf.Clamp01(progress)));
 				float valueSizeB = curveSizeB.Evaluate((1f-Mathf.Clamp01(progress)));
@@ -212,6 +215,13 @@ public class Tail : MonoBehaviour {
 			bodyPartsScripts[i].SetHunger(progressValueHunger);
 			bodyPartsScripts[i].SetProgressDigestion(progressDigestion);
 		}
+
+		if(previousProgressIntro!=1f && progressIntro==1f && dying == false)
+		{
+			GetComponentInParent<Fish>().ExitSpawningMode();
+		}
+
+		previousProgressIntro = progressIntro;
 
 		if(finalLife==0f)
 			Destroy(transform.parent.gameObject);

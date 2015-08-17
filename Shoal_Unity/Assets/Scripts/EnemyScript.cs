@@ -50,12 +50,13 @@ public class EnemyScript : MonoBehaviour {
 	private Entity prey;
 
 	private Rect watchingRect;
+	static public EnemyScript Me;
 
 	//Animation Script
 	EnemyAnimationScript enemyAnimation;
 
 	void Awake(){
-	
+		Me = this;
 
 	}
 
@@ -120,6 +121,11 @@ public class EnemyScript : MonoBehaviour {
 			nextState = EnemyState.Blank;
 		}
 
+		if (Input.GetKeyDown(KeyCode.B)) 
+		{
+			CheckForDamage();
+		}
+
 
 	}
 
@@ -175,7 +181,6 @@ public class EnemyScript : MonoBehaviour {
 		SmoothMove(startRadius, targetRadius, startAngle, targetAngle, time);
 		if (time >= 1f) {
 			nextState = EnemyState.Sleeping;
-
 			startRadius = sleepingRadius;
 			startAngle = Random.Range(0f, 360f);
 			Quaternion degrees = Quaternion.Euler(0, 0, startAngle);
@@ -183,10 +188,11 @@ public class EnemyScript : MonoBehaviour {
 			transform.position = degrees * unrotatedStart;
 
 			float sleepTime = Random.Range(sleepTimeRange.x, sleepTimeRange.y);
-			Invoke("WakeUp", sleepTime);
-			Debug.Log("enemy rebirth");
 			enemyAnimation.setSleepTime (sleepTime);
 			enemyAnimation.setEnemyAnimation (EnemyAnimationScript.EnemyAnimation.resetAnimation);
+			Invoke("WakeUp", sleepTime);
+			Debug.Log("enemy rebirth");
+
 		}
 	}
 
@@ -196,7 +202,7 @@ public class EnemyScript : MonoBehaviour {
 		* collection of fishes is implimeneted
 		*/
 		//FishScript[] fishes = FindObjectsOfType(typeof(FishScript)) as FishScript[];
-		enemyAnimation.setEnemyAnimation(EnemyAnimationScript.EnemyAnimation.huntAnimation);
+		//enemyAnimation.setEnemyAnimation(EnemyAnimationScript.EnemyAnimation.huntAnimation);
 
 		
 		Entity[] fishes = Pond.Instance.GetEntitiesOfType(EntityType.Fish).ToArray();
@@ -231,7 +237,7 @@ public class EnemyScript : MonoBehaviour {
 				}
 			}
 		}
-		CheckForDamage();
+		//CheckForDamage();
 
 
 	}
@@ -271,6 +277,8 @@ public class EnemyScript : MonoBehaviour {
 	}
 	
 	void WakingUpUpdate() {
+		enemyAnimation.setEnemyAnimation(EnemyAnimationScript.EnemyAnimation.huntAnimation);
+
 		lerpTimer += Time.deltaTime;
 		float time = lerpTimer/lerpDuration;
 		SmoothMove(sleepingRadius, huntingRadius, startAngle, targetAngle, time);
@@ -296,8 +304,8 @@ public class EnemyScript : MonoBehaviour {
 		return false;
 	}	
 
-	void CheckForDamage() {
-		if (Input.GetKeyDown(KeyCode.B)) {
+	public void CheckForDamage() {
+
 			enemyAnimation.setEnemyAnimation(EnemyAnimationScript.EnemyAnimation.destroryAnimation);
 			currentHealth--;
 			Debug.Log("DYING");
@@ -327,8 +335,10 @@ public class EnemyScript : MonoBehaviour {
 				lerpDuration = 1f;
 				lerpTimer = 0f;
 			}
-		}
+
 	}
+
+
 
 	public void Reset() {
 		nextState = EnemyState.Resetting;

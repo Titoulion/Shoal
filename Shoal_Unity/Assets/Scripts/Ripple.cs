@@ -13,13 +13,23 @@ public class Ripple : Entity
     private bool afterRipple;
 
     private Vehicle[] fishVehicles;
+	private EnemyScript theEnemy;
 
     private void Start()
     {
         myMat = GetComponent<Renderer>().material;
-
         fishVehicles = Pond.Instance.GetEntitiesOfType(EntityType.Fish).Select(entity => entity.GetComponent<Vehicle>()).ToArray();
+		theEnemy = EnemyScript.Me;
+		DetectDamageEnemy();
     }
+
+	private void DetectDamageEnemy()
+	{
+		if(Vector3.Distance(transform.position,theEnemy.gameObject.transform.position)<4f)
+		{
+			theEnemy.CheckForDamage();
+		}
+	}
 
     private void Update()
     {

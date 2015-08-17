@@ -44,6 +44,7 @@ public class FoodArea : MonoBehaviour
 		valDistortFood+=MyHelper.Map (openFoodArea,0f,1f,5f,25f)*0.001f;
 		myMat.SetFloat("_valueDistort",valDistortFood);
 		myMat.SetFloat("_ProgressTouch",openFoodArea);
+		Debug.Log (GetPositionOnScreen());
 	}
 
 	public void GoActivate(bool goActivate)
@@ -54,5 +55,10 @@ public class FoodArea : MonoBehaviour
 	public void RevertState()
 	{  
 		isActivated = !isActivated;	
+	}
+
+	public Vector2 GetPositionOnScreen()
+	{
+		return(Camera.main.WorldToScreenPoint(transform.position/2.5f));
 	}
 }

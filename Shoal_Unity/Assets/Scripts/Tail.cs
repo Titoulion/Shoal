@@ -216,7 +216,7 @@ public class Tail : MonoBehaviour {
 			bodyPartsScripts[i].SetProgressDigestion(progressDigestion);
 		}
 
-		if(previousProgressIntro!=1f && progressIntro==1f)
+		if(previousProgressIntro!=1f && progressIntro==1f && dying == false)
 		{
 			GetComponentInParent<Fish>().ExitSpawningMode();
 		}

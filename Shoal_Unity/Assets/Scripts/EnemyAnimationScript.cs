@@ -95,9 +95,8 @@ public class EnemyAnimationScript : MonoBehaviour {
 		//for tranparent
 		//Invoke ("wingReset", sleepTime + enemyScript.wakingUpTime - 2.0f);
 		Invoke ("wingReset", sleepTime);
-
-		theAniamtionState = EnemyAnimation.idleAnimation;
-		
+		Debug.Log ("RESET ANIAMATION");
+		//theAniamtionState = EnemyAnimation.idleAnimation;
 	}
 
 	void enemyHuntAnimation(){

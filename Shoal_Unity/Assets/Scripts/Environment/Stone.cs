@@ -4,8 +4,9 @@ using System.Collections;
 
 public class Stone : Entity
 {
-    void Awake()
+	protected override void Awake()
 	{
+		base.Awake();
 		GetComponent<Renderer>().material.SetFloat ("_rand",Random.value);
 	}
 

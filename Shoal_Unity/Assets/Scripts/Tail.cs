@@ -35,7 +35,7 @@ public class Tail : MonoBehaviour {
 	private float[] randomValues2 = new float[0];
 	private int[] randomSens = new int[0];
 	private float timeLife = 0f;
-	private bool dying = false;
+	public bool dying = false;
 	private bool dead = false;
 	private float finalLife = 1f;
 	private Vector2 minMaxTrailTime;
@@ -50,7 +50,7 @@ public class Tail : MonoBehaviour {
 	private Gradient gradient2;
 	private NewGradient myGradientsStuff;
 	private float durationDeath = 1f;
-	private float previousProgressIntro = 0f;
+	public float previousProgressIntro = 0f;
 		
 	void Start () 
 	{
@@ -197,13 +197,12 @@ public class Tail : MonoBehaviour {
 		{
 			float progress = MyHelper.Map ((float)i,0f,(float)(bodyParts.Length-1),0f,1f);
 			
-			if(progressIntro!=1f)
-			{
-				float valueSizeA = curveSizeA.Evaluate((1f-Mathf.Clamp01(progress)));
-				float valueSizeB = curveSizeB.Evaluate((1f-Mathf.Clamp01(progress)));
-				bodyPartsTrails[i].startWidth =headSize* Mathf.Lerp(valueSizeA,valueSizeB,lerpValueSize);
-				bodyPartsScripts[i].SetSize(headSize* Mathf.Lerp(valueSizeA,valueSizeB,lerpValueSize));
-			}
+
+			float valueSizeA = curveSizeA.Evaluate((1f-Mathf.Clamp01(progress)));
+			float valueSizeB = curveSizeB.Evaluate((1f-Mathf.Clamp01(progress)));
+			bodyPartsTrails[i].startWidth =headSize* Mathf.Lerp(valueSizeA,valueSizeB,lerpValueSize);
+			bodyPartsScripts[i].SetSize(headSize* Mathf.Lerp(valueSizeA,valueSizeB,lerpValueSize));
+
 			
 			if(realTimeUpdateAspect)
 			{

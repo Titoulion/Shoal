@@ -17,8 +17,9 @@ public class Food : Entity
 
     public float HealthPlus { get { return healthPlus; } }
 
-	void Awake()
+    protected override void Awake()
 	{
+        base.Awake();
 		lifeTime = maxLifeTime;
 	}
 

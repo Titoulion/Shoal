@@ -34,4 +34,5 @@ public class Food : Entity
 		if(lifeTime<=0f)
 			Destroy(this.gameObject);
 	}
+
 }

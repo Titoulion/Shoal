@@ -9,6 +9,7 @@ public abstract class Entity : MonoBehaviourBase
     public float Radius { get { return radius; } }
 
     protected Pond pond;
+	bool goDestroy = false;
 
     protected virtual void Awake()
     {
@@ -27,6 +28,12 @@ public abstract class Entity : MonoBehaviourBase
 
     public void Eaten()
     {
-        Destroy(gameObject);
+		goDestroy = true;
     }
+
+	void LateUpdate()
+	{
+		if(goDestroy)
+			Destroy (this.gameObject);
+	}
 }

@@ -85,6 +85,11 @@ public class Spawner : MonoBehaviourBase
 		foodAreas[indexFoodArea].RevertState();
 	}
 
+	public Vector2 GetFoodAreaCoordinate(int index)
+	{
+		return(foodAreas[index].GetPositionOnScreen());
+	}
+
 	void Update()
 	{
 		timerFood-=Time.deltaTime;

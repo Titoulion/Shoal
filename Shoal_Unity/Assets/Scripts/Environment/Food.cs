@@ -21,6 +21,7 @@ public class Food : Entity
 	{
         base.Awake();
 		lifeTime = maxLifeTime;
+		transform.localScale = Vector3.zero;
 	}
 
 	void Update()
@@ -31,6 +32,6 @@ public class Food : Entity
 
 		lifeTime-=Time.deltaTime;
 		if(lifeTime<=0f)
-			Eaten();
+			Destroy(this.gameObject);
 	}
 }

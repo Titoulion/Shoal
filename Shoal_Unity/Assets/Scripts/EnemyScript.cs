@@ -234,7 +234,10 @@ public class EnemyScript : MonoBehaviour {
 											fishPos.x * sin + fishPos.y * cos
 											);
 
-				if (watchingRect.Contains(adjFish) && fishes[i].gameObject.GetComponent<Fish>().Health>0f) {
+				if (watchingRect.Contains(adjFish) 
+				    && fishes[i].gameObject.GetComponent<Fish>().Health>0f 
+				    && fishes[i].gameObject.GetComponentInChildren<Tail>().previousProgressIntro==1f
+				    && fishes[i].gameObject.GetComponentInChildren<Tail>().dying == false) {
 					Attack(fishes[i]);
 					break;
 				}

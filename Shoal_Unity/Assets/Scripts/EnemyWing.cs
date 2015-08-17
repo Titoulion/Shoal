@@ -8,9 +8,7 @@ public class EnemyWing : MonoBehaviour {
 
 
 	public GameObject prefabEnemyBodyPart;
-	public 	Color testColor;
-	
-	
+
 	public int bodyNumber;
 	
 	private int wingID;
@@ -20,6 +18,8 @@ public class EnemyWing : MonoBehaviour {
 	
 	private int attackDistance;
 	public float currentAngel;
+	public AnimationCurve lerpAngel;
+
 	
 	public void setWingID(int id){
 		
@@ -84,16 +84,17 @@ public class EnemyWing : MonoBehaviour {
 	}
 	
 	void wingRotation(){
-		
+
+
 		if (wingID  == 1){
-			gameObject.transform.rotation = Quaternion.AngleAxis((currentAngel - Time.time * 20.0f), Vector3.forward);
+			gameObject.transform.localScale = new Vector3 (1.0f,1.0f,0.0f);
+			gameObject.transform.rotation = Quaternion.AngleAxis((currentAngel - lerpAngel.Evaluate(Time.time/2) * 30.0f), Vector3.forward);
 		}
 		if (wingID  == 2){
 			gameObject.transform.localScale = new Vector3(-1.0f,-1.0f,1.0f);
-			gameObject.transform.rotation = Quaternion.AngleAxis((currentAngel + Time.time * 20.0f), Vector3.forward);
+			gameObject.transform.rotation = Quaternion.AngleAxis((currentAngel + lerpAngel.Evaluate(Time.time/2) * 30.0f), Vector3.forward);
 		}
 		//gameObject.transform.localPosition = new Vector3(0.0f,0.0f, 0.0f);
-		gameObject.transform.localScale = new Vector3 (1.0f,1.0f,0.0f);
 
 		
 	}
@@ -108,7 +109,7 @@ public class EnemyWing : MonoBehaviour {
 		
 		float scale = 1.2f;
 		if(wingID == 1){
-			float angle = Mathf.LerpAngle (currentAngel, currentAngel + 10, Time.time);
+			float angle = Mathf.LerpAngle (currentAngel, currentAngel + 5, Time.time);
 			float size = Mathf.Lerp (1.0f, scale, Time.time);
 			float distance = Mathf.Lerp (0.0f,-0.5f, Time.time);
 			gameObject.transform.eulerAngles = new Vector3(0.0f,0.0f, angle);
@@ -120,9 +121,9 @@ public class EnemyWing : MonoBehaviour {
 			
 		}
 		if (wingID == 2) {
-			float angle = Mathf.LerpAngle (currentAngel, currentAngel + 10, Time.time);
+			float angle = Mathf.LerpAngle (currentAngel, currentAngel + 5, Time.time);
 			float distance = Mathf.Lerp (0.0f,0.5f, Time.time);
-			float size = Mathf.Lerp (1.0f, scale, Time.time);
+			float size = Mathf.Lerp (-1.0f, -scale, Time.time);
 			gameObject.transform.eulerAngles = new Vector3(0.0f,0.0f, angle);
 			currentAngel = angle;
 			gameObject.transform.localScale = new Vector3 (size,size,0.0f);

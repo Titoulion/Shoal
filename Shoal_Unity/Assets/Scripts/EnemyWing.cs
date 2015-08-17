@@ -58,7 +58,7 @@ public class EnemyWing : MonoBehaviour {
 		} 
 	}
 	
-	void generateBody(){
+	public void generateBody(){
 		
 		EnemyBody = new GameObject[bodyNumber];
 		EnemyPartsScripts = new EnemyBodyUnit[bodyNumber];	

@@ -18,7 +18,7 @@ public class EnemyAnimationScript : MonoBehaviour {
 	public GameObject prefabWing;
 
 	
-	private GameObject[] EnemyWings = new GameObject[0];
+	public GameObject[] EnemyWings = new GameObject[0];
 	private EnemyWing[] WingScript = new EnemyWing[0];
 	private EnemyScript enemyScript;
 
@@ -176,6 +176,17 @@ public class EnemyAnimationScript : MonoBehaviour {
 			Debug.Log ("RESET ANIAMATION"+EnemyWings.Length);
 
 		}
+
+	}
+
+	public void RegenerateFullBody()
+	{
+		for(int i = 0;i<2;i++)
+		{
+			Destroy(EnemyWings[i]);
+			WingScript[i] = null;
+		}
+		wingGeneration();
 
 	}
 }

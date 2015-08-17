@@ -192,6 +192,7 @@ public class EnemyScript : MonoBehaviour {
 			
 			Invoke("WakeUp", sleepTime);
 			Debug.Log("enemy rebirth");
+			GetComponent<EnemyAnimationScript>().RegenerateFullBody();
 
 			//enemyAnimation.setSleepTime (sleepTime);
 			//enemyAnimation.setEnemyAnimation (EnemyAnimationScript.EnemyAnimation.resetAnimation);

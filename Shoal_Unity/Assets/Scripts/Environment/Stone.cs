@@ -4,7 +4,12 @@ using System.Collections;
 
 public class Stone : Entity
 {
-    public override EntityType Type
+    void Awake()
+	{
+		GetComponent<Renderer>().material.SetFloat ("_rand",Random.value);
+	}
+
+	public override EntityType Type
     {
         get { return EntityType.Stone; }
     }

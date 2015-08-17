@@ -49,6 +49,7 @@ public class EnemyAnimationScript : MonoBehaviour {
 		enemyScript = GetComponent<EnemyScript>();
 		theAniamtionState = EnemyAnimation.nullAnimation;
 		currentAngle = gameObject.transform.eulerAngles.z;
+		wingGeneration();
 	}
 	
 	void Update () {
@@ -80,12 +81,14 @@ public class EnemyAnimationScript : MonoBehaviour {
 		}
 	}
 
+
+
 	
 	void enemyWakeAnimation(){
 		//for tranparent
 		//Invoke ("wingGeneration", sleepTime + enemyScript.wakingUpTime - 2.0f);
 
-		Invoke ("wingGeneration", sleepTime );
+		//Invoke ("wingGeneration", sleepTime );
 
 		theAniamtionState = EnemyAnimation.idleAnimation;
 		

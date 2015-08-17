@@ -268,7 +268,7 @@ public class EnemyScript : MonoBehaviour {
 		enemyAnimation.setTargetAngle (currentAngle);
 		enemyAnimation.setEnemyAnimation (EnemyAnimationScript.EnemyAnimation.repositionAnimation);
 		
-		CheckForDamage();
+		//CheckForDamage();
 
 	}
 

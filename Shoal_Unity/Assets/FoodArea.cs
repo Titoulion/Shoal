@@ -44,7 +44,7 @@ public class FoodArea : MonoBehaviour
 		valDistortFood+=MyHelper.Map (openFoodArea,0f,1f,5f,25f)*0.001f;
 		myMat.SetFloat("_valueDistort",valDistortFood);
 		myMat.SetFloat("_ProgressTouch",openFoodArea);
-		Debug.Log (GetPositionOnScreen());
+		//Debug.Log (GetPositionOnScreen());
 	}
 
 	public void GoActivate(bool goActivate)

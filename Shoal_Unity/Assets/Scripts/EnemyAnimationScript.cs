@@ -18,7 +18,7 @@ public class EnemyAnimationScript : MonoBehaviour {
 	public GameObject prefabWing;
 
 	
-	private GameObject[] EnemyWings = new GameObject[0];
+	public GameObject[] EnemyWings = new GameObject[0];
 	private EnemyWing[] WingScript = new EnemyWing[0];
 	private EnemyScript enemyScript;
 
@@ -49,6 +49,7 @@ public class EnemyAnimationScript : MonoBehaviour {
 		enemyScript = GetComponent<EnemyScript>();
 		theAniamtionState = EnemyAnimation.nullAnimation;
 		currentAngle = gameObject.transform.eulerAngles.z;
+		wingGeneration();
 	}
 	
 	void Update () {
@@ -80,12 +81,14 @@ public class EnemyAnimationScript : MonoBehaviour {
 		}
 	}
 
+
+
 	
 	void enemyWakeAnimation(){
 		//for tranparent
 		//Invoke ("wingGeneration", sleepTime + enemyScript.wakingUpTime - 2.0f);
 
-		Invoke ("wingGeneration", sleepTime );
+		//Invoke ("wingGeneration", sleepTime );
 
 		theAniamtionState = EnemyAnimation.idleAnimation;
 		
@@ -95,8 +98,7 @@ public class EnemyAnimationScript : MonoBehaviour {
 		//for tranparent
 		//Invoke ("wingReset", sleepTime + enemyScript.wakingUpTime - 2.0f);
 		Invoke ("wingReset", sleepTime);
-		Debug.Log ("RESET ANIAMATION");
-		//theAniamtionState = EnemyAnimation.idleAnimation;
+		theAniamtionState = EnemyAnimation.idleAnimation;
 	}
 
 	void enemyHuntAnimation(){
@@ -170,11 +172,24 @@ public class EnemyAnimationScript : MonoBehaviour {
 
 	void wingReset(){
 
+
 		for (int i = 0; i < EnemyWings.Length; i++) {
 			
 			WingScript[i].setStatus(6);
-			
+			Debug.Log ("RESET ANIAMATION"+EnemyWings.Length);
+
 		}
+
+	}
+
+	public void RegenerateFullBody()
+	{
+		for(int i = 0;i<2;i++)
+		{
+			Destroy(EnemyWings[i]);
+			WingScript[i] = null;
+		}
+		wingGeneration();
 
 	}
 }

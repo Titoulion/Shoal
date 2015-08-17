@@ -180,6 +180,7 @@ public class EnemyScript : MonoBehaviour {
 		float time = lerpTimer/lerpDuration;
 		SmoothMove(startRadius, targetRadius, startAngle, targetAngle, time);
 		if (time >= 1f) {
+
 			nextState = EnemyState.Sleeping;
 			startRadius = sleepingRadius;
 			startAngle = Random.Range(0f, 360f);
@@ -188,11 +189,14 @@ public class EnemyScript : MonoBehaviour {
 			transform.position = degrees * unrotatedStart;
 
 			float sleepTime = Random.Range(sleepTimeRange.x, sleepTimeRange.y);
-			enemyAnimation.setSleepTime (sleepTime);
-			enemyAnimation.setEnemyAnimation (EnemyAnimationScript.EnemyAnimation.resetAnimation);
+			
 			Invoke("WakeUp", sleepTime);
 			Debug.Log("enemy rebirth");
+			GetComponent<EnemyAnimationScript>().RegenerateFullBody();
 
+			//enemyAnimation.setSleepTime (sleepTime);
+			//enemyAnimation.setEnemyAnimation (EnemyAnimationScript.EnemyAnimation.resetAnimation);
+			
 		}
 	}
 
@@ -231,7 +235,10 @@ public class EnemyScript : MonoBehaviour {
 											fishPos.x * sin + fishPos.y * cos
 											);
 
-				if (watchingRect.Contains(adjFish) && fishes[i].gameObject.GetComponent<Fish>().Health>0f) {
+				if (watchingRect.Contains(adjFish) 
+				    && fishes[i].gameObject.GetComponent<Fish>().Health>0f 
+				    && fishes[i].gameObject.GetComponentInChildren<Tail>().previousProgressIntro==1f
+				    && fishes[i].gameObject.GetComponentInChildren<Tail>().dying == false) {
 					Attack(fishes[i]);
 					break;
 				}
@@ -262,7 +269,7 @@ public class EnemyScript : MonoBehaviour {
 		enemyAnimation.setTargetAngle (currentAngle);
 		enemyAnimation.setEnemyAnimation (EnemyAnimationScript.EnemyAnimation.repositionAnimation);
 		
-		CheckForDamage();
+		//CheckForDamage();
 
 	}
 

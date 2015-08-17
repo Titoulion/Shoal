@@ -157,18 +157,21 @@ public class EnemyWing : MonoBehaviour {
 		bodyNumber = 8;
 		_currentPointer = 0;
 		generateBody();
+		Debug.Log ("RESET ANIMATION");
 
 		
 	}
 	
 	void destoryTheLast(){
-		
+
 		int thelast = bodyNumber;
-		Destroy (EnemyBody[thelast-1]);
-		bodyNumber--;
-		Debug.Log ("the length" + bodyNumber);
+		if(thelast > 0){
+
+			Destroy (EnemyBody[thelast-1]);
+			bodyNumber--;
+			Debug.Log ("the length" + bodyNumber);
 		
-		
+		}
 		
 	}
 	

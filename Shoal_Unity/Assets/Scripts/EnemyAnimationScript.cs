@@ -95,8 +95,7 @@ public class EnemyAnimationScript : MonoBehaviour {
 		//for tranparent
 		//Invoke ("wingReset", sleepTime + enemyScript.wakingUpTime - 2.0f);
 		Invoke ("wingReset", sleepTime);
-		Debug.Log ("RESET ANIAMATION");
-		//theAniamtionState = EnemyAnimation.idleAnimation;
+		theAniamtionState = EnemyAnimation.idleAnimation;
 	}
 
 	void enemyHuntAnimation(){
@@ -170,10 +169,12 @@ public class EnemyAnimationScript : MonoBehaviour {
 
 	void wingReset(){
 
+
 		for (int i = 0; i < EnemyWings.Length; i++) {
 			
 			WingScript[i].setStatus(6);
-			
+			Debug.Log ("RESET ANIAMATION"+EnemyWings.Length);
+
 		}
 
 	}

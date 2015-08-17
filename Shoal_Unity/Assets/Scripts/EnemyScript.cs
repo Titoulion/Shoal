@@ -180,6 +180,7 @@ public class EnemyScript : MonoBehaviour {
 		float time = lerpTimer/lerpDuration;
 		SmoothMove(startRadius, targetRadius, startAngle, targetAngle, time);
 		if (time >= 1f) {
+
 			nextState = EnemyState.Sleeping;
 			startRadius = sleepingRadius;
 			startAngle = Random.Range(0f, 360f);
@@ -188,11 +189,13 @@ public class EnemyScript : MonoBehaviour {
 			transform.position = degrees * unrotatedStart;
 
 			float sleepTime = Random.Range(sleepTimeRange.x, sleepTimeRange.y);
-			enemyAnimation.setSleepTime (sleepTime);
-			enemyAnimation.setEnemyAnimation (EnemyAnimationScript.EnemyAnimation.resetAnimation);
+			
 			Invoke("WakeUp", sleepTime);
 			Debug.Log("enemy rebirth");
 
+			//enemyAnimation.setSleepTime (sleepTime);
+			//enemyAnimation.setEnemyAnimation (EnemyAnimationScript.EnemyAnimation.resetAnimation);
+			
 		}
 	}
 

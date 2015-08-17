@@ -79,7 +79,7 @@ public class EnemyWing : MonoBehaviour {
 			InvokeRepeating ("apperaSequence", 0.1f, 0.1f);
 			
 		}
-		
+		Debug.Log ("GENERATE BODY");
 		setStatus(1);
 	}
 	
@@ -157,7 +157,7 @@ public class EnemyWing : MonoBehaviour {
 		bodyNumber = 8;
 		_currentPointer = 0;
 		generateBody();
-		Debug.Log ("RESET ANIMATION");
+		Debug.Log ("DO RESET ANIMATION");
 
 		
 	}

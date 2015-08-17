@@ -18,10 +18,12 @@ public class Spawner : MonoBehaviourBase
 	[SerializeField] private float timeBetweenFood = 0.3f;
 	private float timerFood;
 	private float timerRipple;
+	private float timeBeforeNextWhirlPool;
 
 	void Awake()
 	{
 		Instance = this;
+		ResetWhirlPoolTimer();
 	}
 
 	public GameObject SpawnBoulder(Vector2 posOnScreen)
@@ -83,10 +85,17 @@ public class Spawner : MonoBehaviourBase
 		foodAreas[indexFoodArea].RevertState();
 	}
 
+	public Vector2 GetFoodAreaCoordinate(int index)
+	{
+		return(foodAreas[index].GetPositionOnScreen());
+	}
+
 	void Update()
 	{
 		timerFood-=Time.deltaTime;
 		timerRipple-=Time.deltaTime;
+
+		GestionSpawnWhirlPool();
 
 		if (Input.GetMouseButtonDown(0))
 			SpawnFish (Vec2MousePos());
@@ -108,6 +117,23 @@ public class Spawner : MonoBehaviourBase
 
 		if (Input.GetKeyDown(KeyCode.Alpha3)||Input.GetKeyDown(KeyCode.Keypad3))
 			RevertStateFoodArea(1);
+	}
+
+	private void GestionSpawnWhirlPool()
+	{
+		timeBeforeNextWhirlPool-=Time.deltaTime;
+		if(timeBeforeNextWhirlPool<=0f)
+		{
+			float rand = Random.Range(0f,2f*Mathf.PI);
+			Vector3 randomPo = new Vector3(Mathf.Cos (rand),Mathf.Sin (rand),0f)*Random.Range (0f,8f)/2.5f;
+			SpawnWhirlPool(Camera.main.WorldToScreenPoint(randomPo));
+			ResetWhirlPoolTimer();
+		}
+	}
+
+	private void ResetWhirlPoolTimer()
+	{
+		timeBeforeNextWhirlPool = 60f+Random.Range (60f,240f);
 	}
 
 	private Vector2 Vec2MousePos()

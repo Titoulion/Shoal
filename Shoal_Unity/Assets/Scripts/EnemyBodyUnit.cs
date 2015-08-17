@@ -24,6 +24,8 @@ public class EnemyBodyUnit : MonoBehaviour {
 	private float partID;
 	private int animationID;
 	private float lerpTime;
+
+	private Material myMat;
 	
 	
 	public void setPartID(float _id){
@@ -55,6 +57,7 @@ public class EnemyBodyUnit : MonoBehaviour {
 	// Use this for initialization
 	void Awake () {
 		
+		myMat = GetComponent<Renderer>().material;
 		theRenderer = gameObject.GetComponent<SpriteRenderer>();
 		theMaterial = theRenderer.material;
 		randomSeed = Random.value;
@@ -63,6 +66,7 @@ public class EnemyBodyUnit : MonoBehaviour {
 		setColor ();
 		_alpha = Random.Range (0.3f, 0.5f);
 		lerpTime = 0.0f;
+
 		
 	}
 	
@@ -112,6 +116,7 @@ public class EnemyBodyUnit : MonoBehaviour {
 		if (lerpTime < _alpha) {
 			Color _c = new Color (theRenderer.color.r, theRenderer.color.g, theRenderer.color.b, lerpTime);
 			theRenderer.color = _c;
+			myMat.SetFloat("_MyOpacity",lerpTime);
 			//Debug.Log ("FadeIn animation is playing" + lerpTime);
 		} else {
 			
@@ -127,6 +132,7 @@ public class EnemyBodyUnit : MonoBehaviour {
 		if (_alpha > 0.0f) {
 			Color _c = new Color (theRenderer.color.r, theRenderer.color.g, theRenderer.color.b, _alpha);
 			theRenderer.color = _c;
+			myMat.SetFloat("_MyOpacity",_alpha);
 			Debug.Log("FadeOut animation is playing");	
 			
 		} else {

@@ -50,12 +50,13 @@ public class EnemyScript : MonoBehaviour {
 	private Entity prey;
 
 	private Rect watchingRect;
+	static public EnemyScript Me;
 
 	//Animation Script
 	EnemyAnimationScript enemyAnimation;
 
 	void Awake(){
-	
+		Me = this;
 
 	}
 
@@ -120,6 +121,11 @@ public class EnemyScript : MonoBehaviour {
 			nextState = EnemyState.Blank;
 		}
 
+		if (Input.GetKeyDown(KeyCode.B)) 
+		{
+			CheckForDamage();
+		}
+
 
 	}
 
@@ -175,7 +181,6 @@ public class EnemyScript : MonoBehaviour {
 		SmoothMove(startRadius, targetRadius, startAngle, targetAngle, time);
 		if (time >= 1f) {
 			nextState = EnemyState.Sleeping;
-
 			startRadius = sleepingRadius;
 			startAngle = Random.Range(0f, 360f);
 			Quaternion degrees = Quaternion.Euler(0, 0, startAngle);
@@ -232,7 +237,7 @@ public class EnemyScript : MonoBehaviour {
 				}
 			}
 		}
-		CheckForDamage();
+		//CheckForDamage();
 
 
 	}
@@ -299,8 +304,8 @@ public class EnemyScript : MonoBehaviour {
 		return false;
 	}	
 
-	void CheckForDamage() {
-		if (Input.GetKeyDown(KeyCode.B)) {
+	public void CheckForDamage() {
+
 			enemyAnimation.setEnemyAnimation(EnemyAnimationScript.EnemyAnimation.destroryAnimation);
 			currentHealth--;
 			Debug.Log("DYING");
@@ -330,8 +335,10 @@ public class EnemyScript : MonoBehaviour {
 				lerpDuration = 1f;
 				lerpTimer = 0f;
 			}
-		}
+
 	}
+
+
 
 	public void Reset() {
 		nextState = EnemyState.Resetting;

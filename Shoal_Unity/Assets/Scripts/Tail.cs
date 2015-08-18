@@ -25,7 +25,7 @@ public class Tail : MonoBehaviour {
 	private TrailRenderer[] bodyPartsTrails = new TrailRenderer[0];
 	private Vector3[] bodyPartsPositions = new Vector3[0];
 	private int numberBodyParts = 50;
-	private float nextHeadSize = 2f;
+	public float nextHeadSize = 2f;
 	private float tailLenght = 0f;
 	private float radiusMotionBodyParts = 1f;
 	public float headSize = 0f;
@@ -54,6 +54,7 @@ public class Tail : MonoBehaviour {
 	private float durationDeath = 1f;
 	public float previousProgressIntro = 0f;
 	private float timerWhisker = 0f;
+	public bool inIntro = true;
 		
 	void Start () 
 	{
@@ -91,7 +92,7 @@ public class Tail : MonoBehaviour {
 		tailLenght = p1;
 		radiusMotionBodyParts = p1B;
 		exchangeColor = p2;
-		nextHeadSize = p3;
+		nextHeadSize = 0.5f;
 		headSize = 0f;
 		lerpValueSize = p3B;
 	}
@@ -195,7 +196,12 @@ public class Tail : MonoBehaviour {
 			finalLife=Mathf.Clamp01(finalLife-Time.deltaTime/durationDeath);
 
 		float progressIntro = Mathf.Clamp01(timeLife/3f);
-		headSize=Mathf.Lerp (0f,nextHeadSize,curveSizeApparition.Evaluate(progressIntro));
+
+		if(inIntro)
+			headSize=Mathf.Lerp (0f,0.3f,curveSizeApparition.Evaluate(progressIntro));
+		else
+			headSize=Mathf.Lerp (headSize,nextHeadSize,0.05f);
+
 		headSize *= finalLife;
 
 		hunger = 1f-GetComponentInParent<Fish>().Health;

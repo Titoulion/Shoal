@@ -31,6 +31,8 @@ public class Fish : Entity
 		{
 			GetComponent<SpawningFishBehaviour>().enabled = false;
 			SfxManager.Instance.PlaySound(SfxManager.Instance.ploufSound,1f,UnityEngine.Random.Range (0.8f,1.2f));
+			GetComponentInChildren<Tail>().nextHeadSize = UnityEngine.Random.Range(0.5f,1.8f);
+			GetComponentInChildren<Tail>().inIntro = false;
 		}
     }
 

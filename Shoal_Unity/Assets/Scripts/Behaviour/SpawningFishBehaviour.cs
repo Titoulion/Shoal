@@ -44,7 +44,7 @@ public class SpawningFishBehaviour : MonoBehaviourBase
 
     private void Update()
     {
-		SetCircleCenter (Input.mousePosition);
+		//SetCircleCenter (Input.mousePosition);
 
 		angle += Time.deltaTime * swimmingDirection * speedRad*sens;
         var delta = UnityHelper.CreateVector2AngleRad(angle);

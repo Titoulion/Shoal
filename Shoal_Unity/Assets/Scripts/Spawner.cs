@@ -74,7 +74,12 @@ public class Spawner : MonoBehaviourBase
 		spawnPos.z = zPos;
         return spawnPos;
     }
-
+    public void SetPositionFromScreenCoord(GameObject obj, Vector2 posOnScreen, float zPos = 0f)
+    {
+        Vector3 worldPos = Camera.main.ScreenToWorldPoint(posOnScreen) * 2.5f;
+        worldPos.z = zPos;
+        obj.transform.position = worldPos;
+    }
 	public void ActivateFoodArea(bool activated, int indexFoodArea)
 	{
 		foodAreas[indexFoodArea].GoActivate(activated);

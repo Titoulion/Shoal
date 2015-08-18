@@ -328,10 +328,12 @@ public class EnemyScript : MonoBehaviour {
 
 				lerpDuration = wakingUpTime;
 				lerpTimer = 0f;
+				SfxManager.Instance.PlaySound(SfxManager.Instance.monsterDieSound,1f,UnityEngine.Random.Range (0.8f,1.4f));
 
 				CancelInvoke("Reposition");
 			} else {
 				nextState = EnemyState.TakingDamage;
+				SfxManager.Instance.PlaySound(SfxManager.Instance.monsterHurtSound,1f,UnityEngine.Random.Range (0.6f,0.8f));
 				CancelInvoke("Reposition");
 
 				startRadius = currentRadius;
@@ -387,6 +389,7 @@ public class EnemyScript : MonoBehaviour {
 		lerpTimer = 0f;
 		lerpDuration = distance/attackSpeed;
 		nextState = EnemyState.Attacking;
+		SfxManager.Instance.PlaySound(SfxManager.Instance.monsterAttackSound,1f,UnityEngine.Random.Range (0.8f,1.4f));
 		CancelInvoke("Reposition");
 	}
 

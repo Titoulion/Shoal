@@ -29,6 +29,7 @@ public abstract class Entity : MonoBehaviourBase
     public void Eaten()
     {
 		goDestroy = true;
+
     }
 
 	void LateUpdate()

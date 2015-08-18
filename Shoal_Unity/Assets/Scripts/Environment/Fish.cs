@@ -9,7 +9,7 @@ public class Fish : Entity
     [SerializeField] private Transform eatingTransform;
     [SerializeField] private float eatingRadius;
     [SerializeField] private float eatMaxValue = 0.8f;
-	
+	public GameObject myWhisker;
     private float health;
 
 	public event Action EventDeath;
@@ -45,6 +45,8 @@ public class Fish : Entity
                 EatFood((Food) food);
             }
         }
+
+		myWhisker.transform.eulerAngles = new Vector3(0f,0f,GetComponent<Vehicle>().HeadingAngleDeg+90f);
     }
 
 	public void Kill()
@@ -78,6 +80,7 @@ public class Fish : Entity
 
 		GetComponentInChildren<Tail>().GoDigest();
         Health += food.HealthPlus;
+		SfxManager.Instance.PlaySound(SfxManager.Instance.fishEatSound,1f,UnityEngine.Random.Range (1f,1.6f));
         food.Eaten();
     }
 

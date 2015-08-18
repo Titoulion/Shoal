@@ -4,6 +4,7 @@ using System.Collections;
 public class BodyPartScript : MonoBehaviour 
 {
 	private Material myMat;
+	//public GameObject myWhisker;
 
 	void Awake()
 	{

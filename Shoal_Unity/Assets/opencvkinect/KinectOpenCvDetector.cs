@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Rect = UnityEngine.Rect;
 using OpenCvSharp;
 using OpenCvSharp.CPlusPlus;
+using OpenCvSharp.Blob;
 using System.Threading;
 using System.Runtime.InteropServices;
 
@@ -11,18 +12,47 @@ using System.Runtime.InteropServices;
 // Parallel is used to speed up the for loop when converting CvMat to 2D texture
 using Uk.Org.Adcock.Parallel;  // Stewart Adcock's implementation of parallel processing 
 
+public class Trak
+{
+    public int Lifetime;
+    public double X;
+    public double Y;
+    public int Inactive;
+    public int Active;
+    public int Label;
+    public long Id;
+    public CvPoint2D64f Centroid;
+    public int MinX;
+    public int MinY;
+    public int MaxX;
+    public int MaxY;
+    public bool foodArea = false;
+    public bool boulder = false;
+    public bool fish = false;
+    public GameObject targetObject;
+
+}
+
 public class KinectOpenCvDetector : MonoBehaviour
 {
 
     public KinectManagerSimple kinect;
     Thread detectorThread;
     public bool showDetection = true;
+    [Range(0.0f, 100.0f)]
+    public double smoothBlur = 1.0;
+    [Range(1, 10000)]
+    public int blobMinArea = 1;
+    [Range(1, 10000)]
+    public int blobMaxArea = 1;
     public GameObject ScreenObject;
-    [Range(0.0f,100.0f)]
+    [Range(0.0f, 255.0f)]
     public double threshold = 7.0;
+    [Range(0.0f, 255.0f)]
+    public double smThresh = 7.0;
     [Range(-500.0f, 500.0f)]
     public double xAdjust = 0.0;
-    [Range(-500.0f, 500.0f)]
+    [Range(-800.0f, 800.0f)]
     public double yAdjust = 0.0;
     [Range(0, 640)]
     public int roiX = 0;
@@ -32,6 +62,31 @@ public class KinectOpenCvDetector : MonoBehaviour
     public int roiW = 640;
     [Range(0, 480)]
     public int roiH = 480;
+    [Range(0.0f, 640.0f)]
+    public double axisMaskX = 0.0;
+    [Range(0.0f, 480.0f)]
+    public double axisMaskY = 0.0;
+    [Range(0.0f, 640.0f)]
+    public double ellipseMaskCenterX = 0.0;
+    [Range(0.0f, 480.0f)]
+    public double ellipseMaskCenterY = 0.0;
+    [Range(0.0f, 360.0f)]
+    public double maskAngle = 0.0;
+    [Range(0.0f, 360.0f)]
+    public double maskStartAngle = 0.0;
+    [Range(0.0f, 360.0f)]
+    public double maskEndAngle = 0.0;
+    [Range(1, 100)]
+    public int blobMaxLife = 5;
+    [Range(0, 100)]
+    public int blobTrackDly = 5;
+    [Range(0.0f, 1000.0f)]
+    public double blobMinDistance = 10.0;
+    [Range(0.0f, 1000.0f)]
+    public double boulderThresh = 2.7;
+    [Range(0.1f, 10.0f)]
+    public float handsPeriod = 1.0f;
+
     // Object parameters - rectangle where the attached gameObject is in screen coordinates
     UnityEngine.Rect objectScreenPosition = new Rect(0, 0, 1, 1);
     private int imWidth;  // Input devices image width
@@ -44,29 +99,37 @@ public class KinectOpenCvDetector : MonoBehaviour
     private Texture2D result;
     private bool running = false;
     private Mat calibResult;
+    private Mat src;
+    private Mat roi;
     private Mat bg;
     private Mat fg;
     private Mat fgthresh;
+    private Mat[][] handsContours;    
+    private CvMat blobResultImg;   
     private bool first = true;
     private SimpleBlobDetector blob;
-    private OpenCvSharp.Blob.CvTracks tracks;
+    private List<Trak> tracks;
     private OpenCvSharp.Blob.CvBlobs blobs;
     public GameObject spawner;
-    private static double NUI_CAMERA_COLOR_NOMINAL_FOCAL_LENGTH_IN_PIXELS = (531.15);   // Based on 640x480 pixel size.
-    private static double NUI_CAMERA_COLOR_NOMINAL_INVERSE_FOCAL_LENGTH_IN_PIXELS = (1.83e-3);  // (1/NUI_CAMERA_COLOR_NOMINAL_FOCAL_LENGTH_IN_PIXELS)
+    private static double NUI_CAMERA_DEPTH_NOMINAL_FOCAL_LENGTH_IN_PIXELS = (285.63);   // Based on 320x240 pixel size.
+    private static float NUI_CAMERA_DEPTH_NOMINAL_INVERSE_FOCAL_LENGTH_IN_PIXELS = (3.501e-3f); // (1/NUI_CAMERA_DEPTH_NOMINAL_FOCAL_LENGTH_IN_PIXELS)
+    private static double NUI_CAMERA_DEPTH_NOMINAL_DIAGONAL_FOV = (70.0);
+    private static double NUI_CAMERA_DEPTH_NOMINAL_HORIZONTAL_FOV = (58.5);
+    private static double NUI_CAMERA_DEPTH_NOMINAL_VERTICAL_FOV = (45.6);
+    private static int NUI_IMAGE_PLAYER_INDEX_SHIFT = 3;
+    private static int NUI_IMAGE_PLAYER_INDEX_MASK = ((1 << NUI_IMAGE_PLAYER_INDEX_SHIFT) - 1);
+    private static long NUI_IMAGE_DEPTH_MAXIMUM = ((4000 << NUI_IMAGE_PLAYER_INDEX_SHIFT) | NUI_IMAGE_PLAYER_INDEX_MASK);
     private List<Vector2> foodAdd;
     private List<Vector2> boulderAdd;
     private List<Vector2> rippleAdd;
-    
-
-
-
-
+    private long trakCount = 0;
+    public float handsPeriodF;
 
 
     // Use this for initialization
     void Start()
     {
+        handsPeriodF = handsPeriod;
         //using (CvFileStorage fs = new CvFileStorage("KinectCalibration.xml", null, FileStorageMode.Read))
         //{
         //    string nodeName = "calibResult";
@@ -74,18 +137,17 @@ public class KinectOpenCvDetector : MonoBehaviour
         //    calibResult = new Mat(fs.Read<CvMat>(param));
         //}
         // Un-mirror the webcam image
-        if (FlipLeftRightAxis)
-        {
-            transform.localScale = new Vector3(-transform.localScale.x,
-                           transform.localScale.y, transform.localScale.z);
-        }
+        //if (FlipLeftRightAxis)
+        //{
+        //    transform.localScale = new Vector3(-transform.localScale.x,
+        //                   transform.localScale.y, transform.localScale.z);
+        //}
 
-        if (FlipUpDownAxis)
-        {
-            transform.localScale = new Vector3(transform.localScale.x,
-                                -transform.localScale.y, transform.localScale.z);
-        }
-
+        //if (FlipUpDownAxis)
+        //{
+        //    transform.localScale = new Vector3(transform.localScale.x,
+        //                        -transform.localScale.y, transform.localScale.z);
+        //}
         show = new Mat(480, 640, OpenCvSharp.CPlusPlus.MatType.CV_8UC4);
 
         // Load the cascades
@@ -99,27 +161,31 @@ public class KinectOpenCvDetector : MonoBehaviour
         bg = new Mat(roiH, roiW, MatType.CV_8UC1);
         fg = new Mat(roiH, roiW, MatType.CV_8UC1);
         fgthresh = new Mat(roiH, roiW, MatType.CV_8UC1);
-        SimpleBlobDetector.Params blobParam = new SimpleBlobDetector.Params();
-        blobParam.MinDistBetweenBlobs = 1.0f;
-        blobParam.FilterByInertia = false;
-        blobParam.FilterByConvexity = false;
-        blobParam.FilterByColor = false;
-        blobParam.FilterByCircularity = false;
-        blobParam.FilterByArea = true;
-        blobParam.MinArea = 500.0f;
-        blobParam.MaxArea = 10000.0f;
-        blob = new SimpleBlobDetector(blobParam);
+        //showImg = new IplImage();
+        //fgthreshImg = new IplImage();
+        //SimpleBlobDetector.Params blobParam = new SimpleBlobDetector.Params();
+        //blobParam.MinDistBetweenBlobs = 1.0f;
+        //blobParam.FilterByInertia = false;
+        //blobParam.FilterByConvexity = false;
+        //blobParam.FilterByColor = false;
+        //blobParam.FilterByCircularity = false;
+        //blobParam.FilterByArea = true;
+        //blobParam.MinArea = 500.0f;
+        //blobParam.MaxArea = 10000.0f;
+        //blob = new SimpleBlobDetector(blobParam);
 
-        tracks = new OpenCvSharp.Blob.CvTracks();
+        tracks = new List<Trak>();
         blobs = new OpenCvSharp.Blob.CvBlobs();
 
         foodAdd = new List<Vector2>();
         boulderAdd = new List<Vector2>();
         rippleAdd = new List<Vector2>();
 
-        detectorThread = new Thread(new ThreadStart(DoTracking));
-        running = true;
-        detectorThread.Start();
+        //detectorThread = new Thread(new ThreadStart(DoTracking));
+        //running = true;
+        //detectorThread.Start();
+        prepareHandDetector();
+
 
     }
 
@@ -342,17 +408,17 @@ public class KinectOpenCvDetector : MonoBehaviour
     // FaceTracking
     void DoTracking()
     {
-        while (running)
-        {
+        //while (running)
+        //{
             try
             {
                 if (kinect.GetDepthRaw())
                 {
-                    lock (this)
-                    {
-                        Mat src = DoDepthBuffer(kinect.usersDepthMap, KinectWrapper.GetDepthWidth(), KinectWrapper.GetDepthHeight());
-                        Mat roi = src.Clone(new OpenCvSharp.CPlusPlus.Rect(roiX,roiY,roiW,roiH));
-                        roi.ConvertTo(roi, OpenCvSharp.CPlusPlus.MatType.CV_8U, 255.0f / 32767.5f);
+                    //lock (this)
+                    //{
+                        src = DoDepthBuffer(kinect.usersDepthMap, KinectWrapper.GetDepthWidth(), KinectWrapper.GetDepthHeight());
+                        roi = src.Clone(new OpenCvSharp.CPlusPlus.Rect(roiX, roiY, roiW, roiH));
+                        roi.ConvertTo(roi, OpenCvSharp.CPlusPlus.MatType.CV_8U, 255.0 / 32767.0);
                         Cv2.Subtract(new Mat(roiH, roiW, MatType.CV_8UC1, new Scalar(255)), roi, roi);
 
                         // Flip up/down dimension and right/left dimension
@@ -363,165 +429,285 @@ public class KinectOpenCvDetector : MonoBehaviour
                         else if (FlipLeftRightAxis)
                             roi.Flip(FlipMode.Y);
 
-                        // Detect faces
-                        //OpenCvSharp.CPlusPlus.Rect[] faces = cascade.DetectMultiScale(
-                        //    src, 1.08, 2, HaarDetectionType.ScaleImage, new Size(30, 30));
-
-                        //// Render all detected faces
-                        //foreach (OpenCvSharp.CPlusPlus.Rect face in faces)
-                        //{
-                        //    var center = new Point
-                        //    {
-                        //        X = (int)(face.X + face.Width * 0.5),
-                        //        Y = (int)(face.Y + face.Height * 0.5)
-                        //    };
-                        //    var axes = new Size
-                        //    {
-                        //        Width = (int)(face.Width * 0.5),
-                        //        Height = (int)(face.Height * 0.5)
-                        //    };
-                        //    Cv2.Ellipse(src, center, axes, 0, 0, 360, new Scalar(255, 0, 255), 4);
-                        //}
-
-                        //roi.ConvertTo(show, OpenCvSharp.CPlusPlus.MatType.CV_8UC4);
-                        //Mat[] planes = new Mat[4] { roi, roi, roi, roi };
+                        //Apply ellliptical mask
+                        Mat ellipseMask = new Mat(roi.Rows, roi.Cols, OpenCvSharp.CPlusPlus.MatType.CV_8U, new Scalar(0.0));
+                        Cv2.Ellipse(ellipseMask, new Point(ellipseMaskCenterX, ellipseMaskCenterY), new Size(axisMaskX, axisMaskY), maskAngle, maskStartAngle, maskEndAngle, new Scalar(255.0), -1);
+                        Cv2.BitwiseAnd(roi,ellipseMask,roi);
+                        //Subtract background
                         if (first)
                         {
                             bg = roi.Clone();
-                            bg.Blur(new Size(20, 20));
+                            //bg = bg.Blur(new Size(smoothBlur, smoothBlur));
                             first = false;
                         }
                         fg = bg.Clone();
-                        roi.Blur(new Size(20, 20));
-                        Cv.Sub((CvMat)roi, (CvMat)bg, (CvMat)fg);
+                        //roi = roi.Blur(new Size(smoothBlur, smoothBlur));
+                        Mat subMask = roi.Clone();
+                        subMask = subMask.Threshold(smThresh,255.0,ThresholdType.ToZero);
+                        //Cv2.ImShow("sm",subMask);
+                        bg.CopyTo(roi,subMask);
+                        OpenCvSharp.Cv.AbsDiff(roi.ToCvMat(), bg.ToCvMat(), fg.ToCvMat());
+                        //Threshold foreground image
                         fgthresh = fg.Threshold(threshold, 255.0, ThresholdType.Binary);
-                        KeyPoint[] bKeypoints = blob.Detect(fgthresh);
-                        for (int i = 0; i < bKeypoints.Length; i++)
-                        {
-                            float X = bKeypoints[i].Pt.X;
-                            float Y = bKeypoints[i].Pt.Y;
-                            float S = bKeypoints[i].Size;
-                            Cv.Circle((CvMat)roi, new CvPoint((int)X, (int)Y), (int)S, new CvScalar(0.0, 0.0, 0.0));
-                            CvPoint3D64f realPos = NuiTransformDepthImageToSkeleton((long)X, (long)Y, src.Get<ushort>((int)Y, (int)X));
-                            if (realPos.Z < 2.3 && realPos.Z > 1.0)
-                            {
-                                //Debug.Log("Blob!");
-                                foodAdd.Add(new Vector2(X, Y));
-                            }
-                            else if (realPos.Z > 2.3 && fg.Get<float>((int)Y, (int)X) < 200f)
-                            {
-                                boulderAdd.Add(new Vector2(X, Y));
-                            }
-                            else if (realPos.Z < 1.0)
-                            {
-                                rippleAdd.Add(new Vector2(X, Y));
-                            }
-                        }
+                        fgthresh = fgthresh.Blur(new Size(smoothBlur, smoothBlur));
+                        //Detect Blobs
+                        Mat roiToImg = new Mat(roi.Cols,roi.Rows,MatType.CV_8UC3);
+                        Mat threshToImg = fgthresh.Clone();
+                        Cv2.Merge(new Mat[] { roi, roi, roi }, roiToImg);
+                        IplImage showImg = roiToImg.ToIplImage();
+                        IplImage fgthreshImg = threshToImg.ToIplImage();
+                        OpenCvSharp.Blob.CvBlobLib.Label(fgthreshImg, blobs);
+                        OpenCvSharp.Blob.CvBlobLib.FilterByArea(blobs, blobMinArea, blobMaxArea);
+                        OpenCvSharp.Blob.CvBlobLib.RenderBlobs(blobs, fgthreshImg, showImg, RenderBlobsMode.Color | RenderBlobsMode.Centroid);
+                        UpdateTracks(blobs, tracks, blobMinDistance, blobMaxLife);
+                        //OpenCvSharp.Blob.CvBlobLib.RenderTracks(tracks, fgthreshImg, showImg, RenderTracksMode.BoundingBox | RenderTracksMode.Id);
+                        RenderTracks(showImg);
+                        Cv.ShowImage("thres", fgthreshImg);
+                        Cv.ShowImage("showBlob", showImg);
+                        //Check Blob Actions
+                        //Debug.Log(tracks.Count);
                         
-                       
-                        ////cvUpdateTracks(blobs, tracks, 10., 5);
-                        ////OpenCvSharp.Blob.CvBlobLib.UpdateTracks(blobs, tracks, 10.0, 5);
-                        //IplImage showImg = new IplImage(roi.Data);
-                        ////IplImage fgthreshImg = new IplImage(480, 480, BitDepth.U8, 1);
-                        //IplImage fgthreshImg = new IplImage(fgthresh.Data);
-                        //OpenCvSharp.Blob.CvBlobLib.RenderBlobs(blobs,fgthreshImg, showImg, OpenCvSharp.Blob.RenderBlobsMode.Centroid | OpenCvSharp.Blob.RenderBlobsMode.BoundingBox);
-                        //fgthresh = new Mat(fgthreshImg);
-                        //show = new Mat(showImg);
-                        
-                        //OpenCvSharp.Blob.CvBlobLib.RenderTracks(tracks, (IplImage)fgthresh, (IplImage)roi, OpenCvSharp.Blob.RenderTracksMode.Id | OpenCvSharp.Blob.RenderTracksMode.BoundingBox);
-                        //OpenCvSharp.Blob.CvBlobLib.RenderBlobs()
-
-                        show = roi.Clone();
-                    }
+                    //}
                 }
+               
 
             }
             catch (System.Exception e)
             {
-                throw e;
+                //throw e;
+                Debug.Log(e.Message + " " + e.StackTrace);
+            }
+        //}
+    }
+    private void UpdateTracks(CvBlobs blobs, List<Trak> tracks,double minDist, int maxLife) {
+        ArrayList matched = new ArrayList();
+        foreach (var blob in blobs)
+        {
+            bool tracked = false;
+            //Find if blob is being tracked
+            foreach (Trak track in tracks)
+            {
+                double distance = Mathf.Sqrt(MathUtil.DistanceSq(new Vector2((float)blob.Value.Centroid.X,(float)blob.Value.Centroid.Y),new Vector2((float)track.X,(float)track.Y)));
+                if(distance < minDist){
+                    //Todo: add closest track check
+                    //Ok it is tracked! do your stuff blob!
+                    track.Active++;
+                    track.Inactive = 0;
+                    track.Lifetime++;
+                    track.Label = blob.Value.Label;
+                    track.X = blob.Value.Centroid.X;
+                    track.Y = blob.Value.Centroid.Y;
+                    track.Centroid = blob.Value.Centroid;
+                    track.MaxX = blob.Value.MaxX;
+                    track.MaxY = blob.Value.MaxY;
+                    track.MinX = blob.Value.MinX;
+                    track.MinY = blob.Value.MinY;
+                    matched.Add(track.Id);
+                    tracked = true;
+                    OnBlobActive(track.Label);
+                    break; 
+                    
+                }
+
+            }
+            //Blob Is not tracked? create new trak
+            if (!tracked) {
+                Trak track = new Trak();
+                track.Active = 1;
+                track.Inactive = 0;
+                track.Lifetime = 1;
+                track.Label = blob.Value.Label;
+                track.X = blob.Value.Centroid.X;
+                track.Y = blob.Value.Centroid.Y;
+                track.Centroid = blob.Value.Centroid;
+                track.MaxX = blob.Value.MaxX;
+                track.MaxY = blob.Value.MaxY;
+                track.MinX = blob.Value.MinX;
+                track.MinY = blob.Value.MinY;
+                track.Id = trakCount;
+                tracks.Add(track);
+                trakCount++;
+                OnBlobEnter(track.Label);
             }
         }
+        for (int i = 0; i < tracks.Count; i++)
+        {
+            Trak track = (Trak)tracks[i];
+            if (matched.IndexOf(track.Id) == -1) {
+                if (track.Inactive >= maxLife)
+                {
+                    //Tracked object left, this track is leaving
+                    OnBlobExit(track.Label);
+                    
+                }
+                else {
+                    //this track was not matched, let's wait maxLife frames
+                    track.Active = 0;
+                    track.Inactive++;
+                    track.Lifetime++;
+                }
+            }
+        }
+        
+    }
+    private void OnBlobEnter(int blobLabel) {
+        CvBlob cBlob = new CvBlob();
+        Trak rT = tracks.Find(x => x.Label.Equals(blobLabel));
+        foreach (var blob in blobs)
+        {
+            if (blob.Value.Label == blobLabel){
+                cBlob = (CvBlob)blob.Value.Clone();
+                Debug.Log("Blob Entered " + cBlob.Label);
+                Vector2 foodPos = spawner.GetComponent<Spawner>().GetFoodAreaCoordinate(1);
+                Vector2 blobPos = TransformKinectToScreenPos(new Vector2((float)cBlob.Centroid.X, (float)(cBlob.Centroid.Y)));
+                float distTofoodA = Mathf.Sqrt(MathUtil.DistanceSq(blobPos, foodPos));
+                Debug.Log("Dist: " + distTofoodA + " -food- " + foodPos.x + " " + foodPos.y + " -blob- " + blobPos.x + " " + blobPos.y);
+                //foodPos = spawner.GetComponent<Spawner>().GetFoodAreaCoordinate(1);
+                //float distTofoodB = Mathf.Sqrt(MathUtil.DistanceSq(new Vector2((float)cBlob.Centroid.X, (float)cBlob.Centroid.Y), foodPos));
+                //Debug.Log("Disto2" + distTofoodB)
+                if (distTofoodA < 50.0f)
+                {
+                    
+                    rT.foodArea = true;
+                    spawner.GetComponent<Spawner>().ActivateFoodArea(true, 0);
+                    Debug.Log("Got foodArea");
+                    //spawner.GetComponent<Spawner>().RevertStateFoodArea(0);
+                }else{
+                     //Get depth of Blob
+                    CvPoint3D64f sPoint =  NuiTransformDepthImageToSkeleton((long)cBlob.Centroid.X,(long)cBlob.Centroid.Y, src.At<ushort>((int)cBlob.Centroid.Y,(int)cBlob.Centroid.X));
+                    //Todo transform coordinates to Screen coord
+                    if (sPoint.Z > boulderThresh)
+                    {
+                        //boulderAdd.Add(new Vector2((float)cBlob.Centroid.X, (float)cBlob.Centroid.Y));
+                        rT.boulder = true;
+                        rT.targetObject = spawner.GetComponent<Spawner>().SpawnBoulder(blobPos);
+                        Debug.Log("Got Boulder");
+                    }
+                    else
+                    {
+                        rippleAdd.Add(blobPos);
+                        Debug.Log("Got Ripple");
+
+                    }
+                
+                }
+                break;
+            }
+        }
+        
     }
 
+    private void OnBlobActive(int blobLabel)
+    {
+        CvBlob cBlob = new CvBlob();
+        Trak rT = tracks.Find(x => x.Label.Equals(blobLabel));
+
+        foreach (var blob in blobs)
+        {
+            if (blob.Value.Label == blobLabel)
+            {
+                cBlob = (CvBlob)blob.Value;
+                if(rT.boulder){
+                    Vector2 blobPos = TransformKinectToScreenPos(new Vector2((float)cBlob.Centroid.X, (float)(cBlob.Centroid.Y)));
+                    spawner.GetComponent<Spawner>().SetPositionFromScreenCoord(rT.targetObject,blobPos);
+                    Debug.Log("Setting BoulderPos: " + (float)cBlob.Centroid.X + " " + (float)(Screen.height - cBlob.Centroid.Y));
+                }
+                else if (handsPeriodF < 0.3f && DetectHands(cBlob))
+                {
+                    Debug.Log("Hands!");
+                }
+                break;
+            }
+
+
+        }
+         //Debug.Log("Blob Enter " + blobLabel);
+
+    }
+    private void OnBlobExit(int blobLabel)
+    {
+        Trak rT = tracks.Find(x => x.Label.Equals(blobLabel));
+        if (rT.foodArea == true)
+        {
+            spawner.GetComponent<Spawner>().ActivateFoodArea(false, 0);
+        }
+        if (rT.boulder)
+        {
+            Destroy(rT.targetObject);
+        } 
+        tracks.Remove(rT);
+        Debug.Log("Blob Exited " + blobLabel);
+    }
+
+    void RenderTracks(IplImage imgDest){
+        foreach (Trak track in tracks)
+        {
+
+            CvFont font = new CvFont(FontFace.HersheyDuplex, 0.5, 0.5, 0, 1);
+            if (track.Inactive == 0)
+            {
+                Cv.PutText(imgDest, track.Label.ToString(), track.Centroid, font, CvColor.Green);
+            }
+
+            if (track.Inactive > 0)
+                Cv.Rectangle(
+                    imgDest,
+                    new CvPoint(track.MinX, track.MinY),
+                    new CvPoint(track.MaxX - 1, track.MaxY - 1),
+                    new CvColor(0, 0, 50));
+            else
+                Cv.Rectangle(
+                    imgDest,
+                    new CvPoint(track.MinX, track.MinY),
+                    new CvPoint(track.MaxX - 1, track.MaxY - 1),
+                    new CvColor(0, 0, 255));
+        }
+        
+    }
     // get a CV_8U matrix from a Kinect depth frame 
     private Mat DoDepthBuffer(ushort[] depthData, int width, int height)
     {
 
         Mat outp = new Mat(height, width, OpenCvSharp.CPlusPlus.MatType.CV_16U, depthData);
+        // Flip up/down dimension and right/left dimension
+        if (!FlipUpDownAxis && FlipLeftRightAxis)
+            outp = outp.Flip(FlipMode.XY);
+        else if (!FlipUpDownAxis)
+            outp = outp.Flip(FlipMode.X);
+        else if (FlipLeftRightAxis)
+            outp = outp.Flip(FlipMode.Y);
         return outp;
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        handsPeriodF = handsPeriodF - Time.deltaTime <= 0.0f ? handsPeriod : handsPeriodF - Time.deltaTime;
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            first = true;
+        }
+        DoTracking();
         if (show != null)
         {
 
-                        Cv2.ImShow("show",show);
-                        Cv2.ImShow("fg", fg);
-                        Cv2.ImShow("fgthresh", fgthresh);
-                        Cv2.ImShow("bg", bg);
-                        //Cv.ShowImage("thres", fgthreshImg);
-                        //Cv.ShowImage("show2", showImg);
-            if (showDetection)
-            {
-                
-                //Debug.Log(show.Type());
-                //Debug.Log((int) show.Total());
-                //Debug.Log(show.Total());
-                //Debug.Log(show.Channels());
-                //Debug.Log(show.ElemSize());
-                //Debug.Log((int)show.Total() * show.ElemSize() * show.Channels());
-                //int matSize = (int)show.Total() * show.Channels();
-                //Debug.Log(matSize);
-                //byte[] rColors = new byte[matSize];
-                //Marshal.Copy(show.DataStart, rColors, 0, matSize);
-                //result.LoadRawTextureData(rColors);
-                //result.Apply();
-                //ScreenObject.GetComponent<Renderer>().material.mainTexture = result;
-            }
-            else
-            {
-                //Destroy(ScreenObject);
-            }
+                Cv2.ImShow("bg", bg);
+                //Cv2.ImShow("show", show);
+                Cv2.ImShow("fg", fg);
+                //Cv2.ImShow("fgthresh", fgthresh);
+           
         }
-        for (int i = 0; i < foodAdd.Count; i++)
-        {
-            Vector2 fixedPos = (Vector2)foodAdd[i];
-            fixedPos.x = fixedPos.x + (float)xAdjust + (Screen.width /2 - 640/2);
-            fixedPos.y = (fixedPos.y + (float)yAdjust + (Screen.height / 2 - 480 / 2));
-            spawner.GetComponent<Spawner>().SpawnFood(fixedPos);
-        }
-        foodAdd.Clear();
-        for (int i = 0; i < boulderAdd.Count; i++)
-        {
-            Vector2 fixedPos = (Vector2)boulderAdd[i];
-            fixedPos.x = fixedPos.x + (float)xAdjust + (Screen.width / 2 - 640 / 2);
-            fixedPos.y = (fixedPos.y + (float)yAdjust + (Screen.height / 2 - 480 / 2));
-            boulderAdd[i] = fixedPos;
-            
-        }
-        spawner.GetComponent<Spawner>().SetBoulderPositions(boulderAdd);
-        boulderAdd.Clear();
-        for (int i = 0; i < rippleAdd.Count; i++)
-        {
-            Vector2 fixedPos = (Vector2)rippleAdd[i];
-            fixedPos.x = fixedPos.x + (float)xAdjust + (Screen.width / 2 - 640 / 2);
-            fixedPos.y = (fixedPos.y + (float)yAdjust + (Screen.height / 2 - 480 / 2));
-            spawner.GetComponent<Spawner>().SpawnRipple(fixedPos);
-        }
-        rippleAdd.Clear();
     }
 
     void OnDestroy()
     {
-        if (running)
-        {
-            running = false;
-            detectorThread.Interrupt();
-            detectorThread.Join(0);
-        }
+        //if (running)
+        //{
+        //    running = false;
+        //    detectorThread.Interrupt();
+        //    detectorThread.Join(0);
+        //}
+        Cv2.DestroyAllWindows();
     }
 
     private CvPoint3D64f NuiTransformDepthImageToSkeleton(long lDepthX, long lDepthY, ushort usDepthValue)
@@ -545,8 +731,8 @@ public class KinectOpenCvDetector : MonoBehaviour
         // is up in skeleton space and down in image coordinates.
         //
 
-        double fSkeletonX = ((double)lDepthX - (double)KinectWrapper.GetDepthWidth() / 2.0) * NUI_CAMERA_COLOR_NOMINAL_INVERSE_FOCAL_LENGTH_IN_PIXELS * fSkeletonZ;
-        double fSkeletonY = -((double)lDepthY - (double)KinectWrapper.GetDepthHeight() / 2.0) * NUI_CAMERA_COLOR_NOMINAL_INVERSE_FOCAL_LENGTH_IN_PIXELS * fSkeletonZ;
+        double fSkeletonX = ((double)lDepthX - (double)KinectWrapper.GetDepthWidth() / 2.0) * NUI_CAMERA_DEPTH_NOMINAL_INVERSE_FOCAL_LENGTH_IN_PIXELS * fSkeletonZ;
+        double fSkeletonY = -((double)lDepthY - (double)KinectWrapper.GetDepthHeight() / 2.0) * NUI_CAMERA_DEPTH_NOMINAL_INVERSE_FOCAL_LENGTH_IN_PIXELS * fSkeletonZ;
 
         //Debug.Log(lDepthX + " " + lDepthY + " " + usDepthValue + " -> " + fSkeletonX + " " + fSkeletonY + " " + fSkeletonZ);
 
@@ -561,5 +747,148 @@ public class KinectOpenCvDetector : MonoBehaviour
         //v4.w = 1.0f;
         return v4;
     }
+    Vector2 TransformKinectToScreenPos(Vector2 Pos) {
+        Pos.x = Pos.x + (float)xAdjust + (Screen.width / 2 - 640 / 2);
+        Pos.y = Screen.height - (Pos.y + (float)yAdjust + (Screen.height / 2 - 480 / 2));
+        return Pos;
+    }
+
+    void prepareHandDetector() {
+        try
+        {
+            string path1 = Application.dataPath + "/../1.png";
+            string path2 = Application.dataPath + "/../2.png";
+            string path3 = Application.dataPath + "/../3.png";
+            string path4 = Application.dataPath + "/../4.png";
+            Debug.Log(path1);
+            Mat src1 = new Mat(path1, LoadMode.GrayScale);
+            Mat src2 = new Mat(path2, LoadMode.GrayScale);
+            Mat src3 = new Mat(path3, LoadMode.GrayScale);
+            Mat src4 = new Mat(path4, LoadMode.GrayScale);
+            //Detect edges using canny
+            double cthresh = 100.0;
+            //Cv2.Canny(src1, src1, cthresh, cthresh * 2, 3);
+            //Cv2.Canny(src2, src2, cthresh, cthresh * 2, 3);
+            //Cv2.Canny(src3, src3, cthresh, cthresh * 2, 3);
+            //Cv2.Canny(src4, src4, cthresh, cthresh * 2, 3);
+            Mat[] contoursA;
+            OutputArray hierarchyA = InputOutputArray.Create(new List<Vec4i>());
+            src1.FindContours(out contoursA, hierarchyA, OpenCvSharp.ContourRetrieval.External, OpenCvSharp.ContourChain.ApproxSimple);
+            Mat[] contoursB;
+            OutputArray hierarchyB = InputOutputArray.Create(new List<Vec4i>());
+            src2.FindContours(out contoursB, hierarchyB, OpenCvSharp.ContourRetrieval.External, OpenCvSharp.ContourChain.ApproxSimple);
+            Mat[] contoursC;
+            OutputArray hierarchyC = InputOutputArray.Create(new List<Vec4i>());
+            src1.FindContours(out contoursC, hierarchyC, OpenCvSharp.ContourRetrieval.External, OpenCvSharp.ContourChain.ApproxSimple);
+            Mat[] contoursD;
+            OutputArray hierarchyD = InputOutputArray.Create(new List<Vec4i>());
+            src2.FindContours(out contoursD, hierarchyD, OpenCvSharp.ContourRetrieval.External, OpenCvSharp.ContourChain.ApproxSimple);
+            handsContours = new Mat[][] { contoursA, contoursB, contoursC, contoursD };
+            //Debug.Log(src1.Channels() + " " + src1.Depth() + " " + src1.Channels() + " " + src2.Depth());
+
+            ///// Find contours
+            //Mat[] contours = new Mat[]();
+            //CvMemStorage storage = new CvMemStorage();
+            //src1.FindContours(out contours, storage, ContourRetrieval.Tree, ContourChain.ApproxSimple);
+            //contours = contours.ApproxPoly(storage, ApproxPolyMethod.DP, 3, true);
+
+            //SURF sift = new SURF(0.1, 4, 2, true, false);
+            // Detect the keypoints and generate their descriptors using SIFT
+            //KeyPoint[] keypoints1, keypoints2;
+            //MatOfFloat descriptors1 = new MatOfFloat();
+            //MatOfFloat descriptors2 = new MatOfFloat();
+
+            //sift.Run(gray1, null, out keypoints1, descriptors1);
+            //sift.Run(gray2, null, out keypoints2, descriptors2);
+
+            // Detect the keypoints and generate their descriptors using SIFT
+            //Cv2.InitModule_NonFree();
+            //SIFT sift = new SIFT();
+
+            //KeyPoint[] keypoints1, keypoints2;
+            //MatOfFloat descriptors1 = new MatOfFloat();
+            //MatOfFloat descriptors2 = new MatOfFloat();
+            //sift.Run(src1, null, out keypoints1, descriptors1);
+            //sift.Run(src2, null, out keypoints2, descriptors2);
+
+            //// Matching descriptor vectors with a brute force matcher
+            //BFMatcher matcher = new BFMatcher(NormType.L2, false);
+            //DMatch[] matches = matcher.Match(descriptors1, descriptors2);
+
+            //// Draw matches
+            //Mat view = new Mat();
+            //Cv2.DrawMatches(src1, keypoints1, src2, keypoints2, matches, view);
+            //Cv2.ImShow("SIFT-BF",view);
+
+            //// Match descriptor vectors FLANN
+            //FlannBasedMatcher flannMatcher = new FlannBasedMatcher();
+            //matches = flannMatcher.Match(descriptors1, descriptors2);
+
+            //// Draw matches
+            //Mat siftflann = new Mat();
+            //Cv2.DrawMatches(src1, keypoints1, src2, keypoints2, matches, siftflann);
+            //Cv2.ImShow("Sift-flann", siftflann);
+
+            ////////SURF
+            //// Detect the keypoints and generate their descriptors using SURF
+            //SURF surf = new SURF(300, 4, 2, false);
+
+            //surf.Run(src1, null, out keypoints1, descriptors1);
+            //surf.Run(src2, null, out keypoints2, descriptors2);
+
+            //// Matching descriptor vectors with a brute force matcher
+            //matcher = new BFMatcher(NormType.L2, false);
+            //matches = matcher.Match(descriptors1, descriptors2);
+
+            //// Draw matches
+            //Mat view2 = new Mat();
+            //Cv2.DrawMatches(src1, keypoints1, src2, keypoints2, matches, view2);
+            //Cv2.ImShow("Surf-BF", view2);
+
+
+            //// Match descriptor vectors FLANN
+            //flannMatcher = new FlannBasedMatcher();
+            //matches = flannMatcher.Match(descriptors1, descriptors2);
+
+            //// Draw matches
+            //Mat flannView = new Mat();
+            //Cv2.DrawMatches(src1, keypoints1, src2, keypoints2, matches, flannView);
+
+            //Cv2.ImShow("Surf-flann", flannView);
+            
+
+        }
+        catch (System.Exception e) {
+            throw e;
+        }
+
+
+    }
+    bool DetectHands(CvBlob blob)
+    {
+        double cthresh = 100.0;
+        Mat blobMat = new Mat(fgthresh, blob.Rect);
+        //Cv2.Canny(blobMat, blobMat, cthresh, cthresh * 2, 3);
+        Mat[] contoursQuery;
+        OutputArray hierarchyQ = InputOutputArray.Create(new List<Vec4i>());
+        blobMat.FindContours(out contoursQuery, hierarchyQ, OpenCvSharp.ContourRetrieval.External, OpenCvSharp.ContourChain.ApproxSimple); 
+        foreach (var modelContours in handsContours)
+        {
+            foreach (var contourToMatch in contoursQuery)
+            {
+                foreach (var contourB in modelContours)
+                {
+                    double ratio = Cv2.MatchShapes(contourToMatch, contourB, MatchShapesMethod.I1);
+                    //Debug.Log("Matching: " + ratio);
+                    if (ratio < 0.1)
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
 
 }

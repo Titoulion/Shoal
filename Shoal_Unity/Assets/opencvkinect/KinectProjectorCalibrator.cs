@@ -330,14 +330,14 @@ public class KinectProjectorCalibrator : MonoBehaviour
                     Color32[] txcl = new Color32[screenTx.height * screenTx.width];
                     for (int i = 0; i < txcl.Length; i++)
                     {
-                        Color32 cCol = new Color32(255, 255, 255, 255);
+                        Color32 cCol = new Color32(0, 0, 0, 255);
                         txcl[i] = cCol;
                     }
                     screenTx.SetPixels32(txcl, 0);
-                    Color32 sccolor = Color.gray;
-                    for (int i = 0; i < show.Rows; i ++)
+                    Color32 sccolor = Color.white;
+                    for (int i = 0; i < show.Rows; i += 5)
                     {
-                        for (int j = 0; j < show.Cols; j ++)
+                        for (int j = 0; j < show.Cols; j += 5)
                         {
                             CvPoint3D64f realVal = NuiTransformDepthImageToSkeleton((long)j, (long)i, dBuffer.Get<ushort>((int)i, (int)j));
                             if (realVal.Z < projThresh && realVal.Z > 1.0)

@@ -89,11 +89,11 @@ public class KinectManagerSimple : MonoBehaviour
             //switch (smoothing)
             //{
             //    case Smoothing.Default:
-            smoothParameters.fSmoothing = 0.5f;
-            smoothParameters.fCorrection = 0.5f;
-            smoothParameters.fPrediction = 0.5f;
-            smoothParameters.fJitterRadius = 0.05f;
-            smoothParameters.fMaxDeviationRadius = 0.04f;
+            //smoothParameters.fSmoothing = 0.5f;
+            //smoothParameters.fCorrection = 0.5f;
+            //smoothParameters.fPrediction = 0.5f;
+            //smoothParameters.fJitterRadius = 0.05f;
+            //smoothParameters.fMaxDeviationRadius = 0.04f;
             //break;
             //    case Smoothing.Medium:
             //        smoothParameters.fSmoothing = 0.5f;
@@ -103,11 +103,11 @@ public class KinectManagerSimple : MonoBehaviour
             //        smoothParameters.fMaxDeviationRadius = 0.1f;
             //        break;
             //    case Smoothing.Aggressive:
-            //smoothParameters.fSmoothing = 0.7f;
-            //smoothParameters.fCorrection = 0.3f;
-            //smoothParameters.fPrediction = 1.0f;
-            //smoothParameters.fJitterRadius = 1.0f;
-            //smoothParameters.fMaxDeviationRadius = 1.0f;
+            smoothParameters.fSmoothing = 0.7f;
+            smoothParameters.fCorrection = 0.3f;
+            smoothParameters.fPrediction = 1.0f;
+            smoothParameters.fJitterRadius = 1.0f;
+            smoothParameters.fMaxDeviationRadius = 1.0f;
             //        break;
             //}
 

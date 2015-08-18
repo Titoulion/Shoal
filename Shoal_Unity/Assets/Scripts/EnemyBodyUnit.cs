@@ -133,12 +133,12 @@ public class EnemyBodyUnit : MonoBehaviour {
 			Color _c = new Color (theRenderer.color.r, theRenderer.color.g, theRenderer.color.b, _alpha);
 			theRenderer.color = _c;
 			myMat.SetFloat("_MyOpacity",_alpha);
-			Debug.Log("FadeOut animation is playing");	
+			//Debug.Log("FadeOut animation is playing");	
 			
 		} else {
 			
 			
-		}Debug.Log("Disappear");
+		}//Debug.Log("Disappear");
 		
 		
 		

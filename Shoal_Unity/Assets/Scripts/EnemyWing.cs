@@ -79,7 +79,7 @@ public class EnemyWing : MonoBehaviour {
 			InvokeRepeating ("apperaSequence", 0.1f, 0.1f);
 			
 		}
-		Debug.Log ("GENERATE BODY");
+		//Debug.Log ("GENERATE BODY");
 		setStatus(1);
 	}
 	
@@ -100,7 +100,7 @@ public class EnemyWing : MonoBehaviour {
 	}
 	
 	void idleAniamtion(){
-		Debug.Log("idle animation");
+		//Debug.Log("idle animation");
 
 		
 	}
@@ -145,7 +145,7 @@ public class EnemyWing : MonoBehaviour {
 			Invoke ("destoryTheLast", 1);
 		}
 		else{
-			Debug.Log("dead");
+			//Debug.Log("dead");
 			
 		}
 		setStatus (1);
@@ -158,7 +158,7 @@ public class EnemyWing : MonoBehaviour {
 		bodyNumber = 8;
 		_currentPointer = 0;
 		generateBody();
-		Debug.Log ("DO RESET ANIMATION");
+	//	Debug.Log ("DO RESET ANIMATION");
 
 		
 	}
@@ -170,7 +170,7 @@ public class EnemyWing : MonoBehaviour {
 
 			Destroy (EnemyBody[thelast-1]);
 			bodyNumber--;
-			Debug.Log ("the length" + bodyNumber);
+			//Debug.Log ("the length" + bodyNumber);
 		
 		}
 		

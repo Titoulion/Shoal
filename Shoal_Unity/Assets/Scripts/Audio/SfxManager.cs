@@ -19,6 +19,8 @@ public class SfxManager : SingletonMonoBehaviour<SfxManager>
 	[SerializeField] public AudioClipWithVolume monsterAttackSound;
 	[SerializeField] public AudioClipWithVolume monsterDieSound;
 	[SerializeField] public AudioClipWithVolume monsterHurtSound;
+	[SerializeField] public AudioClipWithVolume RippleSound;
+	[SerializeField] public AudioClipWithVolume ploufSound;
 
     private AudioListener audioListener;
 

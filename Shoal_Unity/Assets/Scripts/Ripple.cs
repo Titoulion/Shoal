@@ -21,6 +21,7 @@ public class Ripple : Entity
         fishVehicles = Pond.Instance.GetEntitiesOfType(EntityType.Fish).Select(entity => entity.GetComponent<Vehicle>()).ToArray();
 		theEnemy = EnemyScript.Me;
 		DetectDamageEnemy();
+		SfxManager.Instance.PlaySound(SfxManager.Instance.RippleSound,1f,Random.Range (0.7f,1.8f));
     }
 
 	private void DetectDamageEnemy()

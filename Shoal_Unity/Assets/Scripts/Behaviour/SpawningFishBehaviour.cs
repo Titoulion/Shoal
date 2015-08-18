@@ -14,6 +14,7 @@ public class SpawningFishBehaviour : MonoBehaviourBase
     private float angle;
     private int swimmingDirection;
     private Vector3 circleCenter;
+	private float sens = 1f;
 
     private void OnEnable()
     {
@@ -25,6 +26,9 @@ public class SpawningFishBehaviour : MonoBehaviourBase
 
         swimmingDirection = MathUtil.RandomSign;
         circleCenter = transform.position;
+
+		if(UnityEngine.Random.value>0.5f)
+			sens = -1f;
     }
 
     private void OnDisable()
@@ -33,9 +37,16 @@ public class SpawningFishBehaviour : MonoBehaviourBase
         fish.enabled = true;
     }
 
+	public void SetCircleCenter(Vector2 pos)
+	{
+		circleCenter = Camera.main.ScreenToWorldPoint(new Vector3(pos.x,pos.y,0f))*2.5f;
+	}
+
     private void Update()
     {
-        angle += Time.deltaTime * swimmingDirection * speedRad;
+		SetCircleCenter (Input.mousePosition);
+
+		angle += Time.deltaTime * swimmingDirection * speedRad*sens;
         var delta = UnityHelper.CreateVector2AngleRad(angle);
 
         transform.position = circleCenter + (Vector3) delta * radius;

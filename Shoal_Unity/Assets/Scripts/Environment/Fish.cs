@@ -27,12 +27,16 @@ public class Fish : Entity
 
     public void ExitSpawningMode()
     {
-        GetComponent<SpawningFishBehaviour>().enabled = false;
+		if(GetComponent<SpawningFishBehaviour>().enabled)
+		{
+			GetComponent<SpawningFishBehaviour>().enabled = false;
+			SfxManager.Instance.PlaySound(SfxManager.Instance.ploufSound,1f,UnityEngine.Random.Range (0.8f,1.2f));
+		}
     }
 
     private void Update()
     {
-       if(Health==0)
+		if(Health==0)
 			return;
 
 		Health -= Time.deltaTime / timeToDeath;

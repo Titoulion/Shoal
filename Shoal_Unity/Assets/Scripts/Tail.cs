@@ -225,8 +225,8 @@ public class Tail : MonoBehaviour {
 
 		if(previousProgressIntro!=1f && progressIntro==1f && dying == false)
 		{
-			GetComponentInParent<Fish>().ExitSpawningMode();
-		//	SfxManager.Instance.PlaySound(SfxManager.Instance.fishBornSound,1f,Random.Range (2.4f,3f));
+			//GetComponentInParent<Fish>().ExitSpawningMode();
+
 
 		}
 
@@ -235,6 +235,8 @@ public class Tail : MonoBehaviour {
 		if(finalLife==0f)
 			Destroy(transform.parent.gameObject);
 	}
+
+
 	
 	void Update () 
 	{
@@ -256,6 +258,11 @@ public class Tail : MonoBehaviour {
 		if(Input.GetKeyDown(KeyCode.W))
 		{
 			CreateWhiskers();
+		}
+
+		if(Input.GetKeyDown (KeyCode.P))
+		{
+			GetComponentInParent<Fish>().ExitSpawningMode();
 		}
 
 

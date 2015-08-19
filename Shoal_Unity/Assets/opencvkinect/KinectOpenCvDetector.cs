@@ -87,6 +87,8 @@ public class KinectOpenCvDetector : MonoBehaviour
     public double blobMinDistance = 10.0;
     [Range(0.0f, 1000.0f)]
     public double boulderThresh = 2.7;
+    [Range(0.0f, 10.0f)]
+    public double foodAreaDist = 1.7;
     [Range(0.1f, 100.0f)]
     public float handsPeriod = 1.0f;
     [Range(0, 4000)]
@@ -478,9 +480,9 @@ public class KinectOpenCvDetector : MonoBehaviour
     private void UpdateTracks(CvBlobs blobs, List<Trak> tracks, double minDist, int maxLife)
     {
         ArrayList matched = new ArrayList();
-        ArrayList enter = new ArrayList();
-        ArrayList active = new ArrayList();
-        ArrayList end = new ArrayList();
+        List<int> enter = new List<int>();
+        List<int> end = new List<int>();
+        List<int> active = new List<int>();
         foreach (var blob in blobs)
         {
             Vector2 blobPos = TransformKinectToScreenPos(new Vector2((float)blob.Value.Centroid.X, (float)(blob.Value.Centroid.Y)));
@@ -488,6 +490,7 @@ public class KinectOpenCvDetector : MonoBehaviour
 
             if (distanceFromCenter < ((Screen.height / 2) - radiusRemove))//check Centroid is inside Pond Bounds
             {
+                Debug.Log("Inbounds");
                 bool tracked = false;
                 double minFound = 1000.0;
                 Trak closest = new Trak();
@@ -499,6 +502,8 @@ public class KinectOpenCvDetector : MonoBehaviour
                     double distance = Vector2.Distance(new Vector2((float)blob.Value.Centroid.X, (float)blob.Value.Centroid.Y), new Vector2((float)track.X, (float)track.Y));
                     if (distance < minDist)
                     {
+                        Debug.Log("Found Closest");
+
                         tracked = true;
                         if (distance < minFound)
                         {
@@ -509,11 +514,13 @@ public class KinectOpenCvDetector : MonoBehaviour
                 }
                 if (tracked)
                 {
+                    Debug.Log("updating tracked");
+
                     //Ok it is tracked! do your stuff blob!
                     closest.Active++;
                     closest.Inactive = 0;
                     closest.Lifetime++;
-                    closest.Label = blob.Value.Label;
+                    closest.Label = blob.Key;
                     closest.X = blob.Value.Centroid.X;
                     closest.Y = blob.Value.Centroid.Y;
                     closest.Centroid = blob.Value.Centroid;
@@ -523,17 +530,20 @@ public class KinectOpenCvDetector : MonoBehaviour
                     closest.MinY = blob.Value.MinY;
                     matched.Add(closest.Id);
                     tracked = true;
-                    active.Add(closest.Label);
-                    break;
+                    active.Add((int)closest.Id);
+                    //break;
                 }
                 else
                 {
+                    Debug.Log("New track");
+
                     //Blob Is not tracked? create new trak
+                    trakCount++;
                     Trak track = new Trak();
                     track.Active = 1;
                     track.Inactive = 0;
                     track.Lifetime = 1;
-                    track.Label = blob.Value.Label;
+                    track.Label = blob.Key;
                     track.X = blob.Value.Centroid.X;
                     track.Y = blob.Value.Centroid.Y;
                     track.Centroid = blob.Value.Centroid;
@@ -543,8 +553,7 @@ public class KinectOpenCvDetector : MonoBehaviour
                     track.MinY = blob.Value.MinY;
                     track.Id = trakCount;
                     tracks.Add(track);
-                    trakCount++;
-                    enter.Add(closest.Label);
+                    enter.Add((int)track.Id);
                 }
             }
         }
@@ -556,7 +565,7 @@ public class KinectOpenCvDetector : MonoBehaviour
                 if (track.Inactive >= maxLife)
                 {
                     //Tracked object left, this track is leaving
-                    end.Add(track.Label);
+                    end.Add((int)track.Id);
                 }
                 else
                 {
@@ -567,74 +576,69 @@ public class KinectOpenCvDetector : MonoBehaviour
                 }
             }
         }
-        foreach (int label in active)
+        foreach (int id in active)
         {
-            OnBlobActive(label);
+            Debug.Log(id);
+            int idt = id;
+            OnBlobActive(idt);
         }
-        foreach (int label in end)
+        foreach (int id in end)
         {
-            OnBlobExit(label);
+            Debug.Log(id);
+            int idt = id;
+            OnBlobExit(idt);
         }
-        foreach (int label in enter)
+        foreach (int id in enter)
         {
-            OnBlobEnter(label);
+            Debug.Log(id);
+            int idt = id;
+            OnBlobEnter(idt);
         }
+
     }
-    private void OnBlobEnter(int blobLabel)
+    private void OnBlobEnter(int idt)
     {
-        CvBlob cBlob = new CvBlob();
-        Trak rT = tracks.Find(x => x.Label.Equals(blobLabel));
-        foreach (var blob in blobs)
+        Trak rT = tracks.Find(x => x.Id.Equals((long)idt));
+        CvBlob cBlob = blobs[rT.Label];
+        Vector2 blobPos = TransformKinectToScreenPos(new Vector2((float)cBlob.Centroid.X, (float)(cBlob.Centroid.Y)));
+        Debug.Log("Blob Entered " + cBlob.Label);
+        Vector2 foodPosA = spawner.GetComponent<Spawner>().GetFoodAreaCoordinate(0);
+        Vector2 foodPosB = spawner.GetComponent<Spawner>().GetFoodAreaCoordinate(1);
+        float distTofoodA = Vector2.Distance(foodPosA / (float)Screen.height, blobPos / (float)Screen.height);
+        float distTofoodB = Vector2.Distance(foodPosB / (float)Screen.height, blobPos / (float)Screen.height);
+        if (distTofoodA < foodAreaDist || distTofoodB < foodAreaDist)
         {
-            if (blob.Value.Label == blobLabel)
+            rT.foodArea = true;
+            Debug.Log("Got foodArea");
+        }
+        else
+        {
+            //Get depth of Blob
+            CvPoint3D64f sPoint = calib.NuiTransformDepthImageToSkeleton((long)cBlob.Centroid.X, (long)cBlob.Centroid.Y, src.At<ushort>((int)cBlob.Centroid.Y, (int)cBlob.Centroid.X));
+            //Todo transform coordinates to Screen coord
+            if (sPoint.Z > boulderThresh)
             {
-                cBlob = (CvBlob)blob.Value.Clone();
-                Vector2 blobPos = TransformKinectToScreenPos(new Vector2((float)cBlob.Centroid.X, (float)(cBlob.Centroid.Y)));
-                Debug.Log("Blob Entered " + cBlob.Label);
-                Vector2 foodPosA = spawner.GetComponent<Spawner>().GetFoodAreaCoordinate(0);
-                Vector2 foodPosB = spawner.GetComponent<Spawner>().GetFoodAreaCoordinate(1);
-                float distTofoodA = Vector2.Distance(foodPosA / (float)Screen.height, blobPos / (float)Screen.height);
-                float distTofoodB = Vector2.Distance(foodPosB / (float)Screen.height, blobPos / (float)Screen.height);
-                if (distTofoodA < 0.2f || distTofoodB < 0.2f)
-                {
-                    rT.foodArea = true;
-                    Debug.Log("Got foodArea");
-                }
-                else
-                {
-                    //Get depth of Blob
-                    CvPoint3D64f sPoint = calib.NuiTransformDepthImageToSkeleton((long)cBlob.Centroid.X, (long)cBlob.Centroid.Y, src.At<ushort>((int)cBlob.Centroid.Y, (int)cBlob.Centroid.X));
-                    //Todo transform coordinates to Screen coord
-                    if (sPoint.Z > boulderThresh)
-                    {
-                        //boulderAdd.Add(new Vector2((float)cBlob.Centroid.X, (float)cBlob.Centroid.Y));
-                        rT.boulder = true;
-                        rT.targetObject = spawner.GetComponent<Spawner>().SpawnBoulder(blobPos);
-                        Debug.Log("Got Boulder");
-                    }
-                    else
-                    {
-                        rT.targetObject = spawner.GetComponent<Spawner>().SpawnRipple(blobPos);
-                        Debug.Log("Got Ripple");
-                    }
-                }
-                break;
+                //boulderAdd.Add(new Vector2((float)cBlob.Centroid.X, (float)cBlob.Centroid.Y));
+                Debug.Log("Is boulder?: " + sPoint.Z + " " + boulderThresh);
+                rT.boulder = true;
+                rT.targetObject = spawner.GetComponent<Spawner>().SpawnBoulder(blobPos);
+                Debug.Log("Got Boulder");
+            }
+            else
+            {
+                rT.targetObject = spawner.GetComponent<Spawner>().SpawnRipple(blobPos);
+                Debug.Log("Got Ripple");
             }
         }
+        
 
     }
 
-    private void OnBlobActive(int blobLabel)
+    private void OnBlobActive(int idt)
     {
-        CvBlob cBlob = new CvBlob();
-        Trak rT = tracks.Find(x => x.Label.Equals(blobLabel));
-
-        foreach (var blob in blobs)
-        {
-            if (blob.Value.Label == blobLabel)
-            {
-                cBlob = (CvBlob)blob.Value;
-                Vector2 blobPos = TransformKinectToScreenPos(new Vector2((float)cBlob.Centroid.X, (float)(cBlob.Centroid.Y)));
+        Trak rT = tracks.Find(x => x.Id.Equals((long)idt));
+        CvBlob cBlob = blobs[rT.Label];
+        Vector2 blobPos = TransformKinectToScreenPos(new Vector2((float)cBlob.Centroid.X, (float)(cBlob.Centroid.Y)));
                 if (rT.boulder)
                 {
                     spawner.GetComponent<Spawner>().SetPositionFromScreenCoord(rT.targetObject, blobPos);
@@ -673,7 +677,7 @@ public class KinectOpenCvDetector : MonoBehaviour
                 }
                 else if (rT.hands)
                 {
-                    Debug.Log("DIS: "+Vector2.Distance(rT.lastFishPos, blobPos) );
+                    //Debug.Log("DIS: "+Vector2.Distance(rT.lastFishPos, blobPos) );
                     if (Vector2.Distance(rT.lastFishPos, blobPos) > 50.0f)
                     {
                         Debug.Log("Exit Move");
@@ -696,15 +700,13 @@ public class KinectOpenCvDetector : MonoBehaviour
                         rT.targetObject = spawner.GetComponent<Spawner>().SpawnFish(blobPos);
                     }
                 }
-                break;
-            }
-        }
+       
         //Debug.Log("Blob Enter " + blobLabel);
 
     }
-    private void OnBlobExit(int blobLabel)
+    private void OnBlobExit(int idt)
     {
-        Trak rT = tracks.Find(x => x.Label.Equals(blobLabel));
+        Trak rT = tracks.Find(x => x.Id.Equals((long)idt));
         if (rT.boulder)
         {
             Destroy(rT.targetObject);

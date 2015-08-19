@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class TweakingKinectOpenCv : MonoBehaviour 
 {
-	KinectOpenCvDetector myKinectOpenCvDetector;
+	public KinectOpenCvDetector myKinectOpenCvDetector;
 	public Canvas myCanvas;
 	public Slider sliderSmoothBlur;
 	public Slider sliderBlobMinArea;
@@ -32,17 +32,11 @@ public class TweakingKinectOpenCv : MonoBehaviour
 	public Slider sliderSrcThreshMin;
 	public Slider sliderSrcThreshMax;
 	public Slider sliderRadiusRemove;
-
-
-
+	
 	void Awake()
 	{
-		myKinectOpenCvDetector = GetComponent<KinectOpenCvDetector>();
-		Init();
-	}
+		transform.position = Vector3.zero;
 
-	void Init()
-	{
 		sliderSmoothBlur.value = (float)myKinectOpenCvDetector.smoothBlur;
 		sliderBlobMinArea.value = (float)myKinectOpenCvDetector.blobMinArea;
 		sliderBlobMaxArea.value = (float)myKinectOpenCvDetector.blobMaxArea;

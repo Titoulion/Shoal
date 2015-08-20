@@ -8,6 +8,7 @@ public class Ripple : Entity
     public float durationRipple = 2f;
     public float durationAfterRipple = 2f;
     private float progress = 0f;
+	private float progressAfterRipples = 0f;
     public float alignmentChangeRadius = 5f;
     public float strength = 10f;
     private bool afterRipple;
@@ -21,6 +22,7 @@ public class Ripple : Entity
         fishVehicles = Pond.Instance.GetEntitiesOfType(EntityType.Fish).Select(entity => entity.GetComponent<Vehicle>()).ToArray();
 		theEnemy = EnemyScript.Me;
 		DetectDamageEnemy();
+		SfxManager.Instance.PlaySound(SfxManager.Instance.RippleSound,1f,Random.Range (0.7f,1.8f));
     }
 
 	private void DetectDamageEnemy()
@@ -35,21 +37,21 @@ public class Ripple : Entity
     {
         if (afterRipple)
         {
-            progress += Time.deltaTime / durationAfterRipple;
-            if (progress >= 1f)
+            progressAfterRipples += Time.deltaTime / durationAfterRipple;
+			if (progressAfterRipples >= 1f)
             {
-                Destroy(gameObject);
+                Destroy(this.gameObject);
             }
         }
 
         progress += Time.deltaTime / durationRipple;
         progress = Mathf.Clamp01(progress);
         myMat.SetFloat("_Progress", progress);
-        if (progress == 1f)
+        if (progress == 1f && afterRipple==false)
         {
             GetComponent<Renderer>().enabled = false;
             afterRipple = true;
-            progress = 0;
+            progress = 1f;
             return;
         }
 

@@ -13,6 +13,15 @@ public class SfxManager : SingletonMonoBehaviour<SfxManager>
 
     [SerializeField] private AudioClipWithVolume exampleSound;
 
+	[SerializeField] public AudioClipWithVolume fishBornSound;
+	[SerializeField] public AudioClipWithVolume fishDieSound;
+	[SerializeField] public AudioClipWithVolume fishEatSound;
+	[SerializeField] public AudioClipWithVolume monsterAttackSound;
+	[SerializeField] public AudioClipWithVolume monsterDieSound;
+	[SerializeField] public AudioClipWithVolume monsterHurtSound;
+	[SerializeField] public AudioClipWithVolume RippleSound;
+	[SerializeField] public AudioClipWithVolume ploufSound;
+
     private AudioListener audioListener;
 
     private List<AudioSource> createdAudioSources;

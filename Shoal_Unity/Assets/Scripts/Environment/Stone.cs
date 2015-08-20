@@ -4,6 +4,8 @@ using System.Collections;
 
 public class Stone : Entity
 {
+
+
 	protected override void Awake()
 	{
 		base.Awake();

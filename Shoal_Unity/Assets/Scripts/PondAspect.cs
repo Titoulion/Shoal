@@ -17,16 +17,26 @@ public class PondAspect : MonoBehaviour {
 	[SerializeField] private Gradient rampColorsWaves;
 	[SerializeField] private Gradient rampColorsFoodOff;
 	[SerializeField] private Gradient rampColorsFoodOn;
+	[SerializeField] private Gradient rampColorsRipples;
 
 	void Start () 
 	{
 		myMat = GetComponent<Renderer>().material;
 		Shader.SetGlobalFloat("_GlobalOpacity", 1f);
+
+	}
+
+	void SpawnInitBoulder(float _x, float _y, float rad)
+	{
+		GameObject bould = Spawner.Instance.SpawnBoulder(new Vector2(_x,_y));
+		bould.transform.localScale = Vector3.one*rad;
+		bould.GetComponent<Stone>().radius = rad/2f;
 	}
 
 	void Update () 
 	{
 		UpdatePondAspect();
+	//	Debug.Log (Input.mousePosition.x/Screen.height+"    "+Input.mousePosition.x/Screen.height);
 	}
 
 	private void UpdatePondAspect()
@@ -39,7 +49,8 @@ public class PondAspect : MonoBehaviour {
 		Color col3 = rampColorsWaves.Evaluate(progressDay);
 		Color col4 = rampColorsFoodOff.Evaluate(progressDay);
 		Color col5 = rampColorsFoodOn.Evaluate(progressDay);
-		
+		Color col6 = rampColorsRipples.Evaluate(progressDay);
+
 		myMat.SetColor ("_ColorBlendRamp",col1);
 		Shader.SetGlobalColor("_ColorGlobal2",col1);
 		camRenderFish.backgroundColor = col2;
@@ -47,7 +58,8 @@ public class PondAspect : MonoBehaviour {
 		Shader.SetGlobalColor("_ColorGlobal3",col3);
 		Shader.SetGlobalColor("_ColorGlobal4",col4);
 		Shader.SetGlobalColor("_ColorGlobal5",col5);
-		
+		Shader.SetGlobalColor("_ColorGlobal6",col6);
+
 		speedDistort = 0.02f+0.007f*(Pond.Instance.GetEntitiesOfType(EntityType.Fish).Count());
 		progressDistort+=speedDistort;
 		myMat.SetFloat("_ProgressDistort",progressDistort);

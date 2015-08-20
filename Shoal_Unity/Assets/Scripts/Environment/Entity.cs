@@ -2,12 +2,12 @@
 
 public abstract class Entity : MonoBehaviourBase
 {
-    [SerializeField] private float radius;
+    [SerializeField] public float radius;
 
     public abstract EntityType Type { get; }
 
     public float Radius { get { return radius; } }
-
+	public bool isOn = true;
     protected Pond pond;
 	bool goDestroy = false;
 
@@ -29,6 +29,7 @@ public abstract class Entity : MonoBehaviourBase
     public void Eaten()
     {
 		goDestroy = true;
+
     }
 
 	void LateUpdate()

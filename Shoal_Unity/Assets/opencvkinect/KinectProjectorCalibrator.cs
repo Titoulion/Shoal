@@ -37,6 +37,7 @@ public class KinectProjectorCalibrator : MonoBehaviour
     private bool foundResult = false;
     private Color32[] resetPixels;
     private bool nextBt = false;
+    public bool runCalibration = false;
 
     //private static double NUI_CAMERA_COLOR_NOMINAL_FOCAL_LENGTH_IN_PIXELS = (531.15);   // Based on 640x480 pixel size.
     //private static double NUI_CAMERA_COLOR_NOMINAL_INVERSE_FOCAL_LENGTH_IN_PIXELS = (1.83e-3);  // (1/NUI_CAMERA_COLOR_NOMINAL_FOCAL_LENGTH_IN_PIXELS)
@@ -48,12 +49,6 @@ public class KinectProjectorCalibrator : MonoBehaviour
     private static double NUI_CAMERA_DEPTH_NOMINAL_DIAGONAL_FOV = (70.0);
     private static double NUI_CAMERA_DEPTH_NOMINAL_HORIZONTAL_FOV = (58.5);
     private static double NUI_CAMERA_DEPTH_NOMINAL_VERTICAL_FOV = (45.6);
-
-    //#define NUI_CAMERA_COLOR_NOMINAL_FOCAL_LENGTH_IN_PIXELS         (531.15f)   // Based on 640x480 pixel size.
-    //#define NUI_CAMERA_COLOR_NOMINAL_INVERSE_FOCAL_LENGTH_IN_PIXELS (1.83e-3f)  // (1/NUI_CAMERA_COLOR_NOMINAL_FOCAL_LENGTH_IN_PIXELS)
-    //#define NUI_CAMERA_COLOR_NOMINAL_DIAGONAL_FOV                   ( 73.9f)
-    //#define NUI_CAMERA_COLOR_NOMINAL_HORIZONTAL_FOV                 ( 62.0f)
-    //#define NUI_CAMERA_COLOR_NOMINAL_VERTICAL_FOV                   ( 48.6f)
     private static int NUI_IMAGE_PLAYER_INDEX_SHIFT = 3;
     private static int NUI_IMAGE_PLAYER_INDEX_MASK = ((1 << NUI_IMAGE_PLAYER_INDEX_SHIFT) - 1);
     private static long NUI_IMAGE_DEPTH_MAXIMUM = ((4000 << NUI_IMAGE_PLAYER_INDEX_SHIFT) | NUI_IMAGE_PLAYER_INDEX_MASK);
@@ -153,18 +148,22 @@ public class KinectProjectorCalibrator : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        Application.RegisterLogCallback(HandleLog);
-        scTex = new Texture2D(KinectWrapper.GetDepthWidth(), KinectWrapper.GetDepthHeight(), TextureFormat.RGBA32, false);
-        screenTx = new Texture2D(Screen.width, Screen.height, TextureFormat.RGBA32, false);
-        resetPixels = new Color32[Screen.width * Screen.height];
-        for (int i = 0; i < resetPixels.Length; i++)
+        if (runCalibration)
         {
-            Color32 cCol = new Color32(0, 0, 0, 0);
-            resetPixels[i] = cCol;
+            Application.RegisterLogCallback(HandleLog);
+            scTex = new Texture2D(KinectWrapper.GetDepthWidth(), KinectWrapper.GetDepthHeight(), TextureFormat.RGBA32, false);
+            screenTx = new Texture2D(Screen.width, Screen.height, TextureFormat.RGBA32, false);
+            resetPixels = new Color32[Screen.width * Screen.height];
+            for (int i = 0; i < resetPixels.Length; i++)
+            {
+                Color32 cCol = new Color32(0, 0, 0, 0);
+                resetPixels[i] = cCol;
+            }
+            screenTx.SetPixels32(resetPixels);
+            screenTx.Apply(false);
+            GameObject.FindGameObjectWithTag("Restex").GetComponent<RawImage>().texture = screenTx;
         }
-        screenTx.SetPixels32(resetPixels);
-        screenTx.Apply(false);
-        GameObject.FindGameObjectWithTag("Restex").GetComponent<RawImage>().texture = screenTx;
+
         foundCoordinatesMatrix = new Mat();
         rightSideMatrix = new Mat();
         //result = new Mat(11,1,OpenCvSharp.CPlusPlus.MatType.CV_64FC1);
@@ -201,189 +200,193 @@ public class KinectProjectorCalibrator : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButton(0) || Input.GetMouseButton(1) || Input.GetMouseButton(2))
+        if (runCalibration)
         {
-            if (Input.GetMouseButton(0))
+            if (Input.GetMouseButton(0) || Input.GetMouseButton(1) || Input.GetMouseButton(2))
             {
-                //Debug.Log(Input.mousePosition);
-                GameObject bc = GameObject.FindGameObjectWithTag("BlueCross");
-                bc.transform.localPosition = new Vector3(Map(Input.mousePosition.x, Screen.width / 2.0f - 320.0f, Screen.width / 2.0f + 320.0f, 0.0f, 640.0f) - 320.0f, -Map(Input.mousePosition.y, Screen.height / 2.0f + 240.0f, Screen.height / 2.0f - 240.0f, 0.0f, 480.0f) + 240.0f, 0.0f);
+                if (Input.GetMouseButton(0))
+                {
+                    //Debug.Log(Input.mousePosition);
+                    GameObject bc = GameObject.FindGameObjectWithTag("BlueCross");
+                    bc.transform.localPosition = new Vector3(Map(Input.mousePosition.x, Screen.width / 2.0f - 320.0f, Screen.width / 2.0f + 320.0f, 0.0f, 640.0f) - 320.0f, -Map(Input.mousePosition.y, Screen.height / 2.0f + 240.0f, Screen.height / 2.0f - 240.0f, 0.0f, 480.0f) + 240.0f, 0.0f);
+                }
+                else if (Input.GetMouseButton(1))
+                {
+                    GameObject yc = GameObject.FindGameObjectWithTag("YellowCross");
+                    yc.transform.localPosition = new Vector3(Map(Input.mousePosition.x, Screen.width / 2.0f - 320.0f, Screen.width / 2.0f + 320.0f, 0.0f, 640.0f) - 320.0f, -Map(Input.mousePosition.y, Screen.height / 2.0f + 240.0f, Screen.height / 2.0f - 240.0f, 0.0f, 480.0f) + 240.0f, 0.0f);
+                    nextBt = true;
+                }
+                else if (Input.GetMouseButton(2) && nextBt == true)
+                {
+                    if (addKinectPoint())
+                    {
+                        addProjectorPoint();
+                        Debug.Log("Point Added! -> (" + kinectCoordinates.Count + ") ");
+                        nextBt = false;
+                    }
+                    else
+                    {
+                        Debug.Log("Kinect Point out of bounds!");
+                    }
+                }
             }
-            else if (Input.GetMouseButton(1))
+            if (Input.GetKeyDown(KeyCode.A))
             {
-                GameObject yc = GameObject.FindGameObjectWithTag("YellowCross");
-                yc.transform.localPosition = new Vector3(Map(Input.mousePosition.x, Screen.width / 2.0f - 320.0f, Screen.width / 2.0f + 320.0f, 0.0f, 640.0f) - 320.0f, -Map(Input.mousePosition.y, Screen.height / 2.0f + 240.0f, Screen.height / 2.0f - 240.0f, 0.0f, 480.0f) + 240.0f, 0.0f);
-                nextBt = true;
-            }
-            else if (Input.GetMouseButton(2) && nextBt == true)
-            {
+                //PointerEventData pointer = new PointerEventData(EventSystem.current);
+                //pointer.position = Input.mousePosition;
+                //List<RaycastResult> raycastResults = new List<RaycastResult>();
+                //EventSystem.current.RaycastAll(pointer, raycastResults);
                 if (addKinectPoint())
                 {
                     addProjectorPoint();
-                    Debug.Log("Point Added! -> (" + kinectCoordinates.Count + ") ");
-                    nextBt = false;
+                    Debug.Log("Point Added! -> " + kinectCoordinates.Count);
                 }
                 else
                 {
                     Debug.Log("Kinect Point out of bounds!");
                 }
             }
-        }
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            //PointerEventData pointer = new PointerEventData(EventSystem.current);
-            //pointer.position = Input.mousePosition;
-            //List<RaycastResult> raycastResults = new List<RaycastResult>();
-            //EventSystem.current.RaycastAll(pointer, raycastResults);
-            if (addKinectPoint())
+            if (Input.GetKeyDown(KeyCode.S))
             {
-                addProjectorPoint();
-                Debug.Log("Point Added! -> " + kinectCoordinates.Count);
-            }
-            else
-            {
-                Debug.Log("Kinect Point out of bounds!");
-            }
-        }
-        if (Input.GetKeyDown(KeyCode.S))
-        {
-            if (kinectCoordinates.Count >= 8)
-            {
-                Debug.Log("Starting Calibration...");
-                findTransformation(kinectCoordinates, projectorCoordinates);
-                foundResult = true;
-            }
-            else
-            {
-                Debug.Log("Not Enough Points!");
-            }
-        }
-        if (Input.GetKeyDown(KeyCode.D) && foundResult == true)
-        {
-            showResult = !showResult;
-            if (!showResult)
-            {
-                screenTx.SetPixels32(resetPixels);
-                screenTx.Apply(false);
-            }
-            Debug.Log("Show result toggle: " + showResult);
-        }
-        if (Input.GetKeyDown(KeyCode.F) && foundResult == true)
-        {
-
-            using (CvFileStorage fs = new CvFileStorage("KinectCalibration.xml", null, FileStorageMode.Write))
-            {
-                string nodeName = "calibResult";
-                fs.Write(nodeName, result.ToCvMat());
-                nodeName = "kinectPoints";
-                Mat kinectPts = new Mat(1, kinectCoordinates.Count, MatType.CV_64FC3);
-                for (int i = 0; i < kinectCoordinates.Count; i++)
+                if (kinectCoordinates.Count >= 8)
                 {
-                    kinectPts.Set<CvPoint3D64f>(0, i, (CvPoint3D64f)kinectCoordinates[i]);
-                }
-                fs.Write(nodeName, kinectPts.ToCvMat());
-                nodeName = "projectorPoints";
-                Mat projPts = new Mat(1, projectorCoordinates.Count, MatType.CV_64FC2);
-                for (int i = 0; i < projectorCoordinates.Count; i++)
-                {
-                    projPts.Set<CvPoint2D64f>(0, i, (CvPoint2D64f)projectorCoordinates[i]);
-                }
-                fs.Write(nodeName, projPts.ToCvMat());
-                fs.Dispose();
-            }
-            Debug.Log("Calib Data saved!");
-        }
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            delLastPoints();
-        }
-        if (kinect.GetDepthRaw())
-        {
-            try
-            {
-
-                Mat src = DoDepthBuffer(kinect.usersDepthMap, KinectWrapper.GetDepthWidth(), KinectWrapper.GetDepthHeight());
-                dBuffer = src.Clone();
-                src.ConvertTo(src, OpenCvSharp.CPlusPlus.MatType.CV_8UC1, 255.0f / NUI_IMAGE_DEPTH_MAXIMUM);
-
-                Mat show = new Mat(KinectWrapper.GetDepthHeight(), KinectWrapper.GetDepthWidth(), OpenCvSharp.CPlusPlus.MatType.CV_8UC4);
-                Mat alpha = new Mat(KinectWrapper.GetDepthHeight(), KinectWrapper.GetDepthWidth(), OpenCvSharp.CPlusPlus.MatType.CV_8UC1, new Scalar(255));
-                Mat[] planes = new Mat[4] { src, src, src, alpha };
-                Cv2.Merge(planes, show);
-                //Mat falseColorsMap = new Mat();
-                //Cv2.ApplyColorMap(src, falseColorsMap, OpenCvSharp.CPlusPlus.ColorMapMode.Rainbow);
-                //Cv2.ImShow("show", falseColorsMap);
-                int matSize = (int)show.Total() * show.Channels();
-                byte[] rColors = new byte[matSize];
-                Marshal.Copy(show.DataStart, rColors, 0, matSize);
-                scTex.LoadRawTextureData(rColors);
-                scTex.Apply(false);
-                ScreenObject.GetComponent<RawImage>().texture = scTex;
-                if (showResult)
-                {
-                    //ResultObject.SetActive(true);
-                    screenTx.SetPixels32(resetPixels);
-                    long discarded = 0;
-                    long drawn = 0;
-                    long bounds = 0;
-                    //Color32[] txcl = (Color32[])resetPixels.Clone();
-                    Color32[] txcl = new Color32[screenTx.height * screenTx.width];
-                    for (int i = 0; i < txcl.Length; i++)
-                    {
-                        Color32 cCol = new Color32(255, 255, 255, 255);
-                        txcl[i] = cCol;
-                    }
-                    screenTx.SetPixels32(txcl, 0);
-                    Color32 sccolor = Color.gray;
-                    for (int i = 0; i < show.Rows; i ++)
-                    {
-                        for (int j = 0; j < show.Cols; j ++)
-                        {
-                            CvPoint3D64f realVal = NuiTransformDepthImageToSkeleton((long)j, (long)i, dBuffer.Get<ushort>((int)i, (int)j));
-                            if (realVal.Z < projThresh && realVal.Z > 1.0)
-                            {
-                                CvPoint2D64f scCoord = convertKinectToProjector(realVal);
-                                if (scCoord.X > 0.0 && scCoord.X < Screen.width && scCoord.Y > 0.0 && scCoord.Y < Screen.height)
-                                {
-                                    //Debug.Log(scCoord.X.ToString() + " " + scCoord.Y.ToString());
-                                    //Vec4b bgrPixel = falseColorsMap.At<Vec4b>(i, j);
-                                    //Color32 sccolor = new Color32(bgrPixel[2], bgrPixel[1], bgrPixel[0], 255);
-                                    int X = Mathf.CeilToInt((float)scCoord.X);
-                                    int Y = Mathf.CeilToInt((float)scCoord.Y);
-                                    int arrPos = ((screenTx.height - Y) * screenTx.width) + X;
-                                    //Debug.Log(scCoord.X + " -> " + X + " --" + scCoord.Y + " -> " + Y + " = " + arrPos +  " == " + screenTx.height + " == " + screenTx.width);
-                                    txcl[arrPos] = sccolor;
-                                    //screenTx.SetPixel((int)scCoord.X, Screen.height - (int)scCoord.Y, sccolor);
-                                    drawn++;
-                                }
-                                else
-                                {
-                                    bounds++;
-                                }
-                            }
-                            else
-                            {
-                                discarded++;
-                            }
-                        }
-                    }
-                    Debug.Log("Discarded: " + discarded + " Bounds: " + bounds + " Drawn: " + drawn);
-                    screenTx.SetPixels32(txcl, 0);
-                    screenTx.Apply(false);
-                    //GameObject.FindGameObjectWithTag("Restex").GetComponent<RawImage>().texture = screenTx;
-                    //CvContour contourfinder = new CvContour();
+                    Debug.Log("Starting Calibration...");
+                    findTransformation(kinectCoordinates, projectorCoordinates);
+                    foundResult = true;
                 }
                 else
                 {
-                    //ResultObject.SetActive(false);
+                    Debug.Log("Not Enough Points!");
                 }
-
             }
-            catch (System.Exception e)
+            if (Input.GetKeyDown(KeyCode.D) && foundResult == true)
             {
-                throw e;
+                showResult = !showResult;
+                if (!showResult)
+                {
+                    screenTx.SetPixels32(resetPixels);
+                    screenTx.Apply(false);
+                }
+                Debug.Log("Show result toggle: " + showResult);
+            }
+            if (Input.GetKeyDown(KeyCode.F) && foundResult == true)
+            {
+
+                using (CvFileStorage fs = new CvFileStorage("KinectCalibration.xml", null, FileStorageMode.Write))
+                {
+                    string nodeName = "calibResult";
+                    fs.Write(nodeName, result.ToCvMat());
+                    nodeName = "kinectPoints";
+                    Mat kinectPts = new Mat(1, kinectCoordinates.Count, MatType.CV_64FC3);
+                    for (int i = 0; i < kinectCoordinates.Count; i++)
+                    {
+                        kinectPts.Set<CvPoint3D64f>(0, i, (CvPoint3D64f)kinectCoordinates[i]);
+                    }
+                    fs.Write(nodeName, kinectPts.ToCvMat());
+                    nodeName = "projectorPoints";
+                    Mat projPts = new Mat(1, projectorCoordinates.Count, MatType.CV_64FC2);
+                    for (int i = 0; i < projectorCoordinates.Count; i++)
+                    {
+                        projPts.Set<CvPoint2D64f>(0, i, (CvPoint2D64f)projectorCoordinates[i]);
+                    }
+                    fs.Write(nodeName, projPts.ToCvMat());
+                    fs.Dispose();
+                }
+                Debug.Log("Calib Data saved!");
+            }
+            if (Input.GetKeyDown(KeyCode.Q))
+            {
+                delLastPoints();
+            }
+            if (kinect.GetDepthRaw())
+            {
+                try
+                {
+
+                    Mat src = DoDepthBuffer(kinect.usersDepthMap, KinectWrapper.GetDepthWidth(), KinectWrapper.GetDepthHeight());
+                    dBuffer = src.Clone();
+                    src.ConvertTo(src, OpenCvSharp.CPlusPlus.MatType.CV_8UC1, 255.0f / NUI_IMAGE_DEPTH_MAXIMUM);
+
+                    Mat show = new Mat(KinectWrapper.GetDepthHeight(), KinectWrapper.GetDepthWidth(), OpenCvSharp.CPlusPlus.MatType.CV_8UC4);
+                    Mat alpha = new Mat(KinectWrapper.GetDepthHeight(), KinectWrapper.GetDepthWidth(), OpenCvSharp.CPlusPlus.MatType.CV_8UC1, new Scalar(255));
+                    Mat[] planes = new Mat[4] { src, src, src, alpha };
+                    Cv2.Merge(planes, show);
+                    //Mat falseColorsMap = new Mat();
+                    //Cv2.ApplyColorMap(src, falseColorsMap, OpenCvSharp.CPlusPlus.ColorMapMode.Rainbow);
+                    //Cv2.ImShow("show", falseColorsMap);
+                    int matSize = (int)show.Total() * show.Channels();
+                    byte[] rColors = new byte[matSize];
+                    Marshal.Copy(show.DataStart, rColors, 0, matSize);
+                    scTex.LoadRawTextureData(rColors);
+                    scTex.Apply(false);
+                    ScreenObject.GetComponent<RawImage>().texture = scTex;
+                    if (showResult)
+                    {
+                        //ResultObject.SetActive(true);
+                        screenTx.SetPixels32(resetPixels);
+                        long discarded = 0;
+                        long drawn = 0;
+                        long bounds = 0;
+                        //Color32[] txcl = (Color32[])resetPixels.Clone();
+                        Color32[] txcl = new Color32[screenTx.height * screenTx.width];
+                        for (int i = 0; i < txcl.Length; i++)
+                        {
+                            Color32 cCol = new Color32(0, 0, 0, 255);
+                            txcl[i] = cCol;
+                        }
+                        screenTx.SetPixels32(txcl, 0);
+                        Color32 sccolor = Color.white;
+                        for (int i = 0; i < show.Rows; i += 5)
+                        {
+                            for (int j = 0; j < show.Cols; j += 5)
+                            {
+                                CvPoint3D64f realVal = NuiTransformDepthImageToSkeleton((long)j, (long)i, dBuffer.Get<ushort>((int)i, (int)j));
+                                if (realVal.Z < projThresh && realVal.Z > 1.0)
+                                {
+                                    CvPoint2D64f scCoord = convertKinectToProjector(realVal);
+                                    if (scCoord.X > 0.0 && scCoord.X < Screen.width && scCoord.Y > 0.0 && scCoord.Y < Screen.height)
+                                    {
+                                        //Debug.Log(scCoord.X.ToString() + " " + scCoord.Y.ToString());
+                                        //Vec4b bgrPixel = falseColorsMap.At<Vec4b>(i, j);
+                                        //Color32 sccolor = new Color32(bgrPixel[2], bgrPixel[1], bgrPixel[0], 255);
+                                        int X = Mathf.CeilToInt((float)scCoord.X);
+                                        int Y = Mathf.CeilToInt((float)scCoord.Y);
+                                        int arrPos = ((screenTx.height - Y) * screenTx.width) + X;
+                                        //Debug.Log(scCoord.X + " -> " + X + " --" + scCoord.Y + " -> " + Y + " = " + arrPos +  " == " + screenTx.height + " == " + screenTx.width);
+                                        txcl[arrPos] = sccolor;
+                                        //screenTx.SetPixel((int)scCoord.X, Screen.height - (int)scCoord.Y, sccolor);
+                                        drawn++;
+                                    }
+                                    else
+                                    {
+                                        bounds++;
+                                    }
+                                }
+                                else
+                                {
+                                    discarded++;
+                                }
+                            }
+                        }
+                        Debug.Log("Discarded: " + discarded + " Bounds: " + bounds + " Drawn: " + drawn);
+                        screenTx.SetPixels32(txcl, 0);
+                        screenTx.Apply(false);
+                        //GameObject.FindGameObjectWithTag("Restex").GetComponent<RawImage>().texture = screenTx;
+                        //CvContour contourfinder = new CvContour();
+                    }
+                    else
+                    {
+                        //ResultObject.SetActive(false);
+                    }
+
+                }
+                catch (System.Exception e)
+                {
+                    throw e;
+                }
             }
         }
+
     }
     private bool addKinectPoint()
     {
@@ -398,10 +401,13 @@ public class KinectProjectorCalibrator : MonoBehaviour
         {
             CvPoint3D64f realVal = NuiTransformDepthImageToSkeleton((long)xCoord, (long)yCoord, dBuffer.Get<ushort>((int)yCoord, (int)xCoord));
             Debug.Log(realVal.X + " " + realVal.Y + " " + realVal.Z);
-            if(realVal.Z > 0.0){
+            if (realVal.Z > 0.0)
+            {
                 kinectCoordinates.Add(realVal);
                 return true;
-            }else{
+            }
+            else
+            {
                 return false;
             }
         }
@@ -436,7 +442,7 @@ public class KinectProjectorCalibrator : MonoBehaviour
     /// Returns the skeleton space coordinates of the given depth image pixel (in meters).
     /// </returns>
 
-    private CvPoint3D64f NuiTransformDepthImageToSkeleton(long lDepthX, long lDepthY, ushort usDepthValue)
+    public CvPoint3D64f NuiTransformDepthImageToSkeleton(long lDepthX, long lDepthY, ushort usDepthValue)
     {
 
         //

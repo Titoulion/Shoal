@@ -36,6 +36,9 @@ public class EnemyScript : MonoBehaviour {
 	public Vector2 moveRange;
 
 	public float attackSpeed;
+	public float attackGapTime;
+
+	private float attackInterval = 0f;
 
 	private int currentHealth = 0;
 
@@ -78,6 +81,7 @@ public class EnemyScript : MonoBehaviour {
 		float rectLeft = huntingRadius - attackRange;
 		watchingRect = new Rect(rectLeft, attackWidth/2, attackRange, attackWidth);
 
+		// attackInterval = attackGapTime;
 
 		//get animation script
 	}
@@ -108,7 +112,7 @@ public class EnemyScript : MonoBehaviour {
 				TakingDamageUpdate();
 				break;
 			case EnemyState.Blank:
-				Debug.Log("state should never be set to Blank");
+				//Debug.Log("state should never be set to Blank");
 				break;
 		}
 
@@ -126,12 +130,14 @@ public class EnemyScript : MonoBehaviour {
 			CheckForDamage();
 		}
 
+		//Debug.Log (state);
+
 
 	}
 
 	void AttackingUpdate() {
 		if (prey == null) {
-			Debug.Log("ERROR: prey is null during attack");
+			//Debug.Log("ERROR: prey is null during attack");
 			Reset();
 			return;
 		}
@@ -171,6 +177,7 @@ public class EnemyScript : MonoBehaviour {
 		float time = lerpTimer/lerpDuration;
 		SmoothMove(startRadius, targetRadius, startAngle, targetAngle, time);
 		if (time >= 1f) {
+			attackInterval = attackGapTime;
 			Hunt();
 		}
 	}
@@ -191,7 +198,7 @@ public class EnemyScript : MonoBehaviour {
 			float sleepTime = Random.Range(sleepTimeRange.x, sleepTimeRange.y);
 			
 			Invoke("WakeUp", sleepTime);
-			Debug.Log("enemy rebirth");
+			//Debug.Log("enemy rebirth");
 			GetComponent<EnemyAnimationScript>().RegenerateFullBody();
 
 			//enemyAnimation.setSleepTime (sleepTime);
@@ -207,6 +214,11 @@ public class EnemyScript : MonoBehaviour {
 		*/
 		//FishScript[] fishes = FindObjectsOfType(typeof(FishScript)) as FishScript[];
 		//enemyAnimation.setEnemyAnimation(EnemyAnimationScript.EnemyAnimation.huntAnimation);
+
+		attackInterval -= Time.deltaTime;
+		if (attackInterval > 0f) {
+			return;
+		}
 
 		
 		Entity[] fishes = Pond.Instance.GetEntitiesOfType(EntityType.Fish).ToArray();
@@ -263,6 +275,7 @@ public class EnemyScript : MonoBehaviour {
 		}
 
 		if (time >= 1f) {
+			attackInterval = 0f;
 			Hunt();
 		}
 
@@ -274,7 +287,7 @@ public class EnemyScript : MonoBehaviour {
 	}
 
 	void TakingDamageUpdate() {
-		Debug.Log("Ow"+ currentHealth);
+		//Debug.Log("Ow"+ currentHealth);
 		lerpTimer += Time.deltaTime;
 		float time = lerpTimer/lerpDuration;
 		SmoothMove(startRadius, targetRadius, startAngle, targetAngle, time);
@@ -313,35 +326,57 @@ public class EnemyScript : MonoBehaviour {
 
 	public void CheckForDamage() {
 
+		if(state!=EnemyState.WakingUp &&
+			state!=EnemyState.Resetting &&
+			state!=EnemyState.TakingDamage &&
+			state!=EnemyState.Dying &&
+			state!=EnemyState.Sleeping &&
+			state!=EnemyState.Repositioning)
+			{
+
 			enemyAnimation.setEnemyAnimation(EnemyAnimationScript.EnemyAnimation.destroryAnimation);
 			currentHealth--;
-			Debug.Log("DYING");
-			if (currentHealth <= 0) {
-				nextState = EnemyState.Dying;
-
-				targetRadius = sleepingRadius;
-				Vector2 pos = transform.position;
-				startRadius = Vector2.Distance(Vector2.zero, pos);
-				// startAngle = Mathf.Atan2(pos.y, pos.x);
-				startAngle = currentAngle;
-				targetAngle = startAngle;
-
-				lerpDuration = wakingUpTime;
-				lerpTimer = 0f;
-
-				CancelInvoke("Reposition");
-			} else {
-				nextState = EnemyState.TakingDamage;
-				CancelInvoke("Reposition");
-
-				startRadius = currentRadius;
-				startAngle = currentAngle;
-				targetRadius = huntingRadius;
-				targetAngle = currentAngle;
-
-				lerpDuration = 1f;
-				lerpTimer = 0f;
+			//Debug.Log("DYING");
+			if (currentHealth <= 0) 
+			{
+				if(nextState!=EnemyState.Dying)
+				{
+					nextState = EnemyState.Dying;
+					
+					targetRadius = sleepingRadius;
+					Vector2 pos = transform.position;
+					startRadius = Vector2.Distance(Vector2.zero, pos);
+					// startAngle = Mathf.Atan2(pos.y, pos.x);
+					startAngle = currentAngle;
+					targetAngle = startAngle;
+					
+					lerpDuration = wakingUpTime;
+					lerpTimer = 0f;
+					SfxManager.Instance.PlaySound(SfxManager.Instance.monsterDieSound,1f,UnityEngine.Random.Range (0.8f,1.4f));
+					
+					CancelInvoke("Reposition");
+				}
+				
+			} 
+			else 
+			{
+				if(nextState!=EnemyState.TakingDamage)
+				{
+					nextState = EnemyState.TakingDamage;
+					SfxManager.Instance.PlaySound(SfxManager.Instance.monsterHurtSound,1f,UnityEngine.Random.Range (0.6f,0.8f));
+					CancelInvoke("Reposition");
+					
+					// startRadius = currentRadius;
+					// startAngle = currentAngle;
+					// targetRadius = huntingRadius;
+					// targetAngle = currentAngle;
+					
+					// lerpDuration = 1f;
+					// lerpTimer = 0f;
+					Reposition();
+				}
 			}
+		}
 
 	}
 
@@ -387,6 +422,7 @@ public class EnemyScript : MonoBehaviour {
 		lerpTimer = 0f;
 		lerpDuration = distance/attackSpeed;
 		nextState = EnemyState.Attacking;
+		SfxManager.Instance.PlaySound(SfxManager.Instance.monsterAttackSound,1f,UnityEngine.Random.Range (0.8f,1.4f));
 		CancelInvoke("Reposition");
 	}
 

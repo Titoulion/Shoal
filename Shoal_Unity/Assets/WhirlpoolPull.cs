@@ -59,7 +59,7 @@ public class WhirlpoolPull : MonoBehaviourBase
 
         foreach (var fish in killFishes)
         {
-            Destroy(fish.gameObject);
+			fish.GetComponentInChildren<Tail>().GoDieWithNewDuration(0.2f);
         }
         killFishes.Clear();
     }

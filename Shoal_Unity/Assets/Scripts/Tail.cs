@@ -5,6 +5,7 @@ using System.Linq;
 public class Tail : MonoBehaviour {
 
 	[SerializeField] private GameObject prefabBodyPart;
+	[SerializeField] private GameObject prefabWhisker;
 	[SerializeField] private ProgressModifProperty property1;
 	[SerializeField] private ProgressModifProperty property1B;
 	[SerializeField] private ProgressModifProperty property2;
@@ -18,15 +19,16 @@ public class Tail : MonoBehaviour {
 	[SerializeField] private AnimationCurve curveBlinkHunger;
 	[SerializeField] private AnimationCurve curveSizeApparition;
 
+
 	private GameObject[] bodyParts = new GameObject[0];
 	private BodyPartScript[] bodyPartsScripts = new BodyPartScript[0];
 	private TrailRenderer[] bodyPartsTrails = new TrailRenderer[0];
 	private Vector3[] bodyPartsPositions = new Vector3[0];
 	private int numberBodyParts = 50;
-	private float nextHeadSize = 2f;
+	public float nextHeadSize = 2f;
 	private float tailLenght = 0f;
 	private float radiusMotionBodyParts = 1f;
-	private float headSize = 0f;
+	public float headSize = 0f;
 	private float exchangeColor = 0f;
 	private float lerpValueSize = 0f;
 	private float speedMotionBodyPart = 1f;
@@ -40,7 +42,7 @@ public class Tail : MonoBehaviour {
 	private float finalLife = 1f;
 	private Vector2 minMaxTrailTime;
 	private float hunger =0f;
-	private float minAlpha = 0.2f;
+	private float minAlpha = 0.9f;
 	private float myFishRandom;
 	private float speedBlink = 1f;
 	private Color[] trailsColors;
@@ -51,6 +53,8 @@ public class Tail : MonoBehaviour {
 	private NewGradient myGradientsStuff;
 	private float durationDeath = 1f;
 	public float previousProgressIntro = 0f;
+	private float timerWhisker = 0f;
+	public bool inIntro = true;
 		
 	void Start () 
 	{
@@ -59,6 +63,7 @@ public class Tail : MonoBehaviour {
 		InitValues();
 		GenerateBody();
 		GetComponentInParent<Fish>().PutInSpawningMode();
+		SfxManager.Instance.PlaySound(SfxManager.Instance.fishBornSound,1f,Random.Range (0.8f,1.2f));
 	}
 		
 	private void InitValues()
@@ -87,7 +92,7 @@ public class Tail : MonoBehaviour {
 		tailLenght = p1;
 		radiusMotionBodyParts = p1B;
 		exchangeColor = p2;
-		nextHeadSize = p3;
+		nextHeadSize = 0.5f;
 		headSize = 0f;
 		lerpValueSize = p3B;
 	}
@@ -150,7 +155,7 @@ public class Tail : MonoBehaviour {
 			float nodeAngle	 =	Mathf.Atan2(bodyPartsPositions[i].y - bodyPartsPositions[i-1].y,bodyPartsPositions[i].x - bodyPartsPositions[i-1].x);
 			bodyPartsPositions[i] = new Vector3(bodyPartsPositions[i-1].x + tailLenght*(1f-progress) * Mathf.Cos(nodeAngle),bodyPartsPositions[i-1].y + tailLenght*(1f-progress) * Mathf.Sin(nodeAngle),0f);
 			
-			if(tailAttractor!=null)
+			if(tailAttractor!=null && inIntro==false)
 			{
 				Vector3 toAttractor = tailAttractor.transform.position-bodyPartsPositions[i];
 				float distanceAttractor = toAttractor.magnitude;
@@ -171,6 +176,10 @@ public class Tail : MonoBehaviour {
 			Vector3 circularMotion = toForward*Mathf.Cos (randomValueT*2f*Mathf.PI)*radiusMotionBodyParts*progress+toUp*Mathf.Sin (randomValueT*2f*Mathf.PI)*radiusMotionBodyParts*progress;
 			
 			bodyParts[i].transform.position = bodyPartsPositions[i] + circularMotion;
+
+
+			//bodyPartsScripts[i].myWhisker.transform.rotation = Quaternion.LookRotation(Vector3.Normalize(bodyParts[i-1].transform.position-bodyParts[i].transform.position),-Vector3.forward);
+
 		}
 	}
 
@@ -187,7 +196,12 @@ public class Tail : MonoBehaviour {
 			finalLife=Mathf.Clamp01(finalLife-Time.deltaTime/durationDeath);
 
 		float progressIntro = Mathf.Clamp01(timeLife/3f);
-		headSize=Mathf.Lerp (0f,nextHeadSize,curveSizeApparition.Evaluate(progressIntro));
+
+		if(inIntro)
+			headSize=Mathf.Lerp (0f,0.3f,curveSizeApparition.Evaluate(progressIntro));
+		else
+			headSize=Mathf.Lerp (headSize,nextHeadSize,0.05f);
+
 		headSize *= finalLife;
 
 		hunger = 1f-GetComponentInParent<Fish>().Health;
@@ -210,14 +224,16 @@ public class Tail : MonoBehaviour {
 				bodyPartsTrails[i].material.SetColor ("_Color",myGradientsStuff.randomGradient.Evaluate(progress));
 			}
 
-			bodyPartsTrails[i].material.SetColor ("_Color", Color.Lerp (trailsColors[i],new Color(0.8f,0.8f,0.8f,minAlpha),progressValueHunger));
+			bodyPartsTrails[i].material.SetColor ("_Color", Color.Lerp (trailsColors[i],new Color(0.1f,0.1f,0.1f),progressValueHunger));
 			bodyPartsScripts[i].SetHunger(progressValueHunger);
 			bodyPartsScripts[i].SetProgressDigestion(progressDigestion);
 		}
 
 		if(previousProgressIntro!=1f && progressIntro==1f && dying == false)
 		{
-			GetComponentInParent<Fish>().ExitSpawningMode();
+			//GetComponentInParent<Fish>().ExitSpawningMode();
+
+
 		}
 
 		previousProgressIntro = progressIntro;
@@ -225,14 +241,53 @@ public class Tail : MonoBehaviour {
 		if(finalLife==0f)
 			Destroy(transform.parent.gameObject);
 	}
+
+
 	
 	void Update () 
 	{
 		PositionBodyParts();
 		ProgressionsProperties(true);
 		timeLife+=Time.deltaTime;
+
+
+		timerWhisker+=Time.deltaTime;
+
+		if(timerWhisker>=60f)
+		{
+			timerWhisker = 0f;
+			CreateWhiskers();
+		}
+
+
+
+		if(Input.GetKeyDown(KeyCode.W))
+		{
+			CreateWhiskers();
+		}
+
+		if(Input.GetKeyDown (KeyCode.P))
+		{
+			GetComponentInParent<Fish>().ExitSpawningMode();
+		}
+
+
 	}
 
+	void CreateWhiskers()
+	{
+		Color colo = myGradientsStuff.randomGradient.Evaluate(Random.value);
+		float randScal = Random.Range (1f,1.5f);
+		float randRot = Random.Range (-45f,45f);
+		GameObject whisk = Instantiate (prefabWhisker,Vector3.zero,Quaternion.identity) as GameObject;
+		whisk.transform.parent = GetComponentInParent<Fish>().myWhisker.transform;
+		whisk.GetComponent<Whisker>().Init (randRot,randScal,colo);
+		
+		GameObject whisk2 = Instantiate (prefabWhisker,Vector3.zero,Quaternion.identity) as GameObject;
+		whisk2.transform.parent = GetComponentInParent<Fish>().myWhisker.transform;
+		whisk2.GetComponent<Whisker>().Init (180f-randRot,randScal,colo);
+	}
+	
 	public void GoDigest()
 	{
 		digestion = true;
@@ -242,12 +297,14 @@ public class Tail : MonoBehaviour {
 	public void GoDie()
 	{
 		dying = true;
+		SfxManager.Instance.PlaySound(SfxManager.Instance.fishDieSound,1f,Random.Range (1f,1.4f));
 	}
 
 	public void GoDieWithNewDuration(float duration)
 	{
 		durationDeath = duration;
 		dying = true;
+		SfxManager.Instance.PlaySound(SfxManager.Instance.fishDieSound,1f,Random.Range (1f,1.4f));
 	}
 
 	[System.Serializable]

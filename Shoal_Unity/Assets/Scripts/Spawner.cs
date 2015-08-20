@@ -12,6 +12,7 @@ public class Spawner : MonoBehaviourBase
 	[SerializeField] private Transform prefabRipple;
 	[SerializeField] private Transform prefabFood;
 	[SerializeField] public FoodArea[] foodAreas;
+	[SerializeField] public StoneArea[] stoneAreas;
 
     private List<Transform> boulders = new List<Transform>();
 	[SerializeField] private float timeBetweenRipples = 0.3f;
@@ -34,6 +35,13 @@ public class Spawner : MonoBehaviourBase
 	public GameObject SpawnFish(Vector2 posOnScreen)
 	{
 		return(SpawnStuff(prefabFish, posOnScreen, 0f));
+	}
+
+	public GameObject SpawnFishCloserToCenter(Vector2 posOnScreen)
+	{
+		Vector2 _posOnScreen = posOnScreen;
+		_posOnScreen+=(new Vector2(Screen.width/2f,Screen.height/2f)-posOnScreen).normalized*Screen.height/20f;
+		return(SpawnStuff(prefabFish, _posOnScreen, 0f));
 	}
 
 	public GameObject SpawnWhirlPool(Vector2 posOnScreen)
@@ -74,15 +82,35 @@ public class Spawner : MonoBehaviourBase
 		spawnPos.z = zPos;
         return spawnPos;
     }
-
+    public void SetPositionFromScreenCoord(GameObject obj, Vector2 posOnScreen, float zPos = 0f)
+    {
+        Vector3 worldPos = Camera.main.ScreenToWorldPoint(posOnScreen) * 2.5f;
+        worldPos.z = zPos;
+        obj.transform.position = worldPos;
+    }
+	
 	public void ActivateFoodArea(bool activated, int indexFoodArea)
 	{
-		foodAreas[indexFoodArea].GoActivate(activated);
+		if(indexFoodArea<foodAreas.Length && foodAreas[indexFoodArea]!=null)
+			foodAreas[indexFoodArea].GoActivate(activated);
 	}
 
 	public void RevertStateFoodArea(int indexFoodArea)
 	{
-		foodAreas[indexFoodArea].RevertState();
+		if(indexFoodArea<foodAreas.Length && foodAreas[indexFoodArea]!=null)	
+			foodAreas[indexFoodArea].RevertState();
+	}
+
+	public void ActivateStoneArea(bool activated, int indexStoneArea)
+	{
+		if(indexStoneArea<foodAreas.Length && foodAreas[indexStoneArea]!=null)
+			stoneAreas[indexStoneArea].GoActivate(activated);
+	}
+	
+	public void RevertStateStoneArea(int indexStoneArea)
+	{
+		if(indexStoneArea<foodAreas.Length && foodAreas[indexStoneArea]!=null)
+			stoneAreas[indexStoneArea].RevertState();
 	}
 
 	public Vector2 GetFoodAreaCoordinate(int index)
@@ -98,7 +126,7 @@ public class Spawner : MonoBehaviourBase
 		GestionSpawnWhirlPool();
 
 		if (Input.GetMouseButtonDown(0))
-			SpawnFish (Vec2MousePos());
+			SpawnFishCloserToCenter (Vec2MousePos());
 
 		if (Input.GetMouseButtonDown(1))
 			SpawnFood(Vec2MousePos());
@@ -125,7 +153,7 @@ public class Spawner : MonoBehaviourBase
 		if(timeBeforeNextWhirlPool<=0f)
 		{
 			float rand = Random.Range(0f,2f*Mathf.PI);
-			Vector3 randomPo = new Vector3(Mathf.Cos (rand),Mathf.Sin (rand),0f)*Random.Range (0f,8f)/2.5f;
+			Vector3 randomPo = new Vector3(Mathf.Cos (rand),Mathf.Sin (rand),0f)*Random.Range (5f,8f)/2.5f;
 			SpawnWhirlPool(Camera.main.WorldToScreenPoint(randomPo));
 			ResetWhirlPoolTimer();
 		}

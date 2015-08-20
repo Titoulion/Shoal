@@ -176,7 +176,7 @@ public class EnemyAnimationScript : MonoBehaviour {
 		for (int i = 0; i < EnemyWings.Length; i++) {
 			
 			WingScript[i].setStatus(6);
-			Debug.Log ("RESET ANIAMATION"+EnemyWings.Length);
+			//Debug.Log ("RESET ANIAMATION"+EnemyWings.Length);
 
 		}
 

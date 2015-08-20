@@ -5,7 +5,7 @@ using System.Collections;
 public class Stone : Entity
 {
 	private Vector3 nextPos;
-
+	public bool useDedicatedPosition = true;
 	protected override void Awake()
 	{
 		base.Awake();
@@ -20,7 +20,8 @@ public class Stone : Entity
 
 	private void Update()
 	{
-		transform.position = Vector3.Lerp (transform.position, nextPos,0.4f);
+		if(useDedicatedPosition)
+			transform.position = Vector3.Lerp (transform.position, nextPos,0.4f);
 	}
 
 	public void SetPositionFromScreenCoord(Vector2 posOnScreen)

@@ -23,11 +23,20 @@ public class PondAspect : MonoBehaviour {
 	{
 		myMat = GetComponent<Renderer>().material;
 		Shader.SetGlobalFloat("_GlobalOpacity", 1f);
+
+	}
+
+	void SpawnInitBoulder(float _x, float _y, float rad)
+	{
+		GameObject bould = Spawner.Instance.SpawnBoulder(new Vector2(_x,_y));
+		bould.transform.localScale = Vector3.one*rad;
+		bould.GetComponent<Stone>().radius = rad/2f;
 	}
 
 	void Update () 
 	{
 		UpdatePondAspect();
+	//	Debug.Log (Input.mousePosition.x/Screen.height+"    "+Input.mousePosition.x/Screen.height);
 	}
 
 	private void UpdatePondAspect()

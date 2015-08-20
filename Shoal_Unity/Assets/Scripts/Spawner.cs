@@ -130,7 +130,7 @@ public class Spawner : MonoBehaviourBase
 		if(timeBeforeNextWhirlPool<=0f)
 		{
 			float rand = Random.Range(0f,2f*Mathf.PI);
-			Vector3 randomPo = new Vector3(Mathf.Cos (rand),Mathf.Sin (rand),0f)*Random.Range (0f,8f)/2.5f;
+			Vector3 randomPo = new Vector3(Mathf.Cos (rand),Mathf.Sin (rand),0f)*Random.Range (5f,8f)/2.5f;
 			SpawnWhirlPool(Camera.main.WorldToScreenPoint(randomPo));
 			ResetWhirlPoolTimer();
 		}

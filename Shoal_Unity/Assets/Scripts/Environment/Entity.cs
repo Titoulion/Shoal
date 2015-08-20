@@ -2,7 +2,7 @@
 
 public abstract class Entity : MonoBehaviourBase
 {
-    [SerializeField] private float radius;
+    [SerializeField] public float radius;
 
     public abstract EntityType Type { get; }
 

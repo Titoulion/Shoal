@@ -42,7 +42,7 @@ public class Tail : MonoBehaviour {
 	private float finalLife = 1f;
 	private Vector2 minMaxTrailTime;
 	private float hunger =0f;
-	private float minAlpha = 0.2f;
+	private float minAlpha = 0.9f;
 	private float myFishRandom;
 	private float speedBlink = 1f;
 	private Color[] trailsColors;
@@ -224,7 +224,7 @@ public class Tail : MonoBehaviour {
 				bodyPartsTrails[i].material.SetColor ("_Color",myGradientsStuff.randomGradient.Evaluate(progress));
 			}
 
-			bodyPartsTrails[i].material.SetColor ("_Color", Color.Lerp (trailsColors[i],new Color(0.8f,0.8f,0.8f,minAlpha),progressValueHunger));
+			bodyPartsTrails[i].material.SetColor ("_Color", Color.Lerp (trailsColors[i],new Color(0.1f,0.1f,0.1f),progressValueHunger));
 			bodyPartsScripts[i].SetHunger(progressValueHunger);
 			bodyPartsScripts[i].SetProgressDigestion(progressDigestion);
 		}

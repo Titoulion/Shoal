@@ -464,7 +464,7 @@ public class KinectOpenCvDetector : MonoBehaviour
                 UpdateTracks(blobs, tracks, blobMinDistance, blobMaxLife);
                 //OpenCvSharp.Blob.CvBlobLib.RenderTracks(tracks, fgthreshImg, showImg, RenderTracksMode.BoundingBox | RenderTracksMode.Id);
                 RenderTracks(showImg);
-                Cv.ShowImage("thres", fgthreshImg);
+                //Cv.ShowImage("thres", fgthreshImg);
                 Cv.ShowImage("showBlob", showImg);
                 //Check Blob Actions
                 //Debug.Log(tracks.Count);
@@ -706,7 +706,7 @@ public class KinectOpenCvDetector : MonoBehaviour
         //        }
         //    }
 
-        if (!rT.stoneArea || !rT.foodArea)
+        if (!rT.stoneArea && !rT.foodArea)
         {
 			rT.targetObject = Spawner.Instance.SpawnRipple(blobPos);
            // Debug.Log("Got Ripple");
@@ -778,6 +778,9 @@ public class KinectOpenCvDetector : MonoBehaviour
         //    }
         //}
         //else 
+
+        float distanceFromCenter = Vector2.Distance(blobPos, new Vector2(Screen.width / 2, Screen.height / 2));
+
         if (rT.hands)
         {
             //Debug.Log("DIS: "+Vector2.Distance(rT.lastFishPos, blobPos) );
@@ -792,7 +795,7 @@ public class KinectOpenCvDetector : MonoBehaviour
             }
                     
         }
-        else if (Time.frameCount % handsPeriod == 0 && DetectHands(cBlob) && !rT.foodArea && !rT.stoneArea)
+        else if (Time.frameCount % handsPeriod == 0 && !rT.foodArea && !rT.stoneArea && distanceFromCenter > ((Screen.height / 4)) && DetectHands(cBlob))
         {
             //Check if it is hands
             if (!rT.hands)
@@ -878,9 +881,9 @@ public class KinectOpenCvDetector : MonoBehaviour
         if (show != null)
         {
 
-            Cv2.ImShow("bg", bg);
+            //Cv2.ImShow("bg", bg);
             //Cv2.ImShow("show", show);
-            Cv2.ImShow("fg", fg);
+            //Cv2.ImShow("fg", fg);
             //Cv2.ImShow("fgthresh", fgthresh);
 
         }
@@ -963,10 +966,10 @@ public class KinectOpenCvDetector : MonoBehaviour
             OutputArray hierarchyD = InputOutputArray.Create(new List<Vec4i>());
             src4.FindContours(out contoursD, hierarchyD, OpenCvSharp.ContourRetrieval.CComp, OpenCvSharp.ContourChain.ApproxTC89KCOS);
             handsContours = new Mat[][] { contoursA, contoursB, contoursC, contoursD };
-            Cv2.ImShow("1", src1);
-            Cv2.ImShow("2", src2);
-            Cv2.ImShow("3", src3);
-            Cv2.ImShow("4", src4);
+            //Cv2.ImShow("1", src1);
+            //Cv2.ImShow("2", src2);
+            //Cv2.ImShow("3", src3);
+            //Cv2.ImShow("4", src4);
             //Debug.Log(src1.Channels() + " " + src1.Depth() + " " + src1.Channels() + " " + src2.Depth());
 
             ///// Find contours

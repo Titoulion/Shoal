@@ -126,7 +126,6 @@ public class KinectOpenCvDetector : MonoBehaviour
     private SimpleBlobDetector blob;
     private List<Trak> tracks;
     private OpenCvSharp.Blob.CvBlobs blobs;
-    public GameObject spawner;
     private Vector2 foodPosA;
     private Vector2 foodPosB;
     private List<Vector2> foodAdd;
@@ -174,8 +173,8 @@ public class KinectOpenCvDetector : MonoBehaviour
         foodAdd = new List<Vector2>();
         boulderAdd = new List<Vector2>();
         rippleAdd = new List<Vector2>();
-        foodPosA = spawner.GetComponent<Spawner>().GetFoodAreaCoordinate(0);
-        foodPosB = spawner.GetComponent<Spawner>().GetFoodAreaCoordinate(1);
+        foodPosA = Spawner.Instance.GetFoodAreaCoordinate(0);
+		foodPosB = Spawner.Instance.GetFoodAreaCoordinate(1);
         //detectorThread = new Thread(new ThreadStart(DoTracking));
         //running = true;
         //detectorThread.Start();
@@ -709,7 +708,7 @@ public class KinectOpenCvDetector : MonoBehaviour
 
         if (!rT.stoneArea || !rT.foodArea)
         {
-            rT.targetObject = spawner.GetComponent<Spawner>().SpawnRipple(blobPos);
+			rT.targetObject = Spawner.Instance.SpawnRipple(blobPos);
             Debug.Log("Got Ripple");
         }
 
@@ -801,7 +800,7 @@ public class KinectOpenCvDetector : MonoBehaviour
                 Debug.Log("Hands!");
                 rT.hands = true;
                 rT.lastFishPos = blobPos;
-                rT.targetObject = spawner.GetComponent<Spawner>().SpawnFishCloserToCenter(blobPos);
+				rT.targetObject = Spawner.Instance.SpawnFishCloserToCenter(blobPos);
             }
         }
        
@@ -821,7 +820,7 @@ public class KinectOpenCvDetector : MonoBehaviour
         }
         else if (rT.foodArea)
         {
-            spawner.GetComponent<Spawner>().ActivateFoodArea(false, rT.targetFoodArea);
+			Spawner.Instance.ActivateFoodArea(false, rT.targetFoodArea);
         }
         Debug.Log("Blob Exited " + rT.Id);
         tracks.Remove(rT);

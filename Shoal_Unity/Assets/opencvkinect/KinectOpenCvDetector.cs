@@ -27,12 +27,15 @@ public class Trak
     public int MaxX;
     public int MaxY;
     public bool foodArea = false;
+    public int targetFoodArea;
     public bool boulder = false;
     public bool fish = false;
     public bool hands = false;
+    public bool stoneArea;
+    public int targetStoneArea;
     public GameObject targetObject;
     public Vector2 lastFishPos;
-    public int targetFoodArea;
+
 
 }
 
@@ -97,6 +100,8 @@ public class KinectOpenCvDetector : MonoBehaviour
     public int srcThreshMax = 4000;
     [Range(0, 100)]
     public int radiusRemove = 20;
+    [Range(0.0f, 1.0f)]
+    public double handsThreshold = 0.2;
 
     // Object parameters - rectangle where the attached gameObject is in screen coordinates
     UnityEngine.Rect objectScreenPosition = new Rect(0, 0, 1, 1);
@@ -479,10 +484,12 @@ public class KinectOpenCvDetector : MonoBehaviour
     }
     private void UpdateTracks(CvBlobs blobs, List<Trak> tracks, double minDist, int maxLife)
     {
+
         ArrayList matched = new ArrayList();
         List<int> enter = new List<int>();
         List<int> end = new List<int>();
         List<int> active = new List<int>();
+
         foreach (var blob in blobs)
         {
             Vector2 blobPos = TransformKinectToScreenPos(new Vector2((float)blob.Value.Centroid.X, (float)(blob.Value.Centroid.Y)));
@@ -490,7 +497,7 @@ public class KinectOpenCvDetector : MonoBehaviour
 
             if (distanceFromCenter < ((Screen.height / 2) - radiusRemove))//check Centroid is inside Pond Bounds
             {
-                Debug.Log("Inbounds");
+                //Debug.Log("Inbounds");
                 bool tracked = false;
                 double minFound = 1000.0;
                 Trak closest = new Trak();
@@ -502,7 +509,7 @@ public class KinectOpenCvDetector : MonoBehaviour
                     double distance = Vector2.Distance(new Vector2((float)blob.Value.Centroid.X, (float)blob.Value.Centroid.Y), new Vector2((float)track.X, (float)track.Y));
                     if (distance < minDist)
                     {
-                        Debug.Log("Found Closest");
+                        //Debug.Log("Found Closest");
 
                         tracked = true;
                         if (distance < minFound)
@@ -514,7 +521,7 @@ public class KinectOpenCvDetector : MonoBehaviour
                 }
                 if (tracked)
                 {
-                    Debug.Log("updating tracked");
+                    //Debug.Log("updating tracked");
 
                     //Ok it is tracked! do your stuff blob!
                     closest.Active++;
@@ -535,7 +542,7 @@ public class KinectOpenCvDetector : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log("New track");
+                    //Debug.Log("New track");
 
                     //Blob Is not tracked? create new trak
                     trakCount++;
@@ -576,21 +583,71 @@ public class KinectOpenCvDetector : MonoBehaviour
                 }
             }
         }
+        foreach (StoneArea stoneArea in Spawner.Instance.stoneAreas)
+        {
+            bool toOpen = false;
+
+            for (int i = 0; i < tracks.Count; i++)
+            {
+                Trak track = tracks[i];
+                if (track.Active > 0)
+                {
+                    Vector2 blobPos = TransformKinectToScreenPos(new Vector2((float)track.X, (float)(track.Y)));
+                    if (Vector2.Distance(blobPos, stoneArea.GetPositionOnScreen()) < Screen.height * foodAreaDist)
+                    {
+                        track.stoneArea = true;
+                        toOpen = true;
+                        break;
+                    }
+                    else
+                    {
+                        track.stoneArea = false;
+                    }
+                }
+
+            }
+            stoneArea.GoActivate(toOpen);
+        }
+        foreach (FoodArea foodArea in Spawner.Instance.foodAreas)
+        {
+            bool toOpen = false;
+
+            for (int i = 0; i < tracks.Count; i++)
+            {
+                Trak track = tracks[i];
+                if (tracks[i].Active > 0)
+                {
+                    Vector2 blobPos = TransformKinectToScreenPos(new Vector2((float)track.X, (float)(track.Y)));
+                    if (Vector2.Distance(blobPos, foodArea.GetPositionOnScreen()) < Screen.height * foodAreaDist)
+                    {
+                        track.foodArea = true;
+                        toOpen = true;
+                        break;
+                    }
+                    else
+                    {
+                        track.foodArea = false;
+                    }
+                }
+
+            }
+            foodArea.GoActivate(toOpen);
+        }
         foreach (int id in active)
         {
-            Debug.Log(id);
+            //Debug.Log(id);
             int idt = id;
             OnBlobActive(idt);
         }
         foreach (int id in end)
         {
-            Debug.Log(id);
+            //Debug.Log(id);
             int idt = id;
             OnBlobExit(idt);
         }
         foreach (int id in enter)
         {
-            Debug.Log(id);
+            //Debug.Log(id);
             int idt = id;
             OnBlobEnter(idt);
         }
@@ -602,36 +659,61 @@ public class KinectOpenCvDetector : MonoBehaviour
         CvBlob cBlob = blobs[rT.Label];
         Vector2 blobPos = TransformKinectToScreenPos(new Vector2((float)cBlob.Centroid.X, (float)(cBlob.Centroid.Y)));
         Debug.Log("Blob Entered " + cBlob.Label);
-        Vector2 foodPosA = spawner.GetComponent<Spawner>().GetFoodAreaCoordinate(0);
-        Vector2 foodPosB = spawner.GetComponent<Spawner>().GetFoodAreaCoordinate(1);
-        float distTofoodA = Vector2.Distance(foodPosA / (float)Screen.height, blobPos / (float)Screen.height);
-        float distTofoodB = Vector2.Distance(foodPosB / (float)Screen.height, blobPos / (float)Screen.height);
-        if (distTofoodA < foodAreaDist || distTofoodB < foodAreaDist)
-        {
-            rT.foodArea = true;
-            Debug.Log("Got foodArea");
-        }
-        else
-        {
-            //Get depth of Blob
-            CvPoint3D64f sPoint = calib.NuiTransformDepthImageToSkeleton((long)cBlob.Centroid.X, (long)cBlob.Centroid.Y, src.At<ushort>((int)cBlob.Centroid.Y, (int)cBlob.Centroid.X));
-            //Todo transform coordinates to Screen coord
-            if (sPoint.Z > boulderThresh)
-            {
-                //boulderAdd.Add(new Vector2((float)cBlob.Centroid.X, (float)cBlob.Centroid.Y));
-                Debug.Log("Is boulder?: " + sPoint.Z + " " + boulderThresh);
-                rT.boulder = true;
-                rT.targetObject = spawner.GetComponent<Spawner>().SpawnBoulder(blobPos);
-                Debug.Log("Got Boulder");
-            }
-            else
-            {
-                rT.targetObject = spawner.GetComponent<Spawner>().SpawnRipple(blobPos);
-                Debug.Log("Got Ripple");
-            }
-        }
-        
+        //Vector2 foodPosA = spawner.GetComponent<Spawner>().GetFoodAreaCoordinate(0);
+        //Vector2 foodPosB = spawner.GetComponent<Spawner>().GetFoodAreaCoordinate(1);
+        //float distTofoodA = Vector2.Distance(foodPosA / (float)Screen.height, blobPos / (float)Screen.height);
+        //float distTofoodB = Vector2.Distance(foodPosB / (float)Screen.height, blobPos / (float)Screen.height);
+        //if (distTofoodA < foodAreaDist || distTofoodB < foodAreaDist)
+        //{
+        //    rT.foodArea = true;
+        //    //Debug.Log("Got foodArea");
+        //}
+        //else
+        //{
+        ////    //Get depth of Blob
+        ////    ////Find brightest
+        ////    //Mat blobroi = new Mat(fg, cBlob.Rect);
+        ////    //double minVal = new double();
+        ////    //double maxVal = new double();
+        ////    //int minIdx = new int();
+        ////    //int maxIdx = new int();
+        ////    //Cv2.MinMaxIdx(blobroi, out minVal, out maxVal, out minIdx, out maxIdx);
+        ////    //Size brightSize;
+        ////    //Point ofset;
+        ////    //blobroi.LocateROI(out brightSize, out ofset);
+        ////    //int maxPointX = ofset.X + (maxIdx % blobroi.Cols) + 1;
+        ////    //int maxPointY = ofset.Y + (maxIdx % blobroi.Rows) + 1;
+        ////    //CvPoint3D64f sPoint = calib.NuiTransformDepthImageToSkeleton((long)maxPointX, (long)maxPointY, src.At<ushort>(maxPointY, maxPointX));
+        ////    CvPoint3D64f sPoint = calib.NuiTransformDepthImageToSkeleton((long)cBlob.Centroid.X, (long)cBlob.Centroid.Y, src.At<ushort>((int)cBlob.Centroid.Y, (int)cBlob.Centroid.X));
+        ////    //Debug.Log(maxIdx + " " + ofset.X + " " + ofset.Y + " " + maxPointX + " " + maxPointY);
+        ////    //&& ( maxVal == fg.At<int>((int)cBlob.Centroid.X, (int)cBlob.Centroid.)
+        ////     float distanceFromCenter = Vector2.Distance(blobPos, new Vector2(Screen.width / 2, Screen.height / 2));
+        ////     if (sPoint.Z > boulderThresh && distanceFromCenter < 5.0f)
+        ////    {
+        ////        boulderAdd.Add(new Vector2((float)cBlob.Centroid.X, (float)cBlob.Centroid.Y));
+        ////        Debug.Log("Is boulder?: " + sPoint.Z + " " + boulderThresh);
+        ////        rT.boulder = true;
+        ////        rT.targetObject = spawner.GetComponent<Spawner>().SpawnBoulder(blobPos);
+        ////        Debug.Log("Got Boulder");
+        ////    }
+        //    StoneArea[] sareas = spawner.GetComponent<Spawner>().stoneAreas;
+        //    for (int i = 0; i < sareas.Length; i++)
+        //    {
+        //        StoneArea curS = sareas[i];
+        //        float distToStone = Vector2.Distance(curS.GetPositionOnScreen() / (float)Screen.height, blobPos / (float)Screen.height);
+        //        if(distToStone < foodAreaDist )
+        //        {
+        //            rT.stoneArea = true;
+        //        }
+        //    }
 
+        if (!rT.stoneArea || !rT.foodArea)
+        {
+            rT.targetObject = spawner.GetComponent<Spawner>().SpawnRipple(blobPos);
+            Debug.Log("Got Ripple");
+        }
+
+        //}
     }
 
     private void OnBlobActive(int idt)
@@ -639,67 +721,89 @@ public class KinectOpenCvDetector : MonoBehaviour
         Trak rT = tracks.Find(x => x.Id.Equals((long)idt));
         CvBlob cBlob = blobs[rT.Label];
         Vector2 blobPos = TransformKinectToScreenPos(new Vector2((float)cBlob.Centroid.X, (float)(cBlob.Centroid.Y)));
-                if (rT.boulder)
-                {
-                    spawner.GetComponent<Spawner>().SetPositionFromScreenCoord(rT.targetObject, blobPos);
-                    Debug.Log("Setting BoulderPos: " + (float)blobPos.x + " " + (float)blobPos.y);
-                }
-                else if (rT.foodArea)
-                {
-                    float distTofoodA = Vector2.Distance(foodPosA / (float)Screen.height, blobPos / (float)Screen.height);
-                    float distTofoodB = Vector2.Distance(foodPosB / (float)Screen.height, blobPos / (float)Screen.height);
-                    if (distTofoodA < 0.2f)
-                    {
-                        rT.foodArea = true;
-                        rT.targetFoodArea = 0;
-                        spawner.GetComponent<Spawner>().ActivateFoodArea(true, 0);
-                        Debug.Log("Got foodArea");
-                    }
-                    else
-                    {
-                        rT.foodArea = true;
-                        spawner.GetComponent<Spawner>().ActivateFoodArea(false, 0);
-                        Debug.Log("Exit foodArea");
-                    }
-                    if (distTofoodB < 0.2f)
-                    {
-                        rT.foodArea = true;
-                        rT.targetFoodArea = 1;
-                        spawner.GetComponent<Spawner>().ActivateFoodArea(true, 1);
-                        Debug.Log("Got foodArea");
-                    }
-                    else
-                    {
-                        rT.foodArea = true;
-                        spawner.GetComponent<Spawner>().ActivateFoodArea(false, 1);
-                        Debug.Log("Exit foodArea");
-                    }
-                }
-                else if (rT.hands)
-                {
-                    //Debug.Log("DIS: "+Vector2.Distance(rT.lastFishPos, blobPos) );
-                    if (Vector2.Distance(rT.lastFishPos, blobPos) > 50.0f)
-                    {
-                        Debug.Log("Exit Move");
-                        OnBlobExit(rT.Label);
-                    }
-                    else {
-                        rT.targetObject.GetComponent<SpawningFishBehaviour>().SetCircleCenter(blobPos);
-                        rT.lastFishPos = blobPos;
-                    }
+        //if (rT.boulder)
+        //{
+        //    spawner.GetComponent<Spawner>().SetPositionFromScreenCoord(rT.targetObject, blobPos);
+        //    //Debug.Log("Setting BoulderPos: " + (float)blobPos.x + " " + (float)blobPos.y);
+        //}
+        //else if (rT.foodArea)
+        //{
+        //    float distTofoodA = Vector2.Distance(foodPosA / (float)Screen.height, blobPos / (float)Screen.height);
+        //    float distTofoodB = Vector2.Distance(foodPosB / (float)Screen.height, blobPos / (float)Screen.height);
+        //    if (distTofoodA < 0.2f)
+        //    {
+        //        rT.foodArea = true;
+        //        rT.targetFoodArea = 0;
+        //        spawner.GetComponent<Spawner>().ActivateFoodArea(true, 0);
+        //        Debug.Log("Got foodArea");
+        //    }
+        //    else
+        //    {
+        //        rT.foodArea = false;
+        //        spawner.GetComponent<Spawner>().ActivateFoodArea(false, 0);
+        //        Debug.Log("Exit foodArea");
+        //    }
+        //    if (distTofoodB < 0.2f)
+        //    {
+        //        rT.foodArea = true;
+        //        rT.targetFoodArea = 1;
+        //        spawner.GetComponent<Spawner>().ActivateFoodArea(true, 1);
+        //        Debug.Log("Got foodArea");
+        //    }
+        //    else
+        //    {
+        //        rT.foodArea = false;
+        //        spawner.GetComponent<Spawner>().ActivateFoodArea(false, 1);
+        //        Debug.Log("Exit foodArea");
+        //    }
+        //}
+        //else if (rT.stoneArea)
+        //{
+        //    StoneArea[] sareas = spawner.GetComponent<Spawner>().stoneAreas;
+        //    for (int i = 0; i < sareas.Length; i++)
+        //    {
+        //        StoneArea curS = sareas[i];
+        //        float distToStone = Vector2.Distance(curS.GetPositionOnScreen() / (float)Screen.height, blobPos / (float)Screen.height);
+        //        if (distToStone < foodAreaDist)
+        //        {
+        //            rT.stoneArea = true;
+        //            rT.targetStoneArea = i;
+        //            spawner.GetComponent<Spawner>().ActivateStoneArea(true, i);
+
+        //        }
+        //        else {
+        //            rT.stoneArea = true;
+        //            rT.targetStoneArea = i;
+        //            spawner.GetComponent<Spawner>().ActivateStoneArea(false, i);
+        //        }
+        //    }
+        //}
+        //else 
+        if (rT.hands)
+        {
+            //Debug.Log("DIS: "+Vector2.Distance(rT.lastFishPos, blobPos) );
+            if (Vector2.Distance(rT.lastFishPos, blobPos) > 50.0f)
+            {
+                Debug.Log("Exit Move");
+                OnBlobExit(rT.Label);
+            }
+            else {
+                rT.targetObject.GetComponent<SpawningFishBehaviour>().SetCircleCenterCloserToCenter(blobPos);
+                rT.lastFishPos = blobPos;
+            }
                     
-                }
-                else if (Time.frameCount % handsPeriod == 0 && DetectHands(cBlob))
-                {
-                    //Check if it is hands
-                    if (!rT.hands)
-                    {
-                        Debug.Log("Hands!");
-                        rT.hands = true;
-                        rT.lastFishPos = blobPos;
-                        rT.targetObject = spawner.GetComponent<Spawner>().SpawnFish(blobPos);
-                    }
-                }
+        }
+        else if (Time.frameCount % handsPeriod == 0 && DetectHands(cBlob))
+        {
+            //Check if it is hands
+            if (!rT.hands)
+            {
+                Debug.Log("Hands!");
+                rT.hands = true;
+                rT.lastFishPos = blobPos;
+                rT.targetObject = spawner.GetComponent<Spawner>().SpawnFishCloserToCenter(blobPos);
+            }
+        }
        
         //Debug.Log("Blob Enter " + blobLabel);
 
@@ -806,7 +910,6 @@ public class KinectOpenCvDetector : MonoBehaviour
             CvPoint2D64f projPoint = calib.convertKinectToProjector(skPoint);
             //Debug.Log(skPoint.X + " " + skPoint.Y + " " + skPoint.Z + " SkPoint-->Projector " + projPoint.X + " " + projPoint.Y);
             return new Vector2((int)projPoint.X, Screen.height - (int)projPoint.Y);
-
 
         }
         catch (System.Exception e)
@@ -964,7 +1067,7 @@ public class KinectOpenCvDetector : MonoBehaviour
                 foreach (var contourB in modelContours)
                 {
                         double ratio = Cv2.MatchShapes(contourToMatch, contourB, MatchShapesMethod.I1);
-                        Debug.Log("Matching: " + ratio + " " + contourB.IsContourConvex() + " " + contourToMatch.IsContourConvex() );
+                        //Debug.Log("Matching: " + ratio + " " + contourB.IsContourConvex() + " " + contourToMatch.IsContourConvex() );
                         //if (ratio > 0.0000001)
                         //{
                             scoreTotal += ratio;
@@ -975,8 +1078,8 @@ public class KinectOpenCvDetector : MonoBehaviour
             }
         }
         scoreTotal /= tested;
-        Debug.Log(scoreTotal);
-        if (scoreTotal > 0.0000001 && scoreTotal <= 0.2)
+        //Debug.Log(scoreTotal);
+        if (scoreTotal > 0.0000001 && scoreTotal <= handsThreshold)
         {
             return true;
         }else{

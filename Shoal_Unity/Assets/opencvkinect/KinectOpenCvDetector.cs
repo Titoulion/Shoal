@@ -793,7 +793,7 @@ public class KinectOpenCvDetector : MonoBehaviour
             }
                     
         }
-        else if (Time.frameCount % handsPeriod == 0 && DetectHands(cBlob))
+        else if (Time.frameCount % handsPeriod == 0 && DetectHands(cBlob) && !rT.foodArea && !rT.stoneArea)
         {
             //Check if it is hands
             if (!rT.hands)

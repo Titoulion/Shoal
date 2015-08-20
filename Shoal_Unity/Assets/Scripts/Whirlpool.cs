@@ -3,9 +3,9 @@ using System.Collections;
 
 public class Whirlpool : Entity {
 
-	public float durationOpening = 4f;
-	public float durationStaying = 8f;
-	public float durationClosing = 4f;
+	public float durationOpening = 2f;
+	public float durationStaying = 11f;
+	public float durationClosing = 2f;
 	float progress;
 	Material myMat;
 
@@ -29,7 +29,7 @@ public class Whirlpool : Entity {
 	void Start () {
 		myMat = GetComponent<Renderer>().material;
 		myMat.SetTextureOffset("_Perlin",new Vector2(Random.Range (-1f,1f),Random.Range (-1f,1f)));
-		durationStaying = Random.Range(8f,16f);
+		//durationStaying = Random.Range(8f,16f);
 	}
 	
 	// Update is called once per frame

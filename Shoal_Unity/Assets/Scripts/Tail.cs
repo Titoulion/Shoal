@@ -155,7 +155,7 @@ public class Tail : MonoBehaviour {
 			float nodeAngle	 =	Mathf.Atan2(bodyPartsPositions[i].y - bodyPartsPositions[i-1].y,bodyPartsPositions[i].x - bodyPartsPositions[i-1].x);
 			bodyPartsPositions[i] = new Vector3(bodyPartsPositions[i-1].x + tailLenght*(1f-progress) * Mathf.Cos(nodeAngle),bodyPartsPositions[i-1].y + tailLenght*(1f-progress) * Mathf.Sin(nodeAngle),0f);
 			
-			if(tailAttractor!=null)
+			if(tailAttractor!=null && inIntro==false)
 			{
 				Vector3 toAttractor = tailAttractor.transform.position-bodyPartsPositions[i];
 				float distanceAttractor = toAttractor.magnitude;

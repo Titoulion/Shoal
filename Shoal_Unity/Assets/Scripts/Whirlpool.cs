@@ -11,6 +11,7 @@ public class Whirlpool : Entity {
 
 	float currentState = 1f;
 	bool goDie = false;
+	public float minSize;
 	public float maxSize;
 
 	public AnimationCurve curveSize;
@@ -80,7 +81,7 @@ public class Whirlpool : Entity {
 	
 		myMat.SetFloat ("_ProgressOpen",valueOpen);
 
-		transform.localScale = Map(curveSize.Evaluate(progressDanger),0f,1f,6.2f,12f)*Vector3.one;
+		transform.localScale = Map(curveSize.Evaluate(progressDanger),0f,1f,minSize,maxSize)*Vector3.one;
 
 		speedRotation = Map(curveSize.Evaluate(progressDanger),0f,1f,0.02f,0.08f);
 		intensitySwirl = Map(curveSize.Evaluate(progressDanger),0f,1f,0f,-7f);

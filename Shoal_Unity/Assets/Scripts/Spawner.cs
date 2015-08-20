@@ -36,6 +36,13 @@ public class Spawner : MonoBehaviourBase
 		return(SpawnStuff(prefabFish, posOnScreen, 0f));
 	}
 
+	public GameObject SpawnFishCloserToCenter(Vector2 posOnScreen)
+	{
+		Vector2 _posOnScreen = posOnScreen;
+		_posOnScreen+=(new Vector2(Screen.width/2f,Screen.height/2f)-posOnScreen).normalized*Screen.height/20f;
+		return(SpawnStuff(prefabFish, _posOnScreen, 0f));
+	}
+
 	public GameObject SpawnWhirlPool(Vector2 posOnScreen)
 	{
 		return(SpawnStuff(prefabWhirlPool, posOnScreen, 0f));
@@ -103,7 +110,7 @@ public class Spawner : MonoBehaviourBase
 		GestionSpawnWhirlPool();
 
 		if (Input.GetMouseButtonDown(0))
-			SpawnFish (Vec2MousePos());
+			SpawnFishCloserToCenter (Vec2MousePos());
 
 		if (Input.GetMouseButtonDown(1))
 			SpawnFood(Vec2MousePos());

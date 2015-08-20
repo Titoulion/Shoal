@@ -32,7 +32,8 @@ public class TweakingKinectOpenCv : MonoBehaviour
 	public Slider sliderSrcThreshMin;
 	public Slider sliderSrcThreshMax;
 	public Slider sliderRadiusRemove;
-	
+	public Slider sliderHandsThreshold;
+
 	void Awake()
 	{
 		transform.position = Vector3.zero;
@@ -63,6 +64,7 @@ public class TweakingKinectOpenCv : MonoBehaviour
 		sliderSrcThreshMin.value = (float)myKinectOpenCvDetector.srcThreshMin;
 		sliderSrcThreshMax.value = (float)myKinectOpenCvDetector.srcThreshMax;
 		sliderRadiusRemove.value = (float)myKinectOpenCvDetector.radiusRemove;
+		sliderHandsThreshold.value = (float)myKinectOpenCvDetector.handsThreshold;
 
 	}
 
@@ -101,6 +103,7 @@ public class TweakingKinectOpenCv : MonoBehaviour
 			sliderSrcThreshMin.gameObject.GetComponentInChildren<Text>().text = "Src Thresh Min: "+sliderSrcThreshMin.value;
 			sliderSrcThreshMax.gameObject.GetComponentInChildren<Text>().text = "Src Thresh Max: "+sliderSrcThreshMax.value;
 			sliderRadiusRemove.gameObject.GetComponentInChildren<Text>().text = "Radius Remove: "+sliderRadiusRemove.value;
+			sliderHandsThreshold.gameObject.GetComponentInChildren<Text>().text = "Hands Threshold: "+sliderHandsThreshold.value;
 
 		}
 	}
@@ -131,6 +134,7 @@ public class TweakingKinectOpenCv : MonoBehaviour
 	public void SetSrcThreshMin(float value){  myKinectOpenCvDetector.srcThreshMin = (int)value;  }
 	public void SetSrcThreshMax(float value){  myKinectOpenCvDetector.srcThreshMax = (int)value;  }
 	public void SetRadiusRemove(float value){  myKinectOpenCvDetector.radiusRemove = (int)value;  }
+	public void SetHandsThreshold(float value){  myKinectOpenCvDetector.handsThreshold = (double)value;  }
 
 	void OnDisable()
 	{
@@ -166,6 +170,7 @@ public class TweakingKinectOpenCv : MonoBehaviour
 		stuff+="Src Thresh Min: "+myKinectOpenCvDetector.srcThreshMin+"\n";
 		stuff+="Src Thresh Max: "+myKinectOpenCvDetector.srcThreshMax+"\n";
 		stuff+="Radius Remove: "+myKinectOpenCvDetector.radiusRemove+"\n";
+		stuff+="Hands Threshold: "+myKinectOpenCvDetector.handsThreshold+"\n";
 		stuff+="\n";
 		stuff+="\n";
 		Debug.Log(stuff);

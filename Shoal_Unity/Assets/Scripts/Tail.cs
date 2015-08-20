@@ -55,6 +55,7 @@ public class Tail : MonoBehaviour {
 	public float previousProgressIntro = 0f;
 	private float timerWhisker = 0f;
 	public bool inIntro = true;
+	private float valueProgressRotateBodyParts = 0f;
 		
 	void Start () 
 	{
@@ -148,6 +149,10 @@ public class Tail : MonoBehaviour {
 	{
 		GameObject tailAttractor =(Pond.Instance.GetEntitiesOfType(EntityType.Whirlpool).ToArray().Count()==0)?(null):(Pond.Instance.GetEntitiesOfType(EntityType.Whirlpool).ToArray()[0].gameObject);
 		
+		valueProgressRotateBodyParts+=Time.deltaTime*MyHelper.Map (GetComponentInParent<Fish>().Health,1f,0f,1f,0.2f);
+
+
+
 		bodyPartsPositions[0] = bodyParts[0].transform.position = transform.position;
 		for(int i=1; i<bodyParts.Length; i++)
 		{
@@ -172,7 +177,9 @@ public class Tail : MonoBehaviour {
 			
 			Vector3 toForward = Vector3.Normalize (bodyPartsPositions[i]-bodyPartsPositions[i-1]);
 			Vector3 toUp = Vector3.Cross (toForward,Vector3.forward);
-			float randomValueT =  randomValues[i] + Time.realtimeSinceStartup*randomSens[i]*speedMotionBodyPart;
+
+
+			float randomValueT =  randomValues[i] + valueProgressRotateBodyParts*randomSens[i]*speedMotionBodyPart;
 			Vector3 circularMotion = toForward*Mathf.Cos (randomValueT*2f*Mathf.PI)*radiusMotionBodyParts*progress+toUp*Mathf.Sin (randomValueT*2f*Mathf.PI)*radiusMotionBodyParts*progress;
 			
 			bodyParts[i].transform.position = bodyPartsPositions[i] + circularMotion;

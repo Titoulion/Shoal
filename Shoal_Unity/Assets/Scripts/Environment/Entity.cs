@@ -7,7 +7,7 @@ public abstract class Entity : MonoBehaviourBase
     public abstract EntityType Type { get; }
 
     public float Radius { get { return radius; } }
-
+	public bool isOn = true;
     protected Pond pond;
 	bool goDestroy = false;
 

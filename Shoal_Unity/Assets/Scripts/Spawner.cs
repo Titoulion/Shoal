@@ -12,6 +12,7 @@ public class Spawner : MonoBehaviourBase
 	[SerializeField] private Transform prefabRipple;
 	[SerializeField] private Transform prefabFood;
 	[SerializeField] public FoodArea[] foodAreas;
+	[SerializeField] public StoneArea[] stoneAreas;
 
     private List<Transform> boulders = new List<Transform>();
 	[SerializeField] private float timeBetweenRipples = 0.3f;
@@ -90,12 +91,26 @@ public class Spawner : MonoBehaviourBase
 	
 	public void ActivateFoodArea(bool activated, int indexFoodArea)
 	{
-		foodAreas[indexFoodArea].GoActivate(activated);
+		if(indexFoodArea<foodAreas.Length && foodAreas[indexFoodArea]!=null)
+			foodAreas[indexFoodArea].GoActivate(activated);
 	}
 
 	public void RevertStateFoodArea(int indexFoodArea)
 	{
-		foodAreas[indexFoodArea].RevertState();
+		if(indexFoodArea<foodAreas.Length && foodAreas[indexFoodArea]!=null)	
+			foodAreas[indexFoodArea].RevertState();
+	}
+
+	public void ActivateStoneArea(bool activated, int indexStoneArea)
+	{
+		if(indexStoneArea<foodAreas.Length && foodAreas[indexStoneArea]!=null)
+			stoneAreas[indexStoneArea].GoActivate(activated);
+	}
+	
+	public void RevertStateStoneArea(int indexStoneArea)
+	{
+		if(indexStoneArea<foodAreas.Length && foodAreas[indexStoneArea]!=null)
+			stoneAreas[indexStoneArea].RevertState();
 	}
 
 	public Vector2 GetFoodAreaCoordinate(int index)

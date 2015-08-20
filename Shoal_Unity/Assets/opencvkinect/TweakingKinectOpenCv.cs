@@ -33,6 +33,9 @@ public class TweakingKinectOpenCv : MonoBehaviour
 	public Slider sliderSrcThreshMax;
 	public Slider sliderRadiusRemove;
 	public Slider sliderHandsThreshold;
+	public Slider sliderFoodAreaDistance;
+	public Slider sliderStoneAreaDistance;
+
 
 	void Awake()
 	{
@@ -65,7 +68,8 @@ public class TweakingKinectOpenCv : MonoBehaviour
 		sliderSrcThreshMax.value = (float)myKinectOpenCvDetector.srcThreshMax;
 		sliderRadiusRemove.value = (float)myKinectOpenCvDetector.radiusRemove;
 		sliderHandsThreshold.value = (float)myKinectOpenCvDetector.handsThreshold;
-
+		sliderFoodAreaDistance.value = (float)myKinectOpenCvDetector.foodAreaDist;
+		sliderStoneAreaDistance.value = (float)myKinectOpenCvDetector.stoneAreaDist;
 	}
 
 	void Update()
@@ -104,6 +108,8 @@ public class TweakingKinectOpenCv : MonoBehaviour
 			sliderSrcThreshMax.gameObject.GetComponentInChildren<Text>().text = "Src Thresh Max: "+sliderSrcThreshMax.value;
 			sliderRadiusRemove.gameObject.GetComponentInChildren<Text>().text = "Radius Remove: "+sliderRadiusRemove.value;
 			sliderHandsThreshold.gameObject.GetComponentInChildren<Text>().text = "Hands Threshold: "+sliderHandsThreshold.value;
+			sliderFoodAreaDistance.gameObject.GetComponentInChildren<Text>().text = "Food Area Distance: "+sliderFoodAreaDistance.value;
+			sliderStoneAreaDistance.gameObject.GetComponentInChildren<Text>().text = "Stone Area Distance: "+sliderStoneAreaDistance.value;
 
 		}
 	}
@@ -135,6 +141,8 @@ public class TweakingKinectOpenCv : MonoBehaviour
 	public void SetSrcThreshMax(float value){  myKinectOpenCvDetector.srcThreshMax = (int)value;  }
 	public void SetRadiusRemove(float value){  myKinectOpenCvDetector.radiusRemove = (int)value;  }
 	public void SetHandsThreshold(float value){  myKinectOpenCvDetector.handsThreshold = (double)value;  }
+	public void SetFoodAreaDistance(float value){  myKinectOpenCvDetector.foodAreaDist = (double)value;  }
+	public void SetStoneAreaDistance(float value){  myKinectOpenCvDetector.stoneAreaDist = (double)value;  }
 
 	void OnDisable()
 	{
@@ -171,6 +179,8 @@ public class TweakingKinectOpenCv : MonoBehaviour
 		stuff+="Src Thresh Max: "+myKinectOpenCvDetector.srcThreshMax+"\n";
 		stuff+="Radius Remove: "+myKinectOpenCvDetector.radiusRemove+"\n";
 		stuff+="Hands Threshold: "+myKinectOpenCvDetector.handsThreshold+"\n";
+		stuff+="Food Area Distance: "+myKinectOpenCvDetector.foodAreaDist+"\n";
+		stuff+="Stone Area Distance: "+myKinectOpenCvDetector.stoneAreaDist+"\n";
 		stuff+="\n";
 		stuff+="\n";
 		Debug.Log(stuff);

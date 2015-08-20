@@ -161,7 +161,7 @@ public class Spawner : MonoBehaviourBase
 
 	private void ResetWhirlPoolTimer()
 	{
-		timeBeforeNextWhirlPool = 60f+Random.Range (60f,240f);
+		timeBeforeNextWhirlPool = 60f+Random.Range (30f,120f);
 	}
 
 	private Vector2 Vec2MousePos()

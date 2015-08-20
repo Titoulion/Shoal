@@ -90,8 +90,10 @@ public class KinectOpenCvDetector : MonoBehaviour
     public double blobMinDistance = 10.0;
     [Range(0.0f, 1000.0f)]
     public double boulderThresh = 2.7;
-    [Range(0.0f, 10.0f)]
-    public double foodAreaDist = 1.7;
+    [Range(0.0f, 1.0f)]
+    public double foodAreaDist = 0.2;
+	[Range(0.0f, 1.0f)]
+	public double stoneAreaDist = 0.2;
     [Range(0.1f, 100.0f)]
     public float handsPeriod = 1.0f;
     [Range(0, 4000)]
@@ -592,11 +594,11 @@ public class KinectOpenCvDetector : MonoBehaviour
                 if (track.Active > 0)
                 {
                     Vector2 blobPos = TransformKinectToScreenPos(new Vector2((float)track.X, (float)(track.Y)));
-                    if (Vector2.Distance(blobPos, stoneArea.GetPositionOnScreen()) < Screen.height * foodAreaDist)
+                    if (Vector2.Distance(blobPos, stoneArea.GetPositionOnScreen()) < Screen.height * stoneAreaDist)
                     {
                         track.stoneArea = true;
                         toOpen = true;
-                        break;
+                        //break;
                     }
                     else
                     {
@@ -621,7 +623,7 @@ public class KinectOpenCvDetector : MonoBehaviour
                     {
                         track.foodArea = true;
                         toOpen = true;
-                        break;
+                       // break;
                     }
                     else
                     {

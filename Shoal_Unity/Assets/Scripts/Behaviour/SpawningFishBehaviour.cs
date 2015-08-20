@@ -42,9 +42,16 @@ public class SpawningFishBehaviour : MonoBehaviourBase
 		circleCenter = Camera.main.ScreenToWorldPoint(new Vector3(pos.x,pos.y,0f))*2.5f;
 	}
 
+	public void SetCircleCenterCloserToCenter(Vector2 pos)
+	{
+		Vector2 _posOnScreen = pos;
+		_posOnScreen+=(new Vector2(Screen.width/2f,Screen.height/2f)-pos).normalized*Screen.height/20f;
+		circleCenter = Camera.main.ScreenToWorldPoint(new Vector3(_posOnScreen.x,_posOnScreen.y,0f))*2.5f;
+	}
+
     private void Update()
     {
-		//SetCircleCenter (Input.mousePosition);
+		//SetCircleCenterCloserToCenter (Input.mousePosition);
 
 		angle += Time.deltaTime * swimmingDirection * speedRad*sens;
         var delta = UnityHelper.CreateVector2AngleRad(angle);

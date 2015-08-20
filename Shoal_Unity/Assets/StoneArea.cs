@@ -53,7 +53,7 @@ public class StoneArea : MonoBehaviour
 		isActivated = on;
 		myStone.isOn = isActivated;
 		myStone.gameObject.GetComponent<Renderer>().enabled = isActivated;
-		if(isActivated && timeSinceLastRipple>2f)
+		if(isActivated && timeSinceLastRipple>1f)
 		{
 			Spawner.Instance.SpawnRipple(GetPositionOnScreen());
 			timeSinceLastRipple =0f;

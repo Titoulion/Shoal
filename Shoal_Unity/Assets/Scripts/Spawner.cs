@@ -87,6 +87,7 @@ public class Spawner : MonoBehaviourBase
         worldPos.z = zPos;
         obj.transform.position = worldPos;
     }
+	
 	public void ActivateFoodArea(bool activated, int indexFoodArea)
 	{
 		foodAreas[indexFoodArea].GoActivate(activated);

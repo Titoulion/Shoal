@@ -268,13 +268,13 @@ public class KinectOpenCvDetector : MonoBehaviour
         if (_roi.X < 0)
         {
             _x = 0;
-            Debug.LogWarning("X is outside of image");
+            //Debug.LogWarning("X is outside of image");
         }
 
         if (_roi.Y < 0)
         {
             _y = 0;
-            Debug.LogWarning("Y is outside of image");
+           // Debug.LogWarning("Y is outside of image");
         }
 
         if (_roi.Width < 2)
@@ -285,13 +285,13 @@ public class KinectOpenCvDetector : MonoBehaviour
         if ((_x + _width) > imWidth)
         {
             _width = Mathf.Abs(imWidth - _x);
-            Debug.LogWarning("Width is outside of image");
+            //Debug.LogWarning("Width is outside of image");
         }
 
         if ((_y + _height) > imHeight)
         {
             _height = Mathf.Abs(imHeight - _y);
-            Debug.LogWarning("Height is outside of image");
+            //Debug.LogWarning("Height is outside of image");
         }
         //Debug.Log (new CvRect (_x, _y, _width, _height));
 
@@ -657,7 +657,7 @@ public class KinectOpenCvDetector : MonoBehaviour
         Trak rT = tracks.Find(x => x.Id.Equals((long)idt));
         CvBlob cBlob = blobs[rT.Label];
         Vector2 blobPos = TransformKinectToScreenPos(new Vector2((float)cBlob.Centroid.X, (float)(cBlob.Centroid.Y)));
-        Debug.Log("Blob Entered " + cBlob.Label);
+        //Debug.Log("Blob Entered " + cBlob.Label);
         //Vector2 foodPosA = spawner.GetComponent<Spawner>().GetFoodAreaCoordinate(0);
         //Vector2 foodPosB = spawner.GetComponent<Spawner>().GetFoodAreaCoordinate(1);
         //float distTofoodA = Vector2.Distance(foodPosA / (float)Screen.height, blobPos / (float)Screen.height);
@@ -709,7 +709,7 @@ public class KinectOpenCvDetector : MonoBehaviour
         if (!rT.stoneArea || !rT.foodArea)
         {
 			rT.targetObject = Spawner.Instance.SpawnRipple(blobPos);
-            Debug.Log("Got Ripple");
+           // Debug.Log("Got Ripple");
         }
 
         //}
@@ -783,7 +783,7 @@ public class KinectOpenCvDetector : MonoBehaviour
             //Debug.Log("DIS: "+Vector2.Distance(rT.lastFishPos, blobPos) );
             if (Vector2.Distance(rT.lastFishPos, blobPos) > 50.0f)
             {
-                Debug.Log("Exit Move");
+               // Debug.Log("Exit Move");
                 OnBlobExit(rT.Label);
             }
             else {
@@ -797,7 +797,7 @@ public class KinectOpenCvDetector : MonoBehaviour
             //Check if it is hands
             if (!rT.hands)
             {
-                Debug.Log("Hands!");
+               // Debug.Log("Hands!");
                 rT.hands = true;
                 rT.lastFishPos = blobPos;
 				rT.targetObject = Spawner.Instance.SpawnFishCloserToCenter(blobPos);
@@ -822,7 +822,7 @@ public class KinectOpenCvDetector : MonoBehaviour
         {
 			Spawner.Instance.ActivateFoodArea(false, rT.targetFoodArea);
         }
-        Debug.Log("Blob Exited " + rT.Id);
+        //Debug.Log("Blob Exited " + rT.Id);
         tracks.Remove(rT);
     }
 

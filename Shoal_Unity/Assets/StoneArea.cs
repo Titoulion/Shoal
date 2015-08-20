@@ -7,6 +7,9 @@ public class StoneArea : MonoBehaviour
 	public bool isActivated = false;
 	bool prevIsActivated = false;
 	public Stone myStone;
+	float timerSecurity = 0f;
+	float resetTimerSecurityValue = 0.3f;
+	float timeSinceLastRipple = 0f;
 	
 	void Start () 
 	{
@@ -21,16 +24,28 @@ public class StoneArea : MonoBehaviour
 			prevIsActivated = isActivated;
 			UpdateState (isActivated);
 		}
+
+		timerSecurity-=Time.deltaTime;
+		timeSinceLastRipple+=Time.deltaTime;
 	}
 	
 	public void GoActivate(bool goActivate)
 	{  
-		isActivated = goActivate;
+		if(timerSecurity<=0f)
+		{
+			isActivated = goActivate;
+			timerSecurity = resetTimerSecurityValue;
+		}
+
 	}
 	
 	public void RevertState()
 	{  
-		isActivated = !isActivated;
+		if(timerSecurity<=0f)
+		{
+			isActivated = !isActivated;
+			timerSecurity = resetTimerSecurityValue;
+		}
 	}
 
 	void UpdateState(bool on)
@@ -38,8 +53,12 @@ public class StoneArea : MonoBehaviour
 		isActivated = on;
 		myStone.isOn = isActivated;
 		myStone.gameObject.GetComponent<Renderer>().enabled = isActivated;
-		if(isActivated)
+		if(isActivated && timeSinceLastRipple>1f)
+		{
 			Spawner.Instance.SpawnRipple(GetPositionOnScreen());
+			timeSinceLastRipple =0f;
+		}
+			
 	}
 	
 	public Vector2 GetPositionOnScreen()
